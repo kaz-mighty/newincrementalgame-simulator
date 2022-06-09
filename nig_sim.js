@@ -295,6 +295,13 @@ class MaximumBonuses {
 
 const mbcache = new MaximumBonuses();
 
+function printCombinationList(is_rank) {
+    let add = is_rank ? 8 : 4;
+    for (let i = 0; i <= 256; i += add) {
+        let candidates = mbcache.get(i, is_rank, true);
+        console.info(i, candidates.length)
+    }
+}
 
 class Nig {
     constructor() {
