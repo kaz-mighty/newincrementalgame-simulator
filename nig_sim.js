@@ -380,6 +380,18 @@ class Nig {
 
     loadb(worldDatab) {
         this.players = JSON.parse(atob(worldDatab));
+        for (let i = 0; i < 10; i++) {
+            let player = this.players[i];
+            if (!('worldpipe' in player)) {
+                player.worldpipe = new Array(10).fill(null).map(() => 0);
+            }
+            if (!('smalltrophies' in player)) {
+                player.smalltrophies = new Array(100).fill(false);
+            }
+            if (!('smalltrophies2nd' in player)) {
+                player.smalltrophies2nd = new Array(100).fill(false);
+            }
+        }
         this.loadPlayer(this.players[this.world]);
     };
 
