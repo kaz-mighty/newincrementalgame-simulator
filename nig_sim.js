@@ -1008,6 +1008,12 @@ class Nig {
         let dv = 72;
         return D(2).pow(money.log10() / dv).round();
     };
+    calcGainDarkLevel(x) {
+        const money = x === undefined ? this.player.darkmoney : x;
+        let dv = 18 - this.player.crown.add(2).log2();
+        dv = Math.max(dv, 1);
+        return D(money.log10()).div(dv).pow_base(2).round();
+    };
 
     resetRankborder() {
         let remember = this.countRemembers();
@@ -1432,6 +1438,8 @@ class Nig {
                 return this.calcGainRank(x);
             } else if (target === 'crownreset') {
                 return this.calcGainCrown(x);
+            } else if (target === 'dark_levelreset') {
+                return this.calcGainDarkLevel(x);
             }
         };
         if (f(l).gte(value)) return l;
@@ -1462,6 +1470,9 @@ class Nig {
             } else if (target == 'crownreset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetCrownborder(), target);
+            } else if (target == 'dark_levelreset') {
+                value = value.ceil();
+                return this.searchLowerBound(value, D('1e18'), target);
             } else if (target == 'point') {
                 return value;
             }
@@ -1808,6 +1819,23 @@ class Nig {
         });
         return minres;
     };
+
+    simulateDark(checkpoints) {
+        if (checkpoints.length === 0) return [];
+        let index = Array.from(checkpoints, (_, i) => i);
+        index.sort((i, j) => checkpoints[i].cmp(checkpoints[j]));
+        let events = [];
+        for (let i = 0; i < checkpoints.length; i++) {
+            events.push([checkpoints[i], i]);
+        }
+        events.sort((a, b) => a[0].cmp(b[0]));
+        let result = Array.from(checkpoints).fill(null);
+        events.forEach(([c, i]) => {
+            result[i] = this.calcDarkGoalTick(c);
+        });
+        return result;
+    };
+
 };
 
 const colors = ['#00ff00', '#11ff52', '#23ff9b', '#34ffda', '#46eeff', '#57c2ff', '#699fff', '#7a86ff', '#a18cff', '#ca9dff', '#e9afff', '#ffc0ff'];
@@ -1841,6 +1869,8 @@ const app = Vue.createApp({
             challengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             rankchallengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             checkpoints: [D('1e18'), D('1e72')],
+            simulated_dark_checkpoints: Array.from(new Array(10), () => new Map()),
+            dark_checkpoints: [D('1e18')],
             cpsimulatedtime: Date.now(),
             sampletick: [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
             sampleticklabel: ['1', '1e1', '1e2', '1e3', '1e4', '1e5', '1e6', '1e7', '1e8', '1e9'],
@@ -1857,8 +1887,11 @@ const app = Vue.createApp({
                 toggleBonuses: true,
             },
             autosimulatecheckpoints: false,
+            auto_simulate_dark_checkpoints: false,
             checkpointtarget: 'point',
             checkpointvalue: '',
+            dark_checkpoint_target: 'point',
+            dark_checkpoint_value: '',
             procmspertick: 0,
             verbose: false,
             spoiler: false,
@@ -1961,6 +1994,13 @@ const app = Vue.createApp({
                 return content;
             };
         },
+        darkCheckpointMessage: function () {
+            return function (checkpoint) {
+                const res = this.simulated_dark_checkpoints[this.nig.world].get(checkpoint);
+                if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
+                return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
+            };
+        },
         tmoneys() {
             let [start, stop, opstep] = this.checkpointvalue.split(':', 3);
             let [op, step] = opstep === undefined ? (this.checkpointtarget === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
@@ -1974,7 +2014,7 @@ const app = Vue.createApp({
             let arr = [];
             if (stop !== undefined) {
                 while (arr.length < 100 && start.lte(stop)) {
-                    let t = this.nig.targetmoney(this.checkpointtarget, start);
+                    let t = this.nig.targemoney(this.checkpointtarget, start);
                     if (t.gt(0)) arr.push(t);
                     start = op === '*' ? start.mul(step) : start.add(step);
                 }
@@ -1991,6 +2031,38 @@ const app = Vue.createApp({
                 return this.tmoneys[0].toExponential(1) + ' ポイント';
             } else {
                 return this.tmoneys[0].toExponential(1) + '～' + this.tmoneys[this.tmoneys.length - 1].toExponential(1) + ' ポイント(' + this.tmoneys.length + ')';
+            }
+        },
+        targetDarkMoneys() {
+            let [start, stop, opstep] = this.dark_checkpoint_value.split(':', 3);
+            let [op, step] = opstep === undefined ? (this.dark_checkpoint_target === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
+            try {
+                if (start !== undefined) start = D(start.trim());
+                if (stop !== undefined) stop = D(stop.trim());
+                if (step !== undefined) step = D(step.trim());
+            } catch (error) {
+                return [];
+            };
+            let arr = [];
+            if (stop !== undefined) {
+                while (arr.length < 100 && start.lte(stop)) {
+                    let t = this.nig.targetmoney(this.dark_checkpoint_target, start);
+                    if (t.gt(0)) arr.push(t);
+                    start = op === '*' ? start.mul(step) : start.add(step);
+                }
+            } else {
+                let t = this.nig.targetmoney(this.dark_checkpoint_target, start);
+                if (t.gt(0)) arr.push(t);
+            }
+            return arr;
+        },
+        targetDarkMoneysDesc() {
+            if (this.targetDarkMoneys.length === 0) {
+                return 'Invalid';
+            } else if (this.targetDarkMoneys.length === 1) {
+                return this.targetDarkMoneys[0].toExponential(1) + ' ポイント';
+            } else {
+                return this.targetDarkMoneys[0].toExponential(1) + '～' + this.targetDarkMoneys[this.targetDarkMoneys.length - 1].toExponential(1) + ' ポイント(' + this.targetDarkMoneys.length + ')';
             }
         },
         gexpr() {
@@ -2124,18 +2196,20 @@ const app = Vue.createApp({
             this.clearCheckpointsCache();
         },
         clearCheckpointsCache() {
-            for (let i = 0; i < 10; i++) {
-                this.simulatedcheckpoints[this.nig.world].clear();
-            }
+            this.simulatedcheckpoints[this.nig.world].clear();
+            this.simulated_dark_checkpoints[this.nig.world].clear();
             if (this.autosimulatecheckpoints) this.simulatecheckpoints();
+            if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
                 this.simulatedcheckpoints[i].clear();
+                this.simulated_dark_checkpoints[i].clear();
                 this.challengesimulated[i] = new Array(256).fill(null);
                 this.rankchallengesimulated[i] = new Array(256).fill(null);
             }
             if (this.autosimulatecheckpoints) this.simulatecheckpoints();
+            if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         addcheckpoint() {
             this.tmoneys.forEach(tmoney => this.checkpoints.push(tmoney));
@@ -2170,6 +2244,19 @@ const app = Vue.createApp({
         },
         simulatechallengesall(rank) {
             this.simulatechallenges(1, rank, true);
+        },
+        addDarkCheckpoint() {
+            this.tmoneys.forEach(target_money => this.dark_checkpoints.push(target_money));
+        },
+        removeDarkCheckpoint(i) {
+            this.dark_checkpoints.splice(i, 1);
+        },
+        simulateDarkCheckpoints() {
+            setTimeout(() => {
+                if (this.dark_checkpoints.length === 0) return;
+                const res = this.nig.clone().simulateDark(this.dark_checkpoints);
+                res.forEach((r, i) => this.simulated_dark_checkpoints[this.nig.world].set(this.dark_checkpoints[i], r));
+            }, 0);
         },
         scalesampletime(t) {
             const r = Math.log10(t) / Math.log10(3153600000) * 100;

@@ -80,6 +80,10 @@
       <label class="btn btn-outline-dark" for="simulatedChkpsB" data-bs-toggle="collapse"
         data-bs-target="#simulatedChkps" aria-expanded="false" aria-controls="simulatedChkps">到達</label>
 
+      <input type="checkbox" class="btn-check" id="simulatedDarkB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="simulatedDarkB" data-bs-toggle="collapse"
+        data-bs-target="#simulatedDark" aria-expanded="false" aria-controls="simulatedDark">裏到達</label>
+
       <input type="checkbox" class="btn-check" id="gaexpressionB" autocomplete="off">
       <label class="btn btn-outline-dark" for="gaexpressionB" data-bs-toggle="collapse" data-bs-target="#gaexpression"
         aria-expanded="false" aria-controls="gaexpression">式</label>
@@ -650,6 +654,38 @@
         <li v-for="(chkp, i) in checkpoints" class="list-group-item">
           <span>{{ checkpointmessage(chkp) }}</span>
           <button type="button" class="btn-close float-end" @click="removecheckpoint(i)"></button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="collapse card" id="simulatedDark">
+      <div class="card-body">
+        <div>
+          <button type="button" class="btn btn-outline-dark" @click="simulateDarkCheckpoints">シミュレート</button>
+          <button type="button" class="btn" @click="auto_simulate_dark_checkpoints = !auto_simulate_dark_checkpoints;"
+            :class="buttonselectedcls(auto_simulate_dark_checkpoints)">自動</button>
+        </div>
+        <div class="input-group">
+          <select class="form-select" v-model="dark_checkpoint_target" aria-label="checkpoint target">
+            <option value="point" selected>ポイント</option>
+            <option value="dark_levelreset">裏段位リセット</option>
+          </select>
+          <span class="input-group-text"
+            v-if="dark_checkpoint_target==='dark_levelreset'">で</span>
+          <input type="text" class="form-control" v-model="dark_checkpoint_value" placeholder="start[:stop[:[*]step]]"
+            aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addDarkCheckpoint()}">
+          <span class="input-group-text"
+            v-if="dark_checkpoint_target==='dark_levelreset'">
+            {{ {dark_levelreset: '裏段位'}[dark_checkpoint_target] }}獲得する
+          </span>
+          <span class="input-group-text">{{ targetDarkMoneysDesc }} </span>
+          <button class="btn btn-outline-dark" type="button" @click="addDarkCheckpoint">追加</button>
+        </div>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li v-for="(chkp, i) in dark_checkpoints" class="list-group-item">
+          <span>{{ darkCheckpointMessage(chkp) }}</span>
+          <button type="button" class="btn-close float-end" @click="removeDarkCheckpoint(i)"></button>
         </li>
       </ul>
     </div>
