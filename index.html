@@ -81,8 +81,9 @@
         data-bs-target="#simulatedChkps" aria-expanded="false" aria-controls="simulatedChkps">到達</label>
 
       <input type="checkbox" class="btn-check" id="simulatedDarkB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="simulatedDarkB" data-bs-toggle="collapse"
-        data-bs-target="#simulatedDark" aria-expanded="false" aria-controls="simulatedDark">裏到達</label>
+      <label aria-controls="simulatedDark" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#simulatedDark"
+        data-bs-toggle="collapse" for="simulatedDarkB"
+        v-if="nig.player.money.gte('1e100') || nig.player.darkmoney.gt(0) || nig.player.darkgenerators.some(d => d.gt(0))">裏到達</label>
 
       <input type="checkbox" class="btn-check" id="gaexpressionB" autocomplete="off">
       <label class="btn btn-outline-dark" for="gaexpressionB" data-bs-toggle="collapse" data-bs-target="#gaexpression"
