@@ -2108,12 +2108,8 @@ const app = Vue.createApp({
             let nig = new Nig();
             nig.loadb(input);
             this.nig = nig;
-            for (let i = 0; i < 10; i++) {
-                this.simulatedcheckpoints[i].clear();
-                this.challengesimulated[i] = new Array(256).fill(null);
-                this.rankchallengesimulated[i] = new Array(256).fill(null);
-            }
             this.selectWorld(prevworld);
+            this.clearAllCache();
         },
         selectWorld(i) {
             this.nig.save();
@@ -2246,7 +2242,7 @@ const app = Vue.createApp({
             this.simulatechallenges(1, rank, true);
         },
         addDarkCheckpoint() {
-            this.tmoneys.forEach(target_money => this.dark_checkpoints.push(target_money));
+            this.targetDarkMoneys.forEach(target_money => this.dark_checkpoints.push(target_money));
         },
         removeDarkCheckpoint(i) {
             this.dark_checkpoints.splice(i, 1);
