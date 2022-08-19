@@ -1983,8 +1983,8 @@ const app = Vue.createApp({
                 return message;
             };
         },
-        checkpointmessage: function () {
-            return function (checkpoint) {
+        checkpointMessages() {
+            return this.checkpoints.map(checkpoint => {
                 const res = this.simulatedcheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 const sec = res.sec.add(res.tick.mul(this.procmspertick * 0.001));
@@ -1992,78 +1992,26 @@ const app = Vue.createApp({
                 content += ' (' + sec.toExponential(3) + ' sec)';
                 content += ' ' + (new Date(this.cpsimulatedtime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
                 return content;
-            };
+            });
         },
-        darkCheckpointMessage: function () {
-            return function (checkpoint) {
+        darkCheckpointMessages() {
+            return this.dark_checkpoints.map(checkpoint => {
                 const res = this.simulated_dark_checkpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
-            };
+            });
         },
         tmoneys() {
-            let [start, stop, opstep] = this.checkpointvalue.split(':', 3);
-            let [op, step] = opstep === undefined ? (this.checkpointtarget === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
-            try {
-                if (start !== undefined) start = D(start.trim());
-                if (stop !== undefined) stop = D(stop.trim());
-                if (step !== undefined) step = D(step.trim());
-            } catch (error) {
-                return [];
-            };
-            let arr = [];
-            if (stop !== undefined) {
-                while (arr.length < 100 && start.lte(stop)) {
-                    let t = this.nig.targemoney(this.checkpointtarget, start);
-                    if (t.gt(0)) arr.push(t);
-                    start = op === '*' ? start.mul(step) : start.add(step);
-                }
-            } else {
-                let t = this.nig.targetmoney(this.checkpointtarget, start);
-                if (t.gt(0)) arr.push(t);
-            }
-            return arr;
+            return this.commonTargetMoneys(this.checkpointvalue, this.checkpointtarget);
         },
         tmoneysDesc() {
-            if (this.tmoneys.length === 0) {
-                return 'Invalid';
-            } else if (this.tmoneys.length === 1) {
-                return this.tmoneys[0].toExponential(1) + ' ポイント';
-            } else {
-                return this.tmoneys[0].toExponential(1) + '～' + this.tmoneys[this.tmoneys.length - 1].toExponential(1) + ' ポイント(' + this.tmoneys.length + ')';
-            }
+            return this.commonTargetMoneysDesc(this.tmoneys);
         },
         targetDarkMoneys() {
-            let [start, stop, opstep] = this.dark_checkpoint_value.split(':', 3);
-            let [op, step] = opstep === undefined ? (this.dark_checkpoint_target === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
-            try {
-                if (start !== undefined) start = D(start.trim());
-                if (stop !== undefined) stop = D(stop.trim());
-                if (step !== undefined) step = D(step.trim());
-            } catch (error) {
-                return [];
-            };
-            let arr = [];
-            if (stop !== undefined) {
-                while (arr.length < 100 && start.lte(stop)) {
-                    let t = this.nig.targetmoney(this.dark_checkpoint_target, start);
-                    if (t.gt(0)) arr.push(t);
-                    start = op === '*' ? start.mul(step) : start.add(step);
-                }
-            } else {
-                let t = this.nig.targetmoney(this.dark_checkpoint_target, start);
-                if (t.gt(0)) arr.push(t);
-            }
-            return arr;
+            return this.commonTargetMoneys(this.dark_checkpoint_value, this.dark_checkpoint_target);
         },
         targetDarkMoneysDesc() {
-            if (this.targetDarkMoneys.length === 0) {
-                return 'Invalid';
-            } else if (this.targetDarkMoneys.length === 1) {
-                return this.targetDarkMoneys[0].toExponential(1) + ' ポイント';
-            } else {
-                return this.targetDarkMoneys[0].toExponential(1) + '～' + this.targetDarkMoneys[this.targetDarkMoneys.length - 1].toExponential(1) + ' ポイント(' + this.targetDarkMoneys.length + ')';
-            }
+            return this.commonTargetMoneysDesc(this.targetDarkMoneys);
         },
         gexpr() {
             return this.nig.calcGeneratorExpr();
@@ -2099,6 +2047,38 @@ const app = Vue.createApp({
                 return d.toFixed(0);
             } else {
                 return d.toExponential(places);
+            }
+        },
+        commonTargetMoneys(values, target) {
+            let [start, stop, opstep] = values.split(':', 3);
+            let [op, step] = opstep === undefined ? (target === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
+            try {
+                if (start !== undefined) start = D(start.trim());
+                if (stop !== undefined) stop = D(stop.trim());
+                if (step !== undefined) step = D(step.trim());
+            } catch (error) {
+                return [];
+            }
+            let arr = [];
+            if (stop !== undefined) {
+                while (arr.length < 100 && start.lte(stop)) {
+                    let t = this.nig.targetmoney(target, start);
+                    if (t.gt(0)) arr.push(t);
+                    start = op === '*' ? start.mul(step) : start.add(step);
+                }
+            } else {
+                let t = this.nig.targetmoney(target, start);
+                if (t.gt(0)) arr.push(t);
+            }
+            return arr;
+        },
+        commonTargetMoneysDesc(target) {
+            if (target.length === 0) {
+                return 'Invalid';
+            } else if (target.length === 1) {
+                return target[0].toExponential(1) + ' ポイント';
+            } else {
+                return target[0].toExponential(1) + '～' + target[target.length - 1].toExponential(1) + ' ポイント(' + target.length + ')';
             }
         },
         importsave() {

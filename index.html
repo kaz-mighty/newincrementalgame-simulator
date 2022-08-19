@@ -652,8 +652,8 @@
         </div>
       </div>
       <ul class="list-group list-group-flush">
-        <li v-for="(chkp, i) in checkpoints" class="list-group-item">
-          <span>{{ checkpointmessage(chkp) }}</span>
+        <li class="list-group-item" v-for="(_, i) in checkpoints">
+          <span>{{ checkpointMessages[i] }}</span>
           <button type="button" class="btn-close float-end" @click="removecheckpoint(i)"></button>
         </li>
       </ul>
@@ -684,8 +684,8 @@
         </div>
       </div>
       <ul class="list-group list-group-flush">
-        <li v-for="(chkp, i) in dark_checkpoints" class="list-group-item">
-          <span>{{ darkCheckpointMessage(chkp) }}</span>
+        <li class="list-group-item" v-for="(_, i) in dark_checkpoints">
+          <span>{{ darkCheckpointMessages[i] }}</span>
           <button type="button" class="btn-close float-end" @click="removeDarkCheckpoint(i)"></button>
         </li>
       </ul>
