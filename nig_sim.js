@@ -2079,7 +2079,8 @@ const app = Vue.createApp({
             if (stop !== undefined) {
                 while (arr.length < 100 && start.lte(stop)) {
                     let t = this.nig.targetmoney(target, start);
-                    if (t.gt(0)) arr.push(t);
+                    if (!t.gt(0)) break;
+                    arr.push(t);
                     start = op === '*' ? start.mul(step) : start.add(step);
                 }
             } else {
