@@ -1673,12 +1673,19 @@ class Nig {
 
     simulate(checkpoints) {
         if (checkpoints.length == 0) return [];
-        let idx = Array.from(checkpoints).fill().map((_, i) => i);
-        idx.sort((i, j) => checkpoints[i].cmp(checkpoints[j]));
-        let events = [];
+        const cmp_ev = (a, b) => {
+            let c = a[0].cmp(b[0]);
+            if (c === 0) c = a[1] - b[1];
+            if (c === 0) c = b[2] - a[2];
+            return c;
+        };
+        //発生器の購入が間に合わないと、先にチェックポイントを達成することがあるのでチェックポイント専用キューも用意する
+        let events = new TinyQueue([], cmp_ev); //[cost, id, index, number]
+        let checkpoints_que = new TinyQueue([], (a, b) => a[0].cmp(b[0]));
         let maxchp = D(0);
         for (let i = 0; i < checkpoints.length; i++) {
-            events.push([checkpoints[i], 0, i]);
+            events.push([checkpoints[i], 0, i, 0]);
+            checkpoints_que.push([checkpoints[i], i]);
             maxchp = maxchp.max(checkpoints[i]);
         }
         for (let i = 0; i < 8; i++) {
@@ -1686,57 +1693,66 @@ class Nig {
                 for (let j = this.player.generatorsBought[i]; ; j = j.add(1)) {
                     let c = this.calcGeneratorCost(i, j);
                     if (c.gte(maxchp)) break;
-                    events.push([c, 1, i]);
+                    events.push([c, 1, i, j]);
                 }
             }
         }
-        const cmpev = (a, b) => {
-            const cmpn = (x, y) => x < y ? -1 : x > y ? +1 : 0
-            let c = a[0].cmp(b[0]);
-            if (c === 0) c = cmpn(a[1], b[1]);
-            if (c === 0) c = cmpn(b[2], a[2]);
-            return c;
-        };
-        events.sort(cmpev);
-        const firstg = events.findIndex(a => a[1] === 1);
         for (let i = 0; i < 8; i++) {
-            if (i == 0 || this.player.levelresettime.gt(0) && (i == 1 || this.player.levelitems[3] > i - 2)) {
+            if (this.isAcceleratorOpened(i)) {
                 if (!this.isChallengeActive(5)) {
                     for (let j = this.player.acceleratorsBought[i]; ; j = j.add(1)) {
                         const c = this.calcAcceleratorCost(i, j);
                         if (c.gte(maxchp)) break;
-                        events.push([c, 2, i]);
+                        events.push([c, 2, i, j]);
                     }
                 }
             }
         }
-        let tmp = events.splice(firstg + 1);
-        tmp.sort(cmpev);
-        events.splice(firstg + 1, 0, ...tmp);
 
         let res = Array.from(checkpoints).fill(null);
         let totalticks = D(0);
         let totalsec = D(0);
-        events.forEach(([c, ty, i]) => {
-            const tickandsec = this.calcTickandSec(c, ty !== 0);
-            const tick = tickandsec.tick;
-            const sec = tickandsec.sec;
-            // console.log(c, ty, i, tick, sec, this.player.money);
-            if (ty == 0) {
-                res[i] = {
-                    tick: totalticks.add(tick),
-                    sec: totalsec.add(sec),
-                };
-            } else if (ty == 1) {
-                console.assert(this.buyGenerator(i));
-                totalticks = totalticks.add(tick);
-                totalsec = totalsec.add(sec);
-            } else {
-                console.assert(this.buyAccelerator(i));
-                totalticks = totalticks.add(tick);
-                totalsec = totalsec.add(sec);
+        while (events.length) {
+            let [cost, type, index, number] = events.pop();
+            //達成済みならcontinue
+            if (type === 0) {
+                if (res[index] !== null) continue;
+            } else if (type === 1) {
+                if (this.player.generatorsBought[index].gt(number)) continue;
+            } else if (type === 2) {
+                if (this.player.acceleratorsBought[index].gt(number)) continue;
             }
-        });
+
+            //次の目標まで(最低1tick)更新
+            let tick = D(1), sec = D(0);
+            if (this.player.money.gte(cost)) {
+                this.updateGenerators(D(1), tick);
+                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick, true);
+            } else {
+                const tick_and_sec = this.calcTickandSec(cost, true);
+                tick = tick_and_sec.tick;
+                sec = tick_and_sec.sec;
+            }
+            totalticks = totalticks.add(tick);
+            totalsec = totalsec.add(sec);
+
+            //checkpoint確認
+            while (checkpoints_que.length && this.player.money.gte(checkpoints_que.peek()[0])) {
+                let [_, k] = checkpoints_que.pop();
+                res[k] = {
+                    tick: totalticks,
+                    sec: totalsec,
+                };
+            }
+
+            for (let i = 7; i >= 0; i--) {
+                this.buyGenerator(i);
+            }
+            for (let i = 7; i >= 0; i--) {
+                this.buyAccelerator(i);
+            }
+        }
+        res = res.map(item => item === null ? {tick: D('Infinity'), sec: D('Infinity')} : item);
         return res;
     };
 
