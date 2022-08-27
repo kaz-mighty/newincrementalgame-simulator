@@ -1722,11 +1722,13 @@ class Nig {
             } else if (type === 2) {
                 if (this.player.acceleratorsBought[index].gt(number)) continue;
             }
+            //console.log(totalticks.toExponential(3), this.player.money.toExponential(3), cost.toExponential(3), type, index, number.toFixed(0))
 
             //次の目標まで(最低1tick)更新
             let tick = D(1), sec = D(0);
             if (this.player.money.gte(cost)) {
                 this.updateGenerators(D(1), tick);
+                this.updateAccelerators(D(1), tick)
                 sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick, true);
             } else {
                 const tick_and_sec = this.calcTickandSec(cost, true);
