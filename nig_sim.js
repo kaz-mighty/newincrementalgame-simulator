@@ -470,16 +470,16 @@ class Nig {
             acceleratorsBought: playerData.acceleratorsBought.map(D),
             acceleratorsCost: playerData.acceleratorsCost.map(D),
 
-            darkmoney: D(playerData.darkmoney),
-            darkgenerators: playerData.darkgenerators.map(D),
-            darkgeneratorsBought: playerData.darkgeneratorsBought.map(D),
-            darkgeneratorsCost: playerData.darkgeneratorsCost.map(D),
-            darklevel: D(playerData.darklevel),
+            darkmoney: D(playerData.darkmoney ?? 0),
+            darkgenerators: playerData.darkgenerators?.map(D) ?? new Array(8).fill(D(0)),
+            darkgeneratorsBought: playerData.darkgeneratorsBought?.map(D) ?? new Array(8).fill(D(0)),
+            darkgeneratorsCost: playerData.darkgeneratorsCost?.map(D) ?? new Array(8).fill(D(0)),
+            darklevel: D(playerData.darklevel ?? 0),
 
             lightmoney: D(playerData.lightmoney ?? 0),
-            lightgenerators: playerData.lightgenerators.map(D),
-            lightgeneratorsBought: playerData.lightgeneratorsBought.map(D),
-            lightgeneratorsCost: playerData.lightgeneratorsCost.map(D),
+            lightgenerators: playerData.lightgenerators?.map(D) ?? new Array(8).fill(D(0)),
+            lightgeneratorsBought: playerData.lightgeneratorsBought?.map(D) ?? new Array(8).fill(D(0)),
+            lightgeneratorsCost: playerData.lightgeneratorsCost?.map(D) ?? new Array(8).fill(D(0)),
 
 
             tickspeed: parseFloat(playerData.tickspeed),
@@ -487,17 +487,17 @@ class Nig {
             accelevelused: playerData.accelevelused ?? 0,
 
             onchallenge: playerData.onchallenge ?? false,
-            challenges: numarr2boolarr(playerData.challenges, 8) ?? new Array(8).fill(false),
+            challenges: numarr2boolarr(playerData.challenges ?? [], 8),
             challengecleared: playerData.challengecleared ?? [],
-            challengebonuses: numarr2boolarr(playerData.challengebonuses, 15) ?? new Array(15).fill(false),
+            challengebonuses: numarr2boolarr(playerData.challengebonuses ?? [], 15),
 
             onpchallenge: playerData.onpchallenge ?? false,
-            pchallenges: numarr2boolarr(playerData.pchallenges, 8) ?? new Array(8).fill(false),
+            pchallenges: numarr2boolarr(playerData.pchallenges ?? [], 8),
             pchallengecleared: playerData.pchallengecleared ?? new Array(1024).fill(0),
             prchallengecleared: playerData.prchallengecleared ?? new Array(1024).fill(0),
 
             rankchallengecleared: playerData.rankchallengecleared ?? [],
-            rankchallengebonuses: numarr2boolarr(playerData.rankchallengebonuses, 15) ?? new Array(15).fill(false),
+            rankchallengebonuses: numarr2boolarr(playerData.rankchallengebonuses ?? [], 15),
 
             trophies: playerData.trophies ?? new Array(trophynum).fill(false),
             smalltrophies: playerData.smalltrophies ?? new Array(100).fill(false),
