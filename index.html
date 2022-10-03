@@ -44,7 +44,13 @@
 
       <input type="checkbox" class="btn-check" id="rankInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="rankInfoB" data-bs-toggle="collapse" data-bs-target="#rankInfo"
-        aria-expanded="false" aria-controls="rankInfo" v-if="nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">階位</label>
+        aria-expanded="false" aria-controls="rankInfo"
+        v-if="nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">階位</label>
+
+      <input type="checkbox" class="btn-check" id="crownInfoB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="crownInfoB" data-bs-toggle="collapse" data-bs-target="#crownInfo"
+        aria-expanded="false" aria-controls="crownInfo"
+        v-if="nig.player.crownresettime.gt(0)">冠位</label>
 
       <input type="checkbox" class="btn-check" id="shineInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="shineInfoB" data-bs-toggle="collapse" data-bs-target="#shineInfo"
@@ -58,6 +64,10 @@
       <label class="btn btn-outline-dark" for="chipInfoB" data-bs-toggle="collapse" data-bs-target="#chipInfo"
         aria-expanded="false" aria-controls="chipInfo" v-if="nig.player.smalltrophies[5]">鋳片</label>
 
+      <input type="checkbox" class="btn-check" id="statueInfoB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="statueInfoB" data-bs-toggle="collapse" data-bs-target="#statueInfo"
+        aria-expanded="false" aria-controls="statueInfo" v-if="nig.player.chip[0] >= 10000 || nig.player.statue[0] >= 1">像</label>
+
       <input type="checkbox" class="btn-check" id="trophyInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="trophyInfoB" data-bs-toggle="collapse" data-bs-target="#trophyInfo"
         aria-expanded="false" aria-controls="trophyInfo">実績</label>
@@ -69,6 +79,11 @@
       <input type="checkbox" class="btn-check" id="simulatedChkpsB" autocomplete="off">
       <label class="btn btn-outline-dark" for="simulatedChkpsB" data-bs-toggle="collapse"
         data-bs-target="#simulatedChkps" aria-expanded="false" aria-controls="simulatedChkps">到達</label>
+
+      <input type="checkbox" class="btn-check" id="simulatedDarkB" autocomplete="off">
+      <label aria-controls="simulatedDark" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#simulatedDark"
+        data-bs-toggle="collapse" for="simulatedDarkB"
+        v-if="nig.player.money.gte('1e100') || nig.player.darkmoney.gt(0) || nig.player.darkgenerators.some(d => d.gt(0))">裏到達</label>
 
       <input type="checkbox" class="btn-check" id="gaexpressionB" autocomplete="off">
       <label class="btn btn-outline-dark" for="gaexpressionB" data-bs-toggle="collapse" data-bs-target="#gaexpression"
@@ -83,7 +98,8 @@
       <div class="card card-body">
         <div v-if="nig.worldopened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
-        <div v-if="nig.player.levelresettime.gt(0) || nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">
+        <div
+          v-if="nig.player.levelresettime.gt(0) || nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">
           段位: {{ formatDecimal(nig.player.level, 6) }} 段位リセット: {{ formatDecimal(nig.player.levelresettime, 6) }}
         </div>
         <div v-if="nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">
@@ -92,7 +108,8 @@
         <div v-if="nig.player.crownresettime.gt(0)">
           冠位: {{ formatDecimal(nig.player.crown, 6) }} 冠位リセット: {{ formatDecimal(nig.player.crownresettime, 6) }}
         </div>
-        <div v-if="nig.player.levelresettime.gt(0) || nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">
+        <div
+          v-if="nig.player.levelresettime.gt(0) || nig.player.rankresettime.gt(0) || nig.player.crownresettime.gt(0)">
           最大取得段位: {{ formatDecimal(nig.player.maxlevelgained, 6) }}
         </div>
         <div v-if="nig.player.challengecleared.length>0">挑戦達成: {{ nig.player.challengecleared.length }}</div>
@@ -134,7 +151,7 @@
             <td class="d-grid">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buyGenerator(i-1)"
                 :disabled="!nig.isGeneratorBuyable(i-1)">
-                {{ nig.player.generatorsCost[i-1].toExponential(1) }}
+                {{ nig.player.generatorsCost[i-1].toExponential(3) }}
               </button>
             </td>
             <td class="align-middle">{{ nig.player.generatorsBought[i-1].toNumber() }}</td>
@@ -151,7 +168,7 @@
             <td class="d-grid" v-if="nig.isAcceleratorOpened(i-1)">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buyAccelerator(i-1)"
                 :disabled="!nig.isAcceleratorBuyable(i-1)">
-                {{ nig.player.acceleratorsCost[i-1].toExponential(1) }}
+                {{ nig.player.acceleratorsCost[i-1].toExponential(3) }}
               </button>
             </td>
             <td v-else></td>
@@ -170,6 +187,10 @@
           <tr>
             <td class="align-middle" colspan="2">裏ポイント</td>
             <td class="align-middle" colspan="2">{{ formatDecimal(nig.player.darkmoney, 6) }}</td>
+            <template v-if="isLightBought">
+              <td class="align-middle" colspan="2">天上ポイント</td>
+              <td class="align-middle" colspan="2">{{ formatDecimal(nig.player.lightmoney, 6) }}</td>
+            </template>
           </tr>
           <tr>
             <td class="align-middle" colspan="2">裏段位</td>
@@ -178,11 +199,20 @@
           <tr>
             <td class="align-middle" rowspan="2"></td>
             <td class="align-middle" colspan="3">裏発生器</td>
+            <template v-if="isLightBought">
+              <td class="align-middle" rowspan="2"></td>
+              <td class="align-middle" colspan="3">天上発生器</td>
+            </template>
           </tr>
           <tr>
             <td class="align-middle">所持数</td>
             <td class="align-middle">購入コスト</td>
             <td class="align-middle">購入数</td>
+            <template v-if="isLightBought">
+              <td class="align-middle">所持数</td>
+              <td class="align-middle">購入コスト</td>
+              <td class="align-middle">購入数</td>
+            </template>
           </tr>
         </thead>
         <tbody>
@@ -192,10 +222,22 @@
             <td class="d-grid">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buyDarkGenerator(i-1)"
                 :disabled="!nig.isDarkGeneratorBuyable(i-1)">
-                {{ nig.player.darkgeneratorsCost[i-1].toExponential(1) }}
+                {{ nig.player.darkgeneratorsCost[i-1].toExponential(3) }}
               </button>
             </td>
             <td class="align-middle">{{ nig.player.darkgeneratorsBought[i-1].toNumber() }}</td>
+
+            <template v-if="isLightBought">
+              <td class="align-middle">{{ i }}</td>
+              <td class="align-middle">{{ nig.player.lightgenerators[i-1].toExponential(3) }}</td>
+              <td class="d-grid">
+                <button type="button" class="btn btn-outline-dark btn-sm" @click="buyLightGenerator(i-1)"
+                  :disabled="!nig.isLightGeneratorBuyable(i-1)">
+                  {{ nig.player.lightgeneratorsCost[i-1].toExponential(1) }}
+                </button>
+              </td>
+              <td class="align-middle">{{ nig.player.lightgeneratorsBought[i-1].toNumber() }}</td>
+            </template>
           </tr>
         </tbody>
       </table>
@@ -282,6 +324,32 @@
       </div>
     </div>
 
+    <div class="collapse" id="crownInfo">
+      <div class="card card-body">
+        <div class="form-check">
+          <input class="form-check-input" id="doPC_reset" type="checkbox" v-model="do_perfect_challenge_reset">
+          <label class="form-check-label" for="doPC_reset">挑戦開始時に状態をリセットする</label>
+        </div>
+        <div class="d-flex align-items-center flex-wrap">
+          <div>完全挑戦</div>
+          <div v-for="i in 10" :key="i" class="tooltipcell">
+            <button type="button" class="btn" @click="nig.configPerfectChallenge(i-1)"
+              :class="buttonselectedcls(nig.player.pchallenges[i-1])" :disabled="nig.player.onpchallenge">
+              {{ i }}
+            </button>
+            <span class="uptooltip">{{ itemdata.perfect_challengetext[i-1] }}</span>
+          </div>
+          <div class="tooltipcell">
+            <button type="button" class="btn btn-outline-dark" @click="togglePerfectChallenge"
+              :disabled="!(nig.isStartPerfectChallenge() || nig.player.onpchallenge)">
+              {{ nig.player.onpchallenge ? '挑戦終了' : '挑戦開始' }}
+            </button>
+            <span class="uptooltip" v-html="startPerfectChallengeMessage"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="collapse" id="shineInfo">
       <div class="card card-body">
         <div>
@@ -341,17 +409,17 @@
       <div class="card card-body">
         <div>
           所持鋳片
-          <span v-for="i in 4" :key="i">
+          <span v-for="i in SET_CHIP_KIND" :key="i">
             <span v-show="nig.player.chip[i-1]>0">
-              {{ ' ' }} {{ itemdata.chipname[i-1] }}: {{ nig.player.chip[i-1] }}
+              {{ ' ' }} {{ itemdata.chipname[i-1] + '片' }}: {{ nig.player.chip[i-1] }}
             </span>
           </span>
         </div>
         <div>
           コスト
-          <span v-for="i in 4" :key="i">
+          <span v-for="i in SET_CHIP_KIND" :key="i">
             <span v-show="nig.player.chip[i-1]>0">
-              {{ ' ' }} {{ itemdata.chipname[i-1] }}: {{ nig.chipused[i-1]+1 }}
+              {{ ' ' }} {{ itemdata.chipname[i-1] + '片' }}: {{ nig.chipused[i-1]+1 }}
             </span>
           </span>
         </div>
@@ -360,14 +428,33 @@
           <div v-for="i in 52" :key="i" class="tooltipcell">
             <span v-if="i<=32||nig.countRemembers()>=16">
               <button type="button" class="btn btn-outline-dark" :style="chipcoloredbuttoncls(nig.player.setchip[i-1])"
-                @click="toggleChip(i-1)">{{ i }} {{ nig.player.setchip[i-1]==0 ? '　' :
-                itemdata.chipname[nig.player.setchip[i-1]-1].slice(0, -1) }}</button>
+                @click="toggleChip(i-1)"
+                :disabled="nig.player.disabledchip[i-1]">{{ i }} {{ nig.player.setchip[i-1]==0 ? '　' :
+                itemdata.chipname[nig.player.setchip[i-1]-1] }}</button>
               <span class="uptooltip">{{ itemdata.chipbonusname[i-1] }}</span>
             </span>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="collapse" id="statueInfo">
+      <div class="card card-body">
+        <div v-for="i in SET_CHIP_KIND" :key="i">
+          <div v-show="nig.player.chip[i-1] > 0 || nig.chipused[i-1] > 0">
+            <span>{{itemdata.chipname[i-1] + "像 "}}</span>
+            <span class="tooltipcell">
+              <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
+                :disabled="!nig.isStatueBuildable(i-1)">
+                設像コスト: {{ nig.calcStatueCost(i-1) }}
+              </button>
+            </span>
+            <span> 所持数: {{ nig.player.statue[i-1] }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <div class="collapse" id="trophyInfo">
       <div class="card card-body">
@@ -376,7 +463,7 @@
           <table class="table-bordered table-sm">
             <tbody>
               <tr>
-                <td v-for="i in 8" :key="i">
+                <td v-for="i in TROPHY_NUM" :key="i">
                   <span>{{ nig.player.trophies[i-1] ? itemdata.trophytext[i-1] : '???' }}</span>
                 </td>
               </tr>
@@ -395,7 +482,7 @@
                   </span>
                 </td>
               </tr>
-              <tr v-for="i in 2" :key="i" v-if="nig.player.crownresettime.gt(0)">
+              <tr v-for="i in 3" :key="i" v-if="nig.player.crownresettime.gt(0)">
                 <td v-for="j in 10" :key="j" class="tooltipcell">
                   <span>{{ nig.player.smalltrophies2nd[i*10+j-11] ? 100+(i-1)*10+j : '　' }}</span>
                   <span class="uptooltip" v-if="spoiler">
@@ -552,10 +639,12 @@
             <option value="rankreset">階位リセット</option>
             <option value="crownreset">冠位リセット</option>
           </select>
-          <span class="input-group-text" v-if="checkpointtarget=='levelreset' || checkpointtarget=='rankreset' || checkpointtarget=='crownreset'">で</span>
+          <span class="input-group-text"
+            v-if="checkpointtarget=='levelreset' || checkpointtarget=='rankreset' || checkpointtarget=='crownreset'">で</span>
           <input type="text" class="form-control" v-model="checkpointvalue" placeholder="start[:stop[:[*]step]]"
             aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addcheckpoint()}">
-          <span class="input-group-text" v-if="checkpointtarget=='levelreset' || checkpointtarget=='rankreset' || checkpointtarget=='crownreset'">
+          <span class="input-group-text"
+            v-if="checkpointtarget=='levelreset' || checkpointtarget=='rankreset' || checkpointtarget=='crownreset'">
             {{ {levelreset: '段位', rankreset: '階位', crownreset: '冠位'}[checkpointtarget] }}獲得する
           </span>
           <span class="input-group-text">{{ tmoneysDesc }} </span>
@@ -563,9 +652,41 @@
         </div>
       </div>
       <ul class="list-group list-group-flush">
-        <li v-for="(chkp, i) in checkpoints" class="list-group-item">
-          <span>{{ checkpointmessage(chkp) }}</span>
+        <li class="list-group-item" v-for="(_, i) in checkpoints">
+          <span>{{ checkpointMessages[i] }}</span>
           <button type="button" class="btn-close float-end" @click="removecheckpoint(i)"></button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="collapse card" id="simulatedDark">
+      <div class="card-body">
+        <div>
+          <button type="button" class="btn btn-outline-dark" @click="simulateDarkCheckpoints">シミュレート</button>
+          <button type="button" class="btn" @click="auto_simulate_dark_checkpoints = !auto_simulate_dark_checkpoints;"
+            :class="buttonselectedcls(auto_simulate_dark_checkpoints)">自動</button>
+        </div>
+        <div class="input-group">
+          <select class="form-select" v-model="dark_checkpoint_target" aria-label="checkpoint target">
+            <option value="point" selected>ポイント</option>
+            <option value="dark_levelreset">裏段位リセット</option>
+          </select>
+          <span class="input-group-text"
+            v-if="dark_checkpoint_target==='dark_levelreset'">で</span>
+          <input type="text" class="form-control" v-model="dark_checkpoint_value" placeholder="start[:stop[:[*]step]]"
+            aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addDarkCheckpoint()}">
+          <span class="input-group-text"
+            v-if="dark_checkpoint_target==='dark_levelreset'">
+            {{ {dark_levelreset: '裏段位'}[dark_checkpoint_target] }}獲得する
+          </span>
+          <span class="input-group-text">{{ targetDarkMoneysDesc }} </span>
+          <button class="btn btn-outline-dark" type="button" @click="addDarkCheckpoint">追加</button>
+        </div>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" v-for="(_, i) in dark_checkpoints">
+          <span>{{ darkCheckpointMessages[i] }}</span>
+          <button type="button" class="btn-close float-end" @click="removeDarkCheckpoint(i)"></button>
         </li>
       </ul>
     </div>
@@ -594,7 +715,7 @@
           効力探索が有効なら、効力5と併用して使用する効力の候補として効力3,4,7,8,11,12,14の極大集合を全探索する。
           上位効力探索が有効なら、使用する上位効力の候補として上位効力4,5,7,8,10?,11,12,14の極大集合を全探索する。
           段位効力2を購入しているなら、より良い効力の組み合わせが存在することがある。
-          時間回帰力探索が有効なら、起動1と最大値を探索する(キャンペーン中は未対応)。
+          時間回帰力探索が有効なら、0から最大値まで全探索する。
           モードは発生器iならi-1固定。
 
         </p>
@@ -616,8 +737,17 @@
       </div>
       <div class="card-body">
         <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="verbose" v-model="verbose">
+          <label class="form-check-label" for="verbose">表示増加</label>
+        </div>
+        <div class="form-check">
           <input class="form-check-input" type="checkbox" id="spoiler" v-model="spoiler">
           <label class="form-check-label" for="spoiler">ネタバレ</label>
+        </div>
+        <div>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="scalechaltable(0.9)">-</button>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="scalechaltable(1.1)">+</button>
+          <span>挑戦表サイズ</span>
         </div>
       </div>
     </div>
@@ -633,6 +763,7 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/contrib/auto-render.min.js"
     integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous"
     onload="renderMathInElement(document.body);"></script>
+  <script src="https://unpkg.com/tinyqueue@2.0.0/tinyqueue.min.js"></script>
   <script src="nig_sim.js"></script>
 </body>
 

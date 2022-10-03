@@ -75,6 +75,7 @@ class ItemData {
             '煌く者',
             '想い出す者',
             '有冠者',
+            '天上の者'
         ];
         this.smalltrophytext = [
             'ポイントを0より大きくする',
@@ -188,8 +189,23 @@ class ItemData {
             '階位を1e8より大きくする',
             '階位を1e10より大きくする',
             '階位を1e12より大きくする',
+            '天上発生器1を1つ以上購入する',
+            '天上発生器2を1つ以上購入する',
+            '天上発生器3を1つ以上購入する',
+            '天上発生器4を1つ以上購入する',
+            '天上発生器5を1つ以上購入する',
+            '天上発生器6を1つ以上購入する',
+            '天上発生器7を1つ以上購入する',
+            '天上発生器8を1つ以上購入する',
+            '紫鋼片を1個以上にする',
+            '紫鋼片を210個以上にする',
+            '紫鋼片を1275個以上にする',
+            '銅像を10個以上にする',
+            '銀像を10個以上にする',
+            '金像を10個以上にする',
+            '白金像を10個以上にする'
         ]
-        this.chipname = ['銅片', '銀片', '金片', '白金片'];
+        this.chipname = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipbonusname = [
             '発生器効率',
             '発生器1効率',
@@ -242,7 +258,19 @@ class ItemData {
             '裏発生器8生産強化',
             '煌き入手割合',
             '煌き使用効率',
-            '煌き使用効率裏(工事中)',
+            '煌き使用効率裏',
+        ];
+        this.perfect_challengetext = [
+            '発生器の倍率が1/100になります。',
+            '間隙のベースは10000毛秒になります。',
+            '発生器3と6は生産をしません。',
+            '倍率は6桁毎に切り捨てられます。',
+            '段位と段位リセットの入手量は大幅に減少します。',
+            '階位の入手量は大幅に減少します。',
+            '輝きと煌きは使用できません。',
+            '記憶と思い出は大幅に弱体化されます。',
+            '裏発生器と裏ポイントは発生器を強化しません。',
+            '鋳片効力は、新規挑戦達成でない段位リセットを行うごとにランダムで1つが無効になります。',
         ];
     }
 };
@@ -284,7 +312,7 @@ class MaximumBonuses {
                     }
                 }
                 /* 上位効力4は上位効力5の上位互換 */
-                if (rank && !cs.includes(3) && cs.includes(4)) {} else {
+                if (rank && !cs.includes(3) && cs.includes(4)) { } else {
                     challengebonusescandidates.push(cs);
                 }
             }
@@ -295,6 +323,9 @@ class MaximumBonuses {
 
 const mbcache = new MaximumBonuses();
 
+const trophynum = 9;
+const setchipkind = 10;
+const setchipnum = 100;
 
 class Nig {
     constructor() {
@@ -330,6 +361,11 @@ class Nig {
                 darkgeneratorsCost: [D('1e100'), D('1e108'), D('1e127'), D('1e164'), D('1e225'), D('1e316'), D('1e443'), D('1e612')],
                 darklevel: D(0),
 
+                lightmoney: D(0),
+                lightgenerators: new Array(8).fill(D(0)),
+                lightgeneratorsBought: new Array(8).fill(D(0)),
+                lightgeneratorsCost: [D('1e200'), D('1e216'), D('1e281'), D('1e456'), D('1e825'), D('1e1496'), D('1e2601'), D('1e4296')],
+
                 tickspeed: 1000,
                 accelevel: 0,
                 accelevelused: 0,
@@ -339,10 +375,15 @@ class Nig {
                 challengecleared: [],
                 challengebonuses: new Array(15).fill(false),
 
+                onpchallenge: false,
+                pchallenges: [],
+                pchallengecleared: new Array(1024).fill(0),
+                prchallengecleared: new Array(1024).fill(0),
+
                 rankchallengecleared: [],
                 rankchallengebonuses: new Array(15).fill(false),
 
-                trophies: new Array(8).fill(false),
+                trophies: new Array(trophynum).fill(false),
                 smalltrophies: new Array(100).fill(false),
                 smalltrophies2nd: new Array(100).fill(false),
 
@@ -352,8 +393,11 @@ class Nig {
                 remember: 0,
                 rememberspent: 0,
 
-                chip: [0, 0, 0, 0],
-                setchip: new Array(100).fill(0),
+                chip: new Array(setchipkind).fill(0),
+                setchip: new Array(setchipnum).fill(0),
+                disabledchip: new Array(setchipnum).fill(false),
+
+                statue: new Array(setchipkind).fill(0),
 
                 worldpipe: new Array(10).fill(null).map(() => 0),
             };
@@ -370,7 +414,7 @@ class Nig {
         this.eachpipedsmallmemory = new Array(10).fill(null).map(() => 0);
         this.pipedsmallmemory = 0;
         this.worldopened = new Array(10).fill().map(() => false);
-        this.chipused = [0, 0, 0, 0];
+        this.chipused = new Array(setchipkind).fill(0);
         this.world = 0;
     };
 
@@ -432,6 +476,12 @@ class Nig {
             darkgeneratorsCost: playerData.darkgeneratorsCost.map(D),
             darklevel: D(playerData.darklevel),
 
+            lightmoney: D(playerData.lightmoney ?? 0),
+            lightgenerators: playerData.lightgenerators.map(D),
+            lightgeneratorsBought: playerData.lightgeneratorsBought.map(D),
+            lightgeneratorsCost: playerData.lightgeneratorsCost.map(D),
+
+
             tickspeed: parseFloat(playerData.tickspeed),
             accelevel: playerData.accelevel ?? 0,
             accelevelused: playerData.accelevelused ?? 0,
@@ -441,10 +491,15 @@ class Nig {
             challengecleared: playerData.challengecleared ?? [],
             challengebonuses: numarr2boolarr(playerData.challengebonuses, 15) ?? new Array(15).fill(false),
 
+            onpchallenge: playerData.onpchallenge ?? false,
+            pchallenges: numarr2boolarr(playerData.pchallenges, 8) ?? new Array(8).fill(false),
+            pchallengecleared: playerData.pchallengecleared ?? new Array(1024).fill(0),
+            prchallengecleared: playerData.prchallengecleared ?? new Array(1024).fill(0),
+
             rankchallengecleared: playerData.rankchallengecleared ?? [],
             rankchallengebonuses: numarr2boolarr(playerData.rankchallengebonuses, 15) ?? new Array(15).fill(false),
 
-            trophies: playerData.trophies ?? new Array(8).fill(false),
+            trophies: playerData.trophies ?? new Array(trophynum).fill(false),
             smalltrophies: playerData.smalltrophies ?? new Array(100).fill(false),
             smalltrophies2nd: playerData.smalltrophies2nd ?? new Array(100).fill(false),
 
@@ -454,8 +509,11 @@ class Nig {
             remember: playerData.remember ?? 0,
             rememberspent: playerData.rememberspent ?? 0,
 
-            chip: playerData.chip ?? [0, 0, 0, 0],
-            setchip: playerData.setchip ?? new Array(100).fill(0),
+            chip: playerData.chip ?? new Array(setchipkind).fill(0),
+            setchip: playerData.setchip ?? new Array(setchipnum).fill(0),
+            disabledchip: playerData.disabledchip ?? new Array(setchipnum).fill(false),
+
+            statue: playerData.statue ?? new Array(setchipkind).fill(0),
 
             worldpipe: playerData.worldpipe ?? new Array(10).fill(null).map(() => 0),
         };
@@ -469,6 +527,7 @@ class Nig {
         for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcDarkGeneratorCost(i, this.player.darkgeneratorsBought[i], true);
+        for (let i = 0; i < 8; i++) this.calcLightGeneratorCost(i, this.player.lightgeneratorsBought[i], true);
     };
 
     clone() {
@@ -499,9 +558,18 @@ class Nig {
         if (this.isChallengeBonusActive(3)) mult = mult.mul(D(2));
         if (this.isRankChallengeBonusActive(3)) mult = mult.mul(D(3));
 
-        mult = mult.mul(1 + this.smallmemory * 0.01 + this.memory * 0.25);
+        if (this.isPerfectChallengeActive(0)) mult = mult.div(100);
+
+        let x1 = 0.25;
+        let x2 = 12;
+        if (this.isPerfectChallengeActive(7)) {
+            x1 = 1.0 / 81;
+            x2 = 27;
+        }
+
+        mult = mult.mul(1 + this.smallmemory * 0.01 + this.memory * x1);
         if (this.isRankChallengeBonusActive(11))
-            mult = mult.mul(D(2).pow(D(this.memory).div(12)));
+            mult = mult.mul(D(2).pow(D(this.memory).div(x2)));
 
         mult = mult.mul(1 + Math.sqrt(this.pipedsmallmemory));
 
@@ -511,7 +579,7 @@ class Nig {
             mult = mult.mul(1 + cnt * 0.25);
         }
 
-        if (this.player.darkmoney.gte(1))
+        if (!this.isPerfectChallengeActive(8) && this.player.darkmoney.gte(1))
             mult = mult.mul(D(this.player.darkmoney.add(10).log10()).pow(1 + this.player.setchip[40] * 0.1));
 
         if (this.isRankChallengeBonusActive(9)) {
@@ -526,7 +594,8 @@ class Nig {
         // if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
         // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
         // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
-        if (camp > 4) camp = 4;
+        if ((d.getMonth() == 6 && 27 <= d.getDate()) || ((d.getMonth() == 7 && d.getDate() < 27))) camp = camp + 2;
+        if (camp > 6) camp = 6;
         mult = mult.mul(1 + 4 * camp);
 
 
@@ -550,10 +619,15 @@ class Nig {
                 mult = mult.mul(this.player.maxlevelgained.min(100000));
         }
 
-        if (this.player.darkgenerators[i].gte(1))
+        if (!this.isPerfectChallengeActive(8) && this.player.darkgenerators[i].gte(1))
             mult = mult.mul(D(i + 2 + this.player.darkgenerators[i].log10()).pow(1 + this.player.setchip[i + 32] * 0.25));
 
         mult = mult.mul(1 + this.player.setchip[i + 1] * 0.5);
+
+        if (this.isPerfectChallengeActive(2)) {
+            this.incrementalmults[2] = D(0);
+            this.incrementalmults[5] = D(0);
+        }
 
         this.incrementalmults[i] = mult;
     };
@@ -566,6 +640,11 @@ class Nig {
         let rk = this.player.rank.add(2).div(262142).log2();
         rk += D(this.player.rank.add(2).log2()).log2() * this.player.setchip[23];
         mult = mult.mul(D(lv.pow((i - to) * (1 + Math.max(rk, 0) * 0.05))));
+
+        if (this.isPerfectChallengeActive(3) && mult.gt('1e-100')) {
+            let b = Math.floor(mult.log10() / 6);
+            mult = D(10).pow(b * 6);
+        }
         return mult;
     };
 
@@ -621,9 +700,10 @@ class Nig {
         let d = Array.from(new Array(9), (_, i) => new Array(Math.max(0, highest + 2 - i)).fill(D(0)));
         d[0][0] = this.player.darkmoney;
         for (let i = 0; i <= highest; i++) d[i + 1][0] = this.player.darkgenerators[i];
-        const darkmult = this.softCap(this.player.darklevel.add(1), D(1e10));
+        const darkmult = this.softCap(this.player.darklevel.add(1), D(1e3));
         for (let i = highest + 1; i-- > 0;) {
-            let mult = darkmult.mul(mu);
+            let mult = mu.mul(this.player.lightgenerators[i].add(1));
+            mult = mult.mul(darkmult);
             mult = mult.mul(1 + this.player.setchip[41 + i] * 0.25);
             mult = mult.mul(1 + this.eachpipedsmallmemory[5] * 0.2);
             d[i + 1].forEach((dd, j) => d[i][j + 1] = d[i][j + 1].add(dd.mul(mult)));
@@ -647,7 +727,10 @@ class Nig {
     };
     basetick() {
         const challengebonusescount = this.player.challengebonuses.reduce((x, y) => x + (y ? 1 : 0), 0);
-        return 1000 * (1 + 0.5 * this.player.accelevelused) - this.player.setchip[9] * 50 - this.player.levelitems[1] * challengebonusescount * (1 + this.player.setchip[27] * 0.5);
+        let tick_speed = 1000;
+        if (this.isPerfectChallengeActive(1)) tick_speed = 10000;
+        tick_speed += 500 * this.player.accelevelused;
+        return tick_speed - this.player.setchip[9] * 50 - this.player.levelitems[1] * challengebonusescount * (1 + this.player.setchip[27] * 0.5);
     };
     updateTickspeed() {
         const amult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
@@ -669,6 +752,7 @@ class Nig {
 
     spendShine(num) {
         if (this.player.shine < num) return;
+        if (this.isPerfectChallengeActive(6)) return;
         this.player.shine -= num;
         const val = D(11 + this.player.setchip[31]).pow(D(num).log10());
         this.updateGenerators(val);
@@ -676,11 +760,13 @@ class Nig {
     };
     spendBrightness(num) {
         if (this.player.brightness < num) return;
+        if (this.isPerfectChallengeActive(6)) return;
         this.player.brightness -= num;
         const val = D(11 + this.player.setchip[50]).pow(D(num * 100).log10());
+        const vald = D(10 + this.player.setchip[51] * 0.25).pow(D(num).log10());
         this.updateGenerators(val);
         this.updateAccelerators(val);
-        this.updateDarkGenerators(D(num));
+        this.updateDarkGenerators(vald);
     };
 
     isChallengeActive(index) {
@@ -691,6 +777,9 @@ class Nig {
     };
     isRankChallengeBonusActive(index) {
         return this.player.rankchallengebonuses[index];
+    };
+    isPerfectChallengeActive(index) {
+        return this.player.onpchallenge && this.player.pchallenges[index];
     };
 
     isGeneratorBuyable(index) {
@@ -763,6 +852,53 @@ class Nig {
         return true;
     };
 
+    isLightGeneratorBuyable(index) {
+        return this.player.money.gte(this.player.lightgeneratorsCost[index]);
+    };
+    calcLightGeneratorCost(index, bought, update = false) {
+        let p = 200 + (index === 0 ? 0 : (index + 1) * (index + 1) * (index + 1) * (index + 1));
+        let q = bought.mul(index + 1).mul(index + 1).mul(index + 1);
+        q = q.add(p);
+        const cost = D(10).pow(q);
+        if (update) this.player.lightgeneratorsCost[index] = cost;
+        return cost;
+    };
+    buyLightGenerator(index) {
+        if (!this.isLightGeneratorBuyable(index)) return false;
+        this.player.money = this.player.money.sub(this.player.lightgeneratorsCost[index]);
+        this.player.lightgenerators[index] = this.player.lightgenerators[index].add(1);
+        this.player.lightgeneratorsBought[index] = this.player.lightgeneratorsBought[index].add(1);
+        this.calcLightGeneratorCost(index, this.player.lightgeneratorsBought[index], true);
+        return true;
+    };
+
+    calcToken() {
+        const challenge_id = this.calcPerfectChallengeId();
+        let spent = 0;
+        this.player.challengebonuses.forEach((value, index) => {
+            if (value) {
+                spent += itemdata.rewardcost[index];
+            }
+        });
+        let t = this.player.challengecleared.length;
+        if (this.player.onpchallenge) {
+            t = Math.max(t, this.player.pchallengecleared[challenge_id]);
+        }
+        this.player.token = t - spent;
+
+        spent = 0;
+        this.player.rankchallengebonuses.forEach((value, index) => {
+            if (value) {
+                spent += itemdata.rewardcost[index];
+            }
+        });
+        t = this.player.rankchallengecleared.length;
+        if (this.player.onpchallenge) {
+            t = Math.max(t, this.player.prchallengecleared[challenge_id]);
+        }
+        this.player.ranktoken = t - spent;
+
+    };
     isRewardToggleable(index) {
         return this.player.challengebonuses[index] || (this.player.token >= itemdata.rewardcost[index]);
     };
@@ -817,6 +953,10 @@ class Nig {
         if (this.player.onchallenge) return;
         this.player.challenges[index] = !this.player.challenges[index];
     };
+    configPerfectChallenge(index) {
+        if (this.player.onpchallenge) return;
+        this.player.pchallenges[index] = !this.player.pchallenges[index];
+    };
 
     isGeneratorModeChangeable() {
         return !this.isChallengeActive(3) && !this.isChallengeBonusActive(13);
@@ -854,7 +994,10 @@ class Nig {
                 }
             }
         }
-        gainlevel = gainlevel.round();
+
+        if (this.isPerfectChallengeActive(4)) gainlevel = D(gainlevel.log2()).max(1);
+        gainlevel = gainlevel.round().max(1);
+
         gainlevel = gainlevel.mul(1 + this.eachpipedsmallmemory[2] * 0.2);
         if (this.isChallengeBonusActive(12)) gainlevel = gainlevel.mul(2);
         return gainlevel;
@@ -866,6 +1009,7 @@ class Nig {
         dv = dv - this.player.crown.add(2).log2() * 0.1;
         dv = Math.max(dv, 3);
         let gainrank = D(money.log10()).div(dv).pow_base(2).round();
+        if (this.isPerfectChallengeActive(5)) gainrank = D(gainrank.log10()).max(1);
         if (this.isRankChallengeBonusActive(12)) gainrank = gainrank.mul(3);
         gainrank = gainrank.mul(1 + this.player.setchip[22] * 0.5);
         gainrank = gainrank.mul(1 + this.eachpipedsmallmemory[4] * 0.2);
@@ -876,25 +1020,81 @@ class Nig {
         let dv = 72;
         return D(2).pow(money.log10() / dv).round();
     };
+    calcGainDarkLevel(x) {
+        const money = x === undefined ? this.player.darkmoney : x;
+        let dv = 18 - this.player.crown.add(2).log2();
+        dv = Math.max(dv, 1);
+        return D(money.log10()).div(dv).pow_base(2).round();
+    };
+
+    resetRankborder() {
+        let remember = this.countRemembers();
+        if (this.isPerfectChallengeActive(7)) remember = Math.pow(remember, 0.5);
+        return D(10).pow((this.isChallengeActive(0) ? 96 : 72) - Math.min(remember / 2.0, 36));
+    };
+    resetCrownborder() {
+        return D('1e216');
+    };
 
     resetLevel(_force, exit, challenge) {
         const gainlevel = this.calcGainLevel();
-        const gainlevelreset = this.player.rankresettime.add(1).mul(1 + this.player.setchip[20]).mul(D(exit ? 0 : this.isChallengeBonusActive(8) ? 2 : 1));
+        let rankresettime = this.player.rankresettime.add(1);
+        if (this.isPerfectChallengeActive(4)) rankresettime = rankresettime.pow(0.1).round();
+        const gainlevelreset = rankresettime.mul(1 + this.player.setchip[20]).mul(D(exit ? 0 : this.isChallengeBonusActive(8) ? 2 : 1));
 
+        let is_challenge_clear = false;
         if (this.player.onchallenge) {
             this.player.onchallenge = false;
-            this.player.token = this.player.token + 1;
-            this.player.challengecleared.push(this.calcChallengeId());
+            const id = this.calcChallengeId();
+            if (!this.player.challengecleared.includes(id)) {
+                this.player.challengecleared.push(id);
+                is_challenge_clear = true;
+            }
         } else if (challenge) {
             this.player.onchallenge = true;
             if (this.player.challenges[3])
                 this.player.generatorsMode = new Array(8).fill(0);
         }
+        if (this.isPerfectChallengeActive(9) && (!_force) && (!exit) && (!is_challenge_clear)) {
+            const random_int = Math.floor(Math.random() * 100);
+            this.configChip(random_int, 0);
+            this.player.disabledchip[random_int] = true;
+        }
 
-        this.player.money = D(1);
         this.player.level = this.player.level.add(exit ? D(0) : gainlevel);
         this.player.levelresettime = this.player.levelresettime.add(gainlevelreset);
         this.player.maxlevelgained = this.player.maxlevelgained.max(exit ? D(0) : gainlevel);
+        this.resetLevelData()
+    };
+    //TODO: resetRank is not tested.
+    resetRank(force) {
+        let gain_rank = this.calcGainRank();
+        if (!force && !confirm('昇階リセットして、階位' + gain_rank + 'を得ますか？')) return;
+        if (this.player.onchallenge) {
+            this.player.onchallenge = false;
+            let id = this.calcChallengeId();
+            if (this.player.challengecleared.length >= 128 && !this.player.rankchallengecleared.includes(id)) {
+                this.player.rankchallengecleared.push(this.calcChallengeId());
+            }
+        }
+        let gain_time = this.isRankChallengeBonusActive(8) ? D(3) : D(1);
+        gain_time = gain_time.mul(this.player.setchip[24] + 1).mul(this.player.crownresettime.add(1));
+        this.player.rank = this.player.rank.add(gain_rank);
+        this.player.rankresettime = this.player.rankresettime.add(gain_time);
+        this.resetRankData();
+    };
+    resetCrown(force, exit) {
+        let gain_crown = this.calcGainCrown();
+        if (!force && !confirm('昇冠リセットして、冠位' + gain_crown + 'を得ますか？')) return;
+        if (!exit) {
+            this.player.crown = this.player.crown.add(gain_crown);
+            this.player.crownresettime = this.player.crownresettime.add(1);
+        }
+        this.resetCrownData();
+    };
+
+    resetLevelData() {
+        this.player.money = D(1);
 
         this.player.generators = new Array(8).fill(D(0));
         this.player.generatorsBought = new Array(8).fill(D(0));
@@ -910,13 +1110,18 @@ class Nig {
         if (this.isChallengeBonusActive(1)) this.player.accelerators[0] = D(10);
         if (this.isRankChallengeBonusActive(0)) this.player.money = this.player.money.add(D('1e9'));
         if (this.isRankChallengeBonusActive(1)) this.player.accelerators[0] = this.player.accelerators[0].add(256);
+        this.calcToken();
     };
-
-    resetRankborder() {
-        return D(10).pow((this.isChallengeActive(0) ? 96 : 72) - Math.min(this.countRemembers() / 2.0, 36));
+    resetRankData() {
+        this.player.level = D(0);
+        this.player.levelresettime = D(0);
+        this.player.levelitems = new Array(5).fill(0);
+        this.resetLevelData();
     };
-    resetCrownborder() {
-        return D('1e216');
+    resetCrownData() {
+        this.player.rank = D(0);
+        this.player.rankresettime = D(0);
+        this.resetRankData();
     };
 
     calcChallengeId() {
@@ -924,6 +1129,13 @@ class Nig {
         for (let i = 0; i < 8; i++)
             challengeid = challengeid * 2 + (this.player.challenges[i] ? 1 : 0);
         return challengeid;
+    };
+    calcPerfectChallengeId() {
+        let id = 0;
+        for (let i = 9; i >= 0; i--) {
+            id = id * 2 + (this.player.pchallenges[i] ? 1 : 0);
+        }
+        return id;
     };
 
     startChallenge() {
@@ -935,6 +1147,46 @@ class Nig {
             for (let i = 0; i < 8; i++)
                 this.player.generatorsCost[i] = this.calcGeneratorCost(i, this.player.generatorsBought[i]);
         }
+    };
+    isStartPerfectChallenge() {
+        if (!(this.player.challengecleared.length >= 255 && this.player.rankchallengecleared.length >= 255)) {
+            return false;
+        }
+        const count = this.player.pchallenges.reduce((x, y) => x + (y ? 1 : 0), 0);
+        for (let i = 0; i < 10; i++) {
+            if (this.player.statue[i] < count - i) {
+                return false;
+            }
+        }
+        return true;
+    }
+    startPerfectChallenge(reset) {
+        if (!this.isStartPerfectChallenge()) return false;
+        if (reset) {
+            this.resetCrown(true, true);
+            this.player.challengecleared = [];
+            this.player.challengebonuses = [];
+            this.player.rankchallengecleared = [];
+            this.player.rankchallengebonuses = [];
+        }
+        this.player.onpchallenge = true;
+        this.calcToken();
+        return true;
+    };
+    exitPerfectChallenge() {
+        const id = this.calcPerfectChallengeId();
+        if (this.player.onchallenge) this.exitChallenge();
+        this.player.onpchallenge = false;
+        this.player.pchallengecleared[id] = Math.max(this.player.pchallengecleared[id], this.player.challengecleared.length);
+        this.player.prchallengecleared[id] = Math.max(this.player.prchallengecleared[id], this.player.rankchallengecleared.length);
+        this.player.challengecleared = [];
+        this.player.rankchallengecleared = [];
+        for (let i = 1; i < 256; i++) {
+            this.player.challengecleared.push(i);
+            this.player.rankchallengecleared.push(i);
+        }
+        this.player.disabledchip = new Array(setchipnum).fill(false);
+        this.calcToken();
     };
 
     moveWorld(i) {
@@ -952,6 +1204,22 @@ class Nig {
         }
         if (havepipe > 0) this.player.worldpipe[i] += 1;
     };
+
+    isStatueBuildable(i) {
+        let cost = this.calcStatueCost(i);
+        if (this.player.chip[i] < cost) return false;
+        return true;
+    };
+    calcStatueCost(i) {
+        return (this.player.statue[i] + 1) * 10000;
+    };
+    buildStatue(i) {
+        let cost = this.calcStatueCost(i);
+        if (this.player.chip[i] < cost) return;
+        this.player.chip[i] -= cost;
+        this.player.statue[i] += 1;
+    };
+
     checkTrophies() {
         if (this.player.levelresettime.gt(0)) this.player.trophies[0] = true;
         if (this.player.rankresettime.gt(0)) this.player.trophies[1] = true;
@@ -961,6 +1229,7 @@ class Nig {
         if (this.player.remember > 0) this.player.trophies[6] = true;
         if (this.world == 0 && this.countRemembers() > 0) this.player.trophies[6] = true;
         if (this.player.crownresettime.gt(0)) this.player.trophies[7] = true;
+        if (this.player.lightgenerators[0].gt(0)) this.player.trophies[8] = true;
 
         if (this.player.money.gt(0)) this.player.smalltrophies[0] = true;
         if (this.player.money.gt(777)) this.player.smalltrophies[1] = true;
@@ -1064,18 +1333,32 @@ class Nig {
         if (this.player.darklevel.greaterThan('1e10')) this.player.smalltrophies[99] = true;
 
         if (this.player.crownresettime.gt(0)) {
-            if(this.player.crownresettime.gt(0))this.player.smalltrophies2nd[0] = true;
-            if(this.player.crownresettime.gte(5))this.player.smalltrophies2nd[1] = true;
-            if(this.player.crownresettime.gte(20))this.player.smalltrophies2nd[2] = true;
-            if(this.player.crownresettime.gte(100))this.player.smalltrophies2nd[3] = true;
-            if(this.player.accelevel>=1)this.player.smalltrophies2nd[4] = true;
-            if(this.player.accelevel>=3)this.player.smalltrophies2nd[5] = true;
-            if(this.player.accelevel>=6)this.player.smalltrophies2nd[6] = true;
-            if(this.player.accelevel>=10)this.player.smalltrophies2nd[7] = true;
-            if(this.player.rank.gt('1e8'))this.player.smalltrophies2nd[8] = true;
-            if(this.player.rank.gt('1e10'))this.player.smalltrophies2nd[9] = true;
-            if(this.player.rank.gt('1e12'))this.player.smalltrophies2nd[10] = true;
-
+            if (this.player.crownresettime.gt(0)) this.player.smalltrophies2nd[0] = true;
+            if (this.player.crownresettime.gte(5)) this.player.smalltrophies2nd[1] = true;
+            if (this.player.crownresettime.gte(20)) this.player.smalltrophies2nd[2] = true;
+            if (this.player.crownresettime.gte(100)) this.player.smalltrophies2nd[3] = true;
+            if (this.player.accelevel >= 1) this.player.smalltrophies2nd[4] = true;
+            if (this.player.accelevel >= 3) this.player.smalltrophies2nd[5] = true;
+            if (this.player.accelevel >= 6) this.player.smalltrophies2nd[6] = true;
+            if (this.player.accelevel >= 10) this.player.smalltrophies2nd[7] = true;
+            if (this.player.rank.gt('1e8')) this.player.smalltrophies2nd[8] = true;
+            if (this.player.rank.gt('1e10')) this.player.smalltrophies2nd[9] = true;
+            if (this.player.rank.gt('1e12')) this.player.smalltrophies2nd[10] = true;
+            if (this.player.lightgenerators[0].gte(1)) this.player.smalltrophies2nd[11] = true;
+            if (this.player.lightgenerators[1].gte(1)) this.player.smalltrophies2nd[12] = true;
+            if (this.player.lightgenerators[2].gte(1)) this.player.smalltrophies2nd[13] = true;
+            if (this.player.lightgenerators[3].gte(1)) this.player.smalltrophies2nd[14] = true;
+            if (this.player.lightgenerators[4].gte(1)) this.player.smalltrophies2nd[15] = true;
+            if (this.player.lightgenerators[5].gte(1)) this.player.smalltrophies2nd[16] = true;
+            if (this.player.lightgenerators[6].gte(1)) this.player.smalltrophies2nd[17] = true;
+            if (this.player.lightgenerators[7].gte(1)) this.player.smalltrophies2nd[18] = true;
+            if (this.player.chip[4] > 0) this.player.smalltrophies2nd[19] = true;
+            if (this.player.chip[4] >= 210) this.player.smalltrophies2nd[20] = true;
+            if (this.player.chip[4] >= 1275) this.player.smalltrophies2nd[21] = true;
+            if (this.player.statue[0] >= 10) this.player.smalltrophies2nd[22] = true;
+            if (this.player.statue[1] >= 10) this.player.smalltrophies2nd[23] = true;
+            if (this.player.statue[2] >= 10) this.player.smalltrophies2nd[24] = true;
+            if (this.player.statue[3] >= 10) this.player.smalltrophies2nd[25] = true;
         }
     };
     checkMemories() {
@@ -1115,8 +1398,8 @@ class Nig {
     };
     checkWorlds() {
         this.worldopened[0] = true;
-        if (D(this.players[0].crownresettime).gt(0)){
-            for(let i = 1; i < 10; i++){
+        if (D(this.players[0].crownresettime).gt(0)) {
+            for (let i = 1; i < 10; i++) {
                 this.worldopened[i] = true;
             }
         }
@@ -1132,11 +1415,12 @@ class Nig {
     };
     toggleChip(i) {
         let oldchip = this.player.setchip[i];
-        for (let j = oldchip + 1; j <= 4; j++) if (this.configChip(i, j)) return true;
+        for (let j = oldchip + 1; j <= setchipkind; j++) if (this.configChip(i, j)) return true;
         for (let j = 0; j < oldchip; j++) if (this.configChip(i, j)) return true;
         return false;
     };
     configChip(i, j) {
+        if (this.player.disabledchip[i]) return false;
         if (this.player.setchip[i] == j) return false;
         if (this.player.chip[j - 1] <= this.chipused[j - 1]) return false;
         let oldchip = this.player.setchip[i] - 1;
@@ -1166,6 +1450,8 @@ class Nig {
                 return this.calcGainRank(x);
             } else if (target === 'crownreset') {
                 return this.calcGainCrown(x);
+            } else if (target === 'dark_levelreset') {
+                return this.calcGainDarkLevel(x);
             }
         };
         if (f(l).gte(value)) return l;
@@ -1196,6 +1482,9 @@ class Nig {
             } else if (target == 'crownreset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetCrownborder(), target);
+            } else if (target == 'dark_levelreset') {
+                value = value.ceil();
+                return this.searchLowerBound(value, D('1e18'), target);
             } else if (target == 'point') {
                 return value;
             }
@@ -1396,12 +1685,19 @@ class Nig {
 
     simulate(checkpoints) {
         if (checkpoints.length == 0) return [];
-        let idx = Array.from(checkpoints).fill().map((_, i) => i);
-        idx.sort((i, j) => checkpoints[i].cmp(checkpoints[j]));
-        let events = [];
+        const cmp_ev = (a, b) => {
+            let c = a[0].cmp(b[0]);
+            if (c === 0) c = a[1] - b[1];
+            if (c === 0) c = b[2] - a[2];
+            return c;
+        };
+        //発生器の購入が間に合わないと、先にチェックポイントを達成することがあるのでチェックポイント専用キューも用意する
+        let events = new TinyQueue([], cmp_ev); //[cost, id, index, number]
+        let checkpoints_que = new TinyQueue([], (a, b) => a[0].cmp(b[0]));
         let maxchp = D(0);
         for (let i = 0; i < checkpoints.length; i++) {
-            events.push([checkpoints[i], 0, i]);
+            events.push([checkpoints[i], 0, i, 0]);
+            checkpoints_que.push([checkpoints[i], i]);
             maxchp = maxchp.max(checkpoints[i]);
         }
         for (let i = 0; i < 8; i++) {
@@ -1409,49 +1705,68 @@ class Nig {
                 for (let j = this.player.generatorsBought[i]; ; j = j.add(1)) {
                     let c = this.calcGeneratorCost(i, j);
                     if (c.gte(maxchp)) break;
-                    events.push([c, 1, i]);
+                    events.push([c, 1, i, j]);
                 }
             }
-            if (i == 0 || this.player.levelresettime.gt(0) && (i == 1 || this.player.levelitems[3] > i - 2)) {
+        }
+        for (let i = 0; i < 8; i++) {
+            if (this.isAcceleratorOpened(i)) {
                 if (!this.isChallengeActive(5)) {
                     for (let j = this.player.acceleratorsBought[i]; ; j = j.add(1)) {
                         const c = this.calcAcceleratorCost(i, j);
                         if (c.gte(maxchp)) break;
-                        events.push([c, 2, i]);
+                        events.push([c, 2, i, j]);
                     }
                 }
             }
         }
-        events.sort((a, b) => {
-            const cmpn = (x, y) => x < y ? -1 : x > y ? +1 : 0
-            let c = a[0].cmp(b[0]);
-            if (c === 0) c = cmpn(a[1], b[1]);
-            if (c === 0) c = cmpn(b[2], a[2]);
-            return c;
-        });
+
         let res = Array.from(checkpoints).fill(null);
         let totalticks = D(0);
         let totalsec = D(0);
-        events.forEach(([c, ty, i]) => {
-            const tickandsec = this.calcTickandSec(c, ty !== 0);
-            const tick = tickandsec.tick;
-            const sec = tickandsec.sec;
-            // console.log(c, ty, i, tick, sec, this.player.money);
-            if (ty == 0) {
-                res[i] = {
-                    tick: totalticks.add(tick),
-                    sec: totalsec.add(sec),
-                };
-            } else if (ty == 1) {
-                console.assert(this.buyGenerator(i));
-                totalticks = totalticks.add(tick);
-                totalsec = totalsec.add(sec);
-            } else {
-                console.assert(this.buyAccelerator(i));
-                totalticks = totalticks.add(tick);
-                totalsec = totalsec.add(sec);
+        while (events.length) {
+            let [cost, type, index, number] = events.pop();
+            //達成済みならcontinue
+            if (type === 0) {
+                if (res[index] !== null) continue;
+            } else if (type === 1) {
+                if (this.player.generatorsBought[index].gt(number)) continue;
+            } else if (type === 2) {
+                if (this.player.acceleratorsBought[index].gt(number)) continue;
             }
-        });
+            //console.log(totalticks.toExponential(3), this.player.money.toExponential(3), cost.toExponential(3), type, index, number.toFixed(0))
+
+            //次の目標まで(最低1tick)更新
+            let tick = D(1), sec = D(0);
+            if (this.player.money.gte(cost)) {
+                this.updateGenerators(D(1), tick);
+                this.updateAccelerators(D(1), tick)
+                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick, true);
+            } else {
+                const tick_and_sec = this.calcTickandSec(cost, true);
+                tick = tick_and_sec.tick;
+                sec = tick_and_sec.sec;
+            }
+            totalticks = totalticks.add(tick);
+            totalsec = totalsec.add(sec);
+
+            //checkpoint確認
+            while (checkpoints_que.length && this.player.money.gte(checkpoints_que.peek()[0])) {
+                let [_, k] = checkpoints_que.pop();
+                res[k] = {
+                    tick: totalticks,
+                    sec: totalsec,
+                };
+            }
+
+            for (let i = 7; i >= 0; i--) {
+                this.buyGenerator(i);
+            }
+            for (let i = 7; i >= 0; i--) {
+                this.buyAccelerator(i);
+            }
+        }
+        res = res.map(item => item === null ? {tick: D('Infinity'), sec: D('Infinity')} : item);
         return res;
     };
 
@@ -1473,15 +1788,9 @@ class Nig {
             },
             config,
         };
-        let accelevelcandidates = [];
-        if (config.searchAccelLevel && this.player.accelevel > 0) {
-            accelevelcandidates.push(1);
-            if (this.player.accelevel > 1) {
-                accelevelcandidates.push(this.player.accelevel);
-            }
-        } else {
-            accelevelcandidates.push(this.player.accelevelused);
-        }
+        let accelevelcandidates = config.searchAccelLevel
+            ? Array.from(new Array(this.player.accelevel + 1).keys())
+            : [this.player.accelevelused];
         let challengebonusescandidates = config.searchChallengeBonuses
             ? mbcache.get(this.player.challengecleared.length, false, true)
             : [new Array(15).fill().map((_, i) => i).filter(i => this.player.challengebonuses[i])];
@@ -1540,6 +1849,23 @@ class Nig {
         });
         return minres;
     };
+
+    simulateDark(checkpoints) {
+        if (checkpoints.length === 0) return [];
+        let index = Array.from(checkpoints, (_, i) => i);
+        index.sort((i, j) => checkpoints[i].cmp(checkpoints[j]));
+        let events = [];
+        for (let i = 0; i < checkpoints.length; i++) {
+            events.push([checkpoints[i], i]);
+        }
+        events.sort((a, b) => a[0].cmp(b[0]));
+        let result = Array.from(checkpoints).fill(null);
+        events.forEach(([c, i]) => {
+            result[i] = this.calcDarkGoalTick(c);
+        });
+        return result;
+    };
+
 };
 
 const colors = ['#00ff00', '#11ff52', '#23ff9b', '#34ffda', '#46eeff', '#57c2ff', '#699fff', '#7a86ff', '#a18cff', '#ca9dff', '#e9afff', '#ffc0ff'];
@@ -1562,19 +1888,25 @@ const colorbarpower = f => {
 const app = Vue.createApp({
     data() {
         return {
+            TROPHY_NUM: trophynum,
+            SET_CHIP_KIND: setchipkind,
+            SET_CHIP_NUM: setchipnum,
             nig: new Nig(),
             itemdata: itemdata,
             shinechallengelength: [64, 96, 128, 160, 192, 224],
-            brightnessrankchallengelength: [32, 64, 128],
+            brightnessrankchallengelength: [32, 64, 128, 255],
             simulatedcheckpoints: Array.from(new Array(10), () => new Map()),
             challengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             rankchallengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             checkpoints: [D('1e18'), D('1e72')],
+            simulated_dark_checkpoints: Array.from(new Array(10), () => new Map()),
+            dark_checkpoints: [D('1e18')],
             cpsimulatedtime: Date.now(),
             sampletick: [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
             sampleticklabel: ['1', '1e1', '1e2', '1e3', '1e4', '1e5', '1e6', '1e7', '1e8', '1e9'],
             sampletime: [1, 60, 3600, 86400, 2592000, 31536000, 3153600000],
             sampletimelabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
+            do_perfect_challenge_reset: true,
             hideclearedchallenge: false,
             hidechallengecolor: false,
             showtickminimum: false,
@@ -1585,10 +1917,15 @@ const app = Vue.createApp({
                 toggleBonuses: true,
             },
             autosimulatecheckpoints: false,
+            auto_simulate_dark_checkpoints: false,
             checkpointtarget: 'point',
             checkpointvalue: '',
+            dark_checkpoint_target: 'point',
+            dark_checkpoint_value: '',
             procmspertick: 0,
+            verbose: false,
             spoiler: false,
+            simulatetablewidth: 80,
         }
     },
     computed: {
@@ -1597,6 +1934,12 @@ const app = Vue.createApp({
             let contents = '挑戦: ' + (this.nig.player.challengecleared.includes(id) ? '済' : '未');
             if (this.nig.player.rankchallengecleared.length > 0)
                 contents += '  階位挑戦: ' + (this.nig.player.rankchallengecleared.includes(id) ? '済' : '未');
+            return contents;
+        },
+        startPerfectChallengeMessage() {
+            let id = this.nig.calcPerfectChallengeId();
+            let contents = '進行度 通常: ' + (this.nig.player.pchallengecleared[id]);
+            contents += '  上位: ' + (this.nig.player.prchallengecleared[id]);
             return contents;
         },
         challengeid: function () {
@@ -1662,16 +2005,16 @@ const app = Vue.createApp({
                     const sec = mres.sec.add(mres.tick.mul(this.procmspertick * 0.001));
                     message = mres.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
-                    if (this.challengeConfig.searchChallengeBonuses && mres.challengebonuses.length > 0) message += '<br/>効力' + mres.challengebonuses.map(x => x + 1);
-                    if (this.challengeConfig.searchRankChallengeBonuses && mres.rankchallengebonuses.length > 0) message += '<br/>上位効力' + mres.rankchallengebonuses.map(x => x + 1);
-                    if (this.nig.player.accelevel > 0) message += '<br/>起動時間回帰力' + mres.accelevelused;
+                    if ((this.verbose || this.challengeConfig.searchChallengeBonuses) && mres.challengebonuses.length > 0) message += '<br/>効力' + mres.challengebonuses.map(x => x + 1);
+                    if ((this.verbose || this.challengeConfig.searchRankChallengeBonuses) && mres.rankchallengebonuses.length > 0) message += '<br/>上位効力' + mres.rankchallengebonuses.map(x => x + 1);
+                    if ((this.verbose || this.challengeConfig.searchAccelLevel) && this.nig.player.accelevel > 0) message += '<br/>起動時間回帰力' + mres.accelevelused;
                     // message += '<br/>id: ' + id;
                 }
                 return message;
             };
         },
-        checkpointmessage: function () {
-            return function (checkpoint) {
+        checkpointMessages() {
+            return this.checkpoints.map(checkpoint => {
                 const res = this.simulatedcheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 const sec = res.sec.add(res.tick.mul(this.procmspertick * 0.001));
@@ -1679,39 +2022,26 @@ const app = Vue.createApp({
                 content += ' (' + sec.toExponential(3) + ' sec)';
                 content += ' ' + (new Date(this.cpsimulatedtime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
                 return content;
-            };
+            });
+        },
+        darkCheckpointMessages() {
+            return this.dark_checkpoints.map(checkpoint => {
+                const res = this.simulated_dark_checkpoints[this.nig.world].get(checkpoint);
+                if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
+                return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
+            });
         },
         tmoneys() {
-            let [start, stop, opstep] = this.checkpointvalue.split(':', 3);
-            let [op, step] = opstep === undefined ? (this.checkpointtarget === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
-            try {
-                if (start !== undefined) start = D(start.trim());
-                if (stop !== undefined) stop = D(stop.trim());
-                if (step !== undefined) step = D(step.trim());
-            } catch (error) {
-                return [];
-            };
-            let arr = [];
-            if (stop !== undefined) {
-                while (arr.length < 100 && start.lte(stop)) {
-                    let t = this.nig.targetmoney(this.checkpointtarget, start);
-                    if (t.gt(0)) arr.push(t);
-                    start = op === '*' ? start.mul(step) : start.add(step);
-                }
-            } else {
-                let t = this.nig.targetmoney(this.checkpointtarget, start);
-                if (t.gt(0)) arr.push(t);
-            }
-            return arr;
+            return this.commonTargetMoneys(this.checkpointvalue, this.checkpointtarget);
         },
         tmoneysDesc() {
-            if (this.tmoneys.length === 0) {
-                return 'Invalid';
-            } else if (this.tmoneys.length === 1) {
-                return this.tmoneys[0].toExponential(1) + ' ポイント';
-            } else {
-                return this.tmoneys[0].toExponential(1) + '～' + this.tmoneys[this.tmoneys.length - 1].toExponential(1) + ' ポイント(' + this.tmoneys.length + ')';
-            }
+            return this.commonTargetMoneysDesc(this.tmoneys);
+        },
+        targetDarkMoneys() {
+            return this.commonTargetMoneys(this.dark_checkpoint_value, this.dark_checkpoint_target);
+        },
+        targetDarkMoneysDesc() {
+            return this.commonTargetMoneysDesc(this.targetDarkMoneys);
         },
         gexpr() {
             return this.nig.calcGeneratorExpr();
@@ -1735,6 +2065,11 @@ const app = Vue.createApp({
                 return name + ': \\(' + content + '\\)';
             };
         },
+        isLightBought() {
+            if (this.nig.player.money.gte('1e200') && this.nig.player.crownresettime.gt(0)) return true;
+            if (this.nig.player.lightmoney.gt(0)) return true;
+            return this.nig.player.lightgenerators.some(d => d.gt(0));
+        },
     },
     methods: {
         formatDecimal(d, places) {
@@ -1744,6 +2079,39 @@ const app = Vue.createApp({
                 return d.toExponential(places);
             }
         },
+        commonTargetMoneys(values, target) {
+            let [start, stop, opstep] = values.split(':', 3);
+            let [op, step] = opstep === undefined ? (target === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
+            try {
+                if (start !== undefined) start = D(start.trim());
+                if (stop !== undefined) stop = D(stop.trim());
+                if (step !== undefined) step = D(step.trim());
+            } catch (error) {
+                return [];
+            }
+            let arr = [];
+            if (stop !== undefined) {
+                while (arr.length < 100 && start.lte(stop)) {
+                    let t = this.nig.targetmoney(target, start);
+                    if (!t.gt(0)) break;
+                    arr.push(t);
+                    start = op === '*' ? start.mul(step) : start.add(step);
+                }
+            } else {
+                let t = this.nig.targetmoney(target, start);
+                if (t.gt(0)) arr.push(t);
+            }
+            return arr;
+        },
+        commonTargetMoneysDesc(target) {
+            if (target.length === 0) {
+                return 'Invalid';
+            } else if (target.length === 1) {
+                return target[0].toExponential(1) + ' ポイント';
+            } else {
+                return target[0].toExponential(1) + '～' + target[target.length - 1].toExponential(1) + ' ポイント(' + target.length + ')';
+            }
+        },
         importsave() {
             const prevworld = this.nig.world;
             const input = window.prompt('データを入力', '');
@@ -1751,12 +2119,8 @@ const app = Vue.createApp({
             let nig = new Nig();
             nig.loadb(input);
             this.nig = nig;
-            for (let i = 0; i < 10; i++) {
-                this.simulatedcheckpoints[i].clear();
-                this.challengesimulated[i] = new Array(256).fill(null);
-                this.rankchallengesimulated[i] = new Array(256).fill(null);
-            }
             this.selectWorld(prevworld);
+            this.clearAllCache();
         },
         selectWorld(i) {
             this.nig.save();
@@ -1783,6 +2147,10 @@ const app = Vue.createApp({
             this.nig.buyDarkGenerator(i);
             this.clearAllCache();
         },
+        buyLightGenerator(i) {
+            this.nig.buyLightGenerator(i);
+            this.clearAllCache();
+        },
         toggleReward(i) {
             this.nig.toggleReward(i);
             this.clearCheckpointsCache();
@@ -1794,6 +2162,9 @@ const app = Vue.createApp({
         buyLevelitems(i) {
             this.nig.buyLevelitems(i);
             this.clearAllCache();
+        },
+        buildStatue(i) {
+            this.nig.buildStatue(i);
         },
         changeMode(i) {
             this.nig.changeMode(i);
@@ -1811,6 +2182,14 @@ const app = Vue.createApp({
             }
             this.clearCheckpointsCache();
         },
+        togglePerfectChallenge() {
+            if (this.nig.player.onpchallenge) {
+                this.nig.exitPerfectChallenge();
+            } else {
+                this.nig.startPerfectChallenge(this.do_perfect_challenge_reset);
+            }
+            this.clearAllCache();
+        },
         toggleChip(i) {
             this.nig.toggleChip(i);
             this.clearAllCache();
@@ -1824,18 +2203,20 @@ const app = Vue.createApp({
             this.clearCheckpointsCache();
         },
         clearCheckpointsCache() {
-            for (let i = 0; i < 10; i++) {
-                this.simulatedcheckpoints[this.nig.world].clear();
-            }
+            this.simulatedcheckpoints[this.nig.world].clear();
+            this.simulated_dark_checkpoints[this.nig.world].clear();
             if (this.autosimulatecheckpoints) this.simulatecheckpoints();
+            if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
                 this.simulatedcheckpoints[i].clear();
+                this.simulated_dark_checkpoints[i].clear();
                 this.challengesimulated[i] = new Array(256).fill(null);
                 this.rankchallengesimulated[i] = new Array(256).fill(null);
             }
             if (this.autosimulatecheckpoints) this.simulatecheckpoints();
+            if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         addcheckpoint() {
             this.tmoneys.forEach(tmoney => this.checkpoints.push(tmoney));
@@ -1871,6 +2252,19 @@ const app = Vue.createApp({
         simulatechallengesall(rank) {
             this.simulatechallenges(1, rank, true);
         },
+        addDarkCheckpoint() {
+            this.targetDarkMoneys.forEach(target_money => this.dark_checkpoints.push(target_money));
+        },
+        removeDarkCheckpoint(i) {
+            this.dark_checkpoints.splice(i, 1);
+        },
+        simulateDarkCheckpoints() {
+            setTimeout(() => {
+                if (this.dark_checkpoints.length === 0) return;
+                const res = this.nig.clone().simulateDark(this.dark_checkpoints);
+                res.forEach((r, i) => this.simulated_dark_checkpoints[this.nig.world].set(this.dark_checkpoints[i], r));
+            }, 0);
+        },
         scalesampletime(t) {
             const r = Math.log10(t) / Math.log10(3153600000) * 100;
             return {
@@ -1890,12 +2284,27 @@ const app = Vue.createApp({
         chipcoloredbuttoncls(j) {
             if (j === 0) {
                 return {};
+            } else if (j >= 9) {
+                let color = ['silver', 'gold'][j - 9];
+                return {
+                    'background-color': color,
+                    'background-image': 'linear-gradient(135deg,transparent 20%,40%,rgba(255,255,255,1) 50%,60%,transparent 80%)'
+                }
+
             } else {
-                let color = ['#cd7f32', 'silver', 'gold', '#E5E4E2'][j - 1];
+                let color = [
+                    '#cd7f32', 'silver', 'gold',
+                    '#E5E4E2', '#EE82EE', '#FF3333',
+                    '#42FFDD', '#38B48B'
+                ][j - 1];
                 return {
                     'background-color': color,
                 };
             }
+        },
+        scalechaltable(c) {
+            this.simulatetablewidth = Math.max(20, Math.min(100, this.simulatetablewidth * c));
+            document.querySelector(':root').style.setProperty('--chal-width', `${this.simulatetablewidth}vh`);
         },
     },
     mounted() {
