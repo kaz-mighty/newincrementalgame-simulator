@@ -1497,7 +1497,7 @@ class Nig {
 
     calcgoalticks(tmoney, update) {
         if (this.player.money.gte(tmoney)) return D(0);
-        if (this.player.generators.every(g => g.eq(0))) return D('Infinity');
+        if (this.player.generators.every(g => g.eq(0))) return D(Infinity);
         const gexpr = this.calcGeneratorExpr();
         let ok = D(2);
         let ng = D(0);
@@ -1529,7 +1529,7 @@ class Nig {
 
     tick2sec(tick, update) {
         if (tick.lte(0)) return D(0);
-        if (tick.eq(D('Infinity'))) return D('Infinity');
+        if (tick.eq(D(Infinity))) return D(Infinity);
         const aexpr = this.calcAcceleratorExpr();
         const delta = D('1e-3');
         const basetick = D(this.basetick()).div(1000);
@@ -1567,7 +1567,7 @@ class Nig {
 
     calcTickandSec(tmoney, update) {
         if (this.player.money.gte(tmoney)) return { ticks: D(0), sec: D(0) };
-        if (tmoney.eq(D('Infinity'))) return { ticks: D('Infinity'), sec: D('Infinity') };
+        if (tmoney.eq(D(Infinity))) return { ticks: D(Infinity), sec: D(Infinity) };
         if (this.isRankChallengeBonusActive(9)) {
             const previnfo = {
                 money: this.player.money,
@@ -1663,7 +1663,7 @@ class Nig {
 
     calcDarkGoalTick(tdmoney, mu = D(1)) {
         if (this.player.darkmoney.gte(tdmoney)) return D(0);
-        if (this.player.darkgenerators.every(g => g.eq(0))) return D('Infinity');
+        if (this.player.darkgenerators.every(g => g.eq(0))) return D(Infinity);
         const dexpr = this.calcDarkGeneratorExpr(mu);
         let ok = D(2);
         let ng = D(0);
@@ -1774,15 +1774,15 @@ class Nig {
     simulatechallenges(challengeid, rank, config) {
         let minres = {
             tickminimum: {
-                tick: D('Infinity'),
-                sec: D('Infinity'),
+                tick: D(Infinity),
+                sec: D(Infinity),
                 challengebonuses: [],
                 rankchallengebonuses: [],
                 accelevelused: 0,
             },
             secminimum: {
-                tick: D('Infinity'),
-                sec: D('Infinity'),
+                tick: D(Infinity),
+                sec: D(Infinity),
                 challengebonuses: [],
                 rankchallengebonuses: [],
                 accelevelused: 0,
@@ -1977,7 +1977,7 @@ const app = Vue.createApp({
                 if (res !== null) {
                     if (this.showtickminimum) {
                         const tick = res.tickminimum.tick;
-                        if (tick.eq(D('Infinity'))) {
+                        if (tick.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
                             const f = tick.max(1).log10() / Math.log10(1e10);
@@ -1985,7 +1985,7 @@ const app = Vue.createApp({
                         }
                     } else {
                         const sec = res.secminimum.sec.add(res.secminimum.tick.mul(this.procmspertick * 0.001));
-                        if (sec.eq(D('Infinity'))) {
+                        if (sec.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
                             const f = sec.max(1).log10() / Math.log10(3153600000);
