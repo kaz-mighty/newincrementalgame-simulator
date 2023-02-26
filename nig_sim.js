@@ -1767,7 +1767,7 @@ class Nig {
                 this.buyAccelerator(i);
             }
         }
-        res = res.map(item => item === null ? {tick: D('Infinity'), sec: D('Infinity')} : item);
+        res = res.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
         return res;
     };
 
