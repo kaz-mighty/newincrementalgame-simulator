@@ -2242,7 +2242,7 @@ const app = Vue.createApp({
             if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeid].secminimum.challengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengebonuses[i]);
             if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeid].secminimum.rankchallengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankchallengebonuses[i]);
             if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeid].secminimum.accelevelused !== this.nig.player.accelevelused;
-            if (!this.searchClearChallenge) {
+            if (!this.searchClearChallenge && rec) {
                 let cleared = rank ? this.nig.player.rankchallengecleared : this.nig.player.challengecleared;
                 update &&= !cleared.includes(challengeid);
             }
