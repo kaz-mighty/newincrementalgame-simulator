@@ -1917,6 +1917,7 @@ const app = Vue.createApp({
                 searchAccelLevel: true,
                 toggleBonuses: true,
             },
+            searchClearChallenge: true,
             autosimulatecheckpoints: false,
             auto_simulate_dark_checkpoints: false,
             checkpointtarget: 'point',
@@ -2234,18 +2235,27 @@ const app = Vue.createApp({
             }, 0);
         },
         simulatechallenges(challengeid, rank, rec) {
-            setTimeout(() => {
-                if (challengeid <= 0 || 256 <= challengeid) return;
-                let sim = rank ? this.rankchallengesimulated : this.challengesimulated;
-                let update = sim[this.nig.world][challengeid] === null;
-                if (!update) update |= sim[this.nig.world][challengeid].config !== this.challengeConfig;
-                if (!update) update |= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeid].secminimum.challengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengebonuses[i]);
-                if (!update) update |= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeid].secminimum.rankchallengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankchallengebonuses[i]);
-                if (!update) update |= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeid].secminimum.accelevelused !== this.nig.player.accelevelused;
+            if (challengeid <= 0 || 256 <= challengeid) return;
+            let sim = rank ? this.rankchallengesimulated : this.challengesimulated;
+            let update = sim[this.nig.world][challengeid] === null;
+            if (!update) update ||= sim[this.nig.world][challengeid].config !== this.challengeConfig;
+            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeid].secminimum.challengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengebonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeid].secminimum.rankchallengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankchallengebonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeid].secminimum.accelevelused !== this.nig.player.accelevelused;
+            if (!this.searchClearChallenge) {
+                let cleared = rank ? this.nig.player.rankchallengecleared : this.nig.player.challengecleared;
+                update &&= !cleared.includes(challengeid);
+            }
 
-                if (update) sim[this.nig.world][challengeid] = this.nig.clone().simulatechallenges(challengeid, rank, JSON.parse(JSON.stringify(this.challengeConfig)));
+            // simulateする場合のみsetTimeoutを挟む
+            if (update) {
+                setTimeout(() => {
+                    sim[this.nig.world][challengeid] = this.nig.clone().simulatechallenges(challengeid, rank, JSON.parse(JSON.stringify(this.challengeConfig)));
+                    if (rec) this.simulatechallenges(challengeid + 1, rank, rec);
+                }, 0);
+            } else {
                 if (rec) this.simulatechallenges(challengeid + 1, rank, rec);
-            }, 0);
+            }
         },
         simulatechallengeone(i, j, rank) {
             this.simulatechallenges(this.challengeid(i, j), rank, false);
