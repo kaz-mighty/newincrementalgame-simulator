@@ -75,7 +75,8 @@ class ItemData {
             '煌く者',
             '想い出す者',
             '有冠者',
-            '天上の者'
+            '天上の者',
+            '瞬く者',
         ];
         this.smalltrophytext = [
             'ポイントを0より大きくする',
@@ -203,7 +204,36 @@ class ItemData {
             '銅像を10個以上にする',
             '銀像を10個以上にする',
             '金像を10個以上にする',
-            '白金像を10個以上にする'
+            '白金像を10個以上にする',
+            '冠位を100以上にする',
+            '冠位を10000以上にする',
+            '冠位を1e8以上にする',
+            '天上ポイントを1以上にする',
+            '天上ポイントを1e9以上にする',
+            '天上ポイントを1e18以上にする',
+            '天上ポイントを1e36以上にする',
+            '10以上の瞬きを所持する',
+            '100以上の瞬きを所持する',
+            '1000以上の瞬きを所持する',
+            '10000以上の瞬きを所持する',
+            '100000以上の瞬きを所持する',
+            '1000000以上の瞬きを所持する',
+            '朱鋼片を1個以上にする',
+            '朱鋼片を210個以上にする',
+            '朱鋼片を1275個以上にする',
+            '蒼鋼片を1個以上にする',
+            '蒼鋼片を210個以上にする',
+            '蒼鋼片を1275個以上にする',
+            '紫鋼像を10個以上にする',
+            '朱鋼像を10個以上にする',
+            '蒼鋼像を10個以上にする',
+            '銅像を64個以上にする',
+            '銀像を64個以上にする',
+            '金像を64個以上にする',
+            '白金像を64個以上にする',
+            '紫鋼像を64個以上にする',
+            '朱鋼像を64個以上にする',
+            '蒼鋼像を64個以上にする',
         ]
         this.chipname = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipbonusname = [
@@ -323,7 +353,7 @@ class MaximumBonuses {
 
 const mbcache = new MaximumBonuses();
 
-const trophynum = 9;
+const trophynum = 10;
 const setchipkind = 10;
 const setchipnum = 100;
 
@@ -338,6 +368,7 @@ class Nig {
                 token: 0,
                 shine: 0,
                 brightness: 0,
+                flicker: 0,
 
                 rank: D(0),
                 rankresettime: D(0),
@@ -415,6 +446,7 @@ class Nig {
         this.pipedsmallmemory = 0;
         this.worldopened = new Array(10).fill().map(() => false);
         this.chipused = new Array(setchipkind).fill(0);
+        this.pchallengestage = 0;
         this.world = 0;
     };
 
@@ -453,6 +485,7 @@ class Nig {
             token: playerData.token ?? 0,
             shine: playerData.shine ?? 0,
             brightness: playerData.brightness ?? 0,
+            flicker: playerData.flicker ?? 0,
 
             rank: D(playerData.rank ?? 0),
             rankresettime: D(playerData.rankresettime ?? 0),
@@ -524,6 +557,7 @@ class Nig {
         this.checkWorlds();
         this.updateTickspeed();
         this.checkPipedSmallMemories();
+        this.checkPChallengeCleared();
         for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcDarkGeneratorCost(i, this.player.darkgeneratorsBought[i], true);
@@ -591,9 +625,10 @@ class Nig {
 
         let camp = this.player.accelevelused;
         let d = new Date();
-        if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
+        // if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
         // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
         // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
+        if (d.getMonth() == 4 && 3 <= d.getDate() && d.getDate() <= 7) camp = camp + 1;
         // if ((d.getMonth() == 6 && 27 <= d.getDate()) || ((d.getMonth() == 7 && d.getDate() < 27))) camp = camp + 2;
 
         if (camp > 7) camp = 7;
@@ -712,6 +747,18 @@ class Nig {
         }
         return d;
     };
+    calcLightGeneratorExpr(mu = D(1)) {
+        let highest = 0;
+        for (let i = 0; i < 8; i++) if (this.player.lightgenerators[i].gt(0)) highest = i;
+        let d = Array.from(new Array(9), (_, i) => new Array(Math.max(0, highest + 2 - i)).fill(D(0)));
+        d[0][0] = this.player.lightmoney;
+        for (let i = 0; i <= highest; i++) d[i + 1][0] = this.player.lightgenerators[i];
+        for (let i = highest + 1; i-- > 0;) {
+            d[i + 1].forEach((dd, j) => d[i][j + 1] = d[i][j + 1].add(dd));
+            while (d[i].length > 0 && d[i][d[i].length - 1].eq(0)) d[i].pop();
+        }
+        return d;
+    }
     static calcAfterNtick(expr, n) {
         let p = D(1);
         let res = D(0);
@@ -750,6 +797,10 @@ class Nig {
         this.player.darkmoney = Nig.calcAfterNtick(dexpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.darkgenerators[i] = Nig.calcAfterNtick(dexpr[i + 1], tick);
     };
+    updateLightGenerators(mu = D(1), tick = D(1), lexpr = this.calcLightGeneratorExpr(mu)){
+        this.player.lightmoney = Nig.calcAfterNtick(lexpr[0], tick);
+        for (let i = 0; i < 8; i++) this.player.lightgenerators[i] = Nig.calcAfterNtick(lexpr[i + 1], tick);
+    }
 
     spendShine(num) {
         if (this.player.shine < num) return;
@@ -769,6 +820,16 @@ class Nig {
         this.updateAccelerators(val);
         this.updateDarkGenerators(vald);
     };
+    spendFlicker(num) {
+        if (this.player.flicker < num) return;
+        this.player.flicker -= num;
+        const val = D(11 + this.player.setchip[50]).pow(D(num * 10000).log10());
+        const vald = D(10 + this.player.setchip[51] * 0.25).pow(D(num).log10());
+        this.updateGenerators(val);
+        this.updateAccelerators(val);
+        this.updateDarkGenerators(vald);
+        this.updateLightGenerators(vald);
+    }
 
     isChallengeActive(index) {
         return this.player.onchallenge && this.player.challenges[index]
@@ -900,6 +961,17 @@ class Nig {
         this.player.ranktoken = t - spent;
 
     };
+    checkPChallengeCleared(){
+      let cnt = 0;
+      for (let i = 0; i < 1024; i++) {
+        cnt += this.player.pchallengecleared[i]
+        cnt += this.player.prchallengecleared[i]
+      }
+
+      cnt /= 510;
+      this.pchallengestage = Math.floor(cnt);
+    }
+
     isRewardToggleable(index) {
         return this.player.challengebonuses[index] || (this.player.token >= itemdata.rewardcost[index]);
     };
@@ -1056,7 +1128,7 @@ class Nig {
             if (this.player.challenges[3])
                 this.player.generatorsMode = new Array(8).fill(0);
         }
-        if (this.isPerfectChallengeActive(9) && (!_force) && (!exit) && (!is_challenge_clear)) {
+        if (this.isPerfectChallengeActive(9) && (!exit) && (!is_challenge_clear)) {
             const random_int = Math.floor(Math.random() * 100);
             this.configChip(random_int, 0);
             this.player.disabledchip[random_int] = true;
@@ -1188,6 +1260,7 @@ class Nig {
         }
         this.player.disabledchip = new Array(setchipnum).fill(false);
         this.calcToken();
+        this.checkPChallengeCleared();
     };
 
     moveWorld(i) {
@@ -1198,6 +1271,7 @@ class Nig {
     openPipe(i) {
         let maxpipe = 1;
         if (this.player.trophies[7]) maxpipe = 2;
+        if (this.player.trophies[9]) maxpipe = 3;
         if (this.player.worldpipe[i] >= maxpipe) return;
         let havepipe = Math.floor((this.smallmemory - 72) / 3);
         for (let j = 0; j < 10; j++) {
@@ -1231,6 +1305,7 @@ class Nig {
         if (this.world == 0 && this.countRemembers() > 0) this.player.trophies[6] = true;
         if (this.player.crownresettime.gt(0)) this.player.trophies[7] = true;
         if (this.player.lightgenerators[0].gt(0)) this.player.trophies[8] = true;
+        if (this.player.flicker > 0) this.player.trophies[9] = true;
 
         if (this.player.money.gt(0)) this.player.smalltrophies[0] = true;
         if (this.player.money.gt(777)) this.player.smalltrophies[1] = true;
@@ -1360,6 +1435,35 @@ class Nig {
             if (this.player.statue[1] >= 10) this.player.smalltrophies2nd[23] = true;
             if (this.player.statue[2] >= 10) this.player.smalltrophies2nd[24] = true;
             if (this.player.statue[3] >= 10) this.player.smalltrophies2nd[25] = true;
+            if (this.player.crown.gte(100)) this.player.smalltrophies2nd[26] = true
+            if (this.player.crown.gte(10000)) this.player.smalltrophies2nd[27] = true
+            if (this.player.crown.gte("1e8")) this.player.smalltrophies2nd[28] = true
+            if (this.player.lightmoney.gte(1)) this.player.smalltrophies2nd[29] = true
+            if (this.player.lightmoney.gte("1e9")) this.player.smalltrophies2nd[30] = true
+            if (this.player.lightmoney.gte("1e18")) this.player.smalltrophies2nd[31] = true
+            if (this.player.lightmoney.gte("1e36")) this.player.smalltrophies2nd[32] = true
+            if (this.player.flicker >= 10) this.player.smalltrophies2nd[33] = true
+            if (this.player.flicker >= 100) this.player.smalltrophies2nd[34] = true
+            if (this.player.flicker >= 1000) this.player.smalltrophies2nd[35] = true
+            if (this.player.flicker >= 10000) this.player.smalltrophies2nd[36] = true
+            if (this.player.flicker >= 100000) this.player.smalltrophies2nd[37] = true
+            if (this.player.flicker >= 1000000) this.player.smalltrophies2nd[38] = true
+            if (this.player.chip[5] > 0) this.player.smalltrophies2nd[39] = true
+            if (this.player.chip[5] >= 210) this.player.smalltrophies2nd[40] = true
+            if (this.player.chip[5] >= 1275) this.player.smalltrophies2nd[41] = true
+            if (this.player.chip[6] > 0) this.player.smalltrophies2nd[42] = true
+            if (this.player.chip[6] >= 210) this.player.smalltrophies2nd[43] = true
+            if (this.player.chip[6] >= 1275) this.player.smalltrophies2nd[44] = true
+            if (this.player.statue[4] >= 10) this.player.smalltrophies2nd[45] = true
+            if (this.player.statue[5] >= 10) this.player.smalltrophies2nd[46] = true
+            if (this.player.statue[6] >= 10) this.player.smalltrophies2nd[47] = true
+            if (this.player.statue[0] >= 64) this.player.smalltrophies2nd[48] = true
+            if (this.player.statue[1] >= 64) this.player.smalltrophies2nd[49] = true
+            if (this.player.statue[2] >= 64) this.player.smalltrophies2nd[50] = true
+            if (this.player.statue[3] >= 64) this.player.smalltrophies2nd[51] = true
+            if (this.player.statue[4] >= 64) this.player.smalltrophies2nd[52] = true
+            if (this.player.statue[5] >= 64) this.player.smalltrophies2nd[53] = true
+            if (this.player.statue[6] >= 64) this.player.smalltrophies2nd[54] = true
         }
     };
     checkMemories() {
@@ -1896,6 +2000,7 @@ const app = Vue.createApp({
             itemdata: itemdata,
             shinechallengelength: [64, 96, 128, 160, 192, 224],
             brightnessrankchallengelength: [32, 64, 128, 255],
+            flickerpchallengestage: [1],
             simulatedcheckpoints: Array.from(new Array(10), () => new Map()),
             challengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             rankchallengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
@@ -2135,6 +2240,10 @@ const app = Vue.createApp({
         },
         spendBrightness(num) {
             this.nig.spendBrightness(num);
+            this.clearAllCache();
+        },
+        spendFlicker(num) {
+            this.nig.spendFlicker(num);
             this.clearAllCache();
         },
         buyGenerator(i) {
