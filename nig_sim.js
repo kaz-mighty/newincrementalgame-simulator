@@ -724,7 +724,10 @@ class Nig {
         let d = Array.from(new Array(9), (_, i) => new Array(Math.max(0, highest + 2 - i)).fill(D(0)));
         d[0][0] = this.player.darkmoney;
         for (let i = 0; i <= highest; i++) d[i + 1][0] = this.player.darkgenerators[i];
-        const darkmult = this.softCap(this.player.darklevel.add(1), D(1e3));
+        let darkmult = this.softCap(this.player.darklevel.add(1), D(1e3));
+        if (this.player.lightmoney.gte(1)){
+            darkmult = darkmult.mul(this.player.lightmoney.log10()+1);
+        }
         for (let i = highest + 1; i-- > 0;) {
             let mult = mu.mul(this.player.lightgenerators[i].add(1));
             mult = mult.mul(darkmult);
