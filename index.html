@@ -342,6 +342,7 @@
             <span class="uptooltip" v-html="startPerfectChallengeMessage"></span>
           </div>
         </div>
+        <div>完全挑戦段階: {{ nig.pchallengestage }}</div>
       </div>
     </div>
 
@@ -362,6 +363,15 @@
             <button type="button" class="btn btn-outline-dark" v-if="nig.player.rankchallengecleared.length >= length"
               @click="spendBrightness(Math.pow(10, i))" :disabled="nig.player.brightness<Math.pow(10, i)">
               煌き消費: {{ Math.pow(10, i) }}
+            </button>
+          </span>
+        </div>
+        <div v-if="nig.pchallengestage>=1">
+          瞬き所持数: {{ nig.player.flicker }}
+          <span v-for="(length, i) in flickerpchallengestage">
+            <button :disabled="nig.player.flicker<Math.pow(10, i)" @click="spendFlicker(Math.pow(10, i))" class="btn btn-outline-dark"
+              type="button" v-if="nig.pchallengestage >= length">
+              瞬き消費: {{ Math.pow(10, i) }}
             </button>
           </span>
         </div>

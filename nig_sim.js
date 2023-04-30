@@ -338,6 +338,7 @@ class Nig {
                 token: 0,
                 shine: 0,
                 brightness: 0,
+                flicker: 0,
 
                 rank: D(0),
                 rankresettime: D(0),
@@ -415,6 +416,7 @@ class Nig {
         this.pipedsmallmemory = 0;
         this.worldopened = new Array(10).fill().map(() => false);
         this.chipused = new Array(setchipkind).fill(0);
+        this.pchallengestage = 0;
         this.world = 0;
     };
 
@@ -441,6 +443,7 @@ class Nig {
             token: playerData.token ?? 0,
             shine: playerData.shine ?? 0,
             brightness: playerData.brightness ?? 0,
+            flicker: playerData.flicker ?? 0,
 
             rank: D(playerData.rank ?? 0),
             rankresettime: D(playerData.rankresettime ?? 0),
@@ -512,6 +515,7 @@ class Nig {
         this.checkWorlds();
         this.updateTickspeed();
         this.checkPipedSmallMemories();
+        this.checkPChallengeCleared();
         for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcDarkGeneratorCost(i, this.player.darkgeneratorsBought[i], true);
@@ -700,6 +704,18 @@ class Nig {
         }
         return d;
     };
+    calcLightGeneratorExpr(mu = D(1)) {
+        let highest = 0;
+        for (let i = 0; i < 8; i++) if (this.player.lightgenerators[i].gt(0)) highest = i;
+        let d = Array.from(new Array(9), (_, i) => new Array(Math.max(0, highest + 2 - i)).fill(D(0)));
+        d[0][0] = this.player.lightmoney;
+        for (let i = 0; i <= highest; i++) d[i + 1][0] = this.player.lightgenerators[i];
+        for (let i = highest + 1; i-- > 0;) {
+            d[i + 1].forEach((dd, j) => d[i][j + 1] = d[i][j + 1].add(dd));
+            while (d[i].length > 0 && d[i][d[i].length - 1].eq(0)) d[i].pop();
+        }
+        return d;
+    }
     static calcAfterNtick(expr, n) {
         let p = D(1);
         let res = D(0);
@@ -738,6 +754,10 @@ class Nig {
         this.player.darkmoney = Nig.calcAfterNtick(dexpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.darkgenerators[i] = Nig.calcAfterNtick(dexpr[i + 1], tick);
     };
+    updateLightGenerators(mu = D(1), tick = D(1), lexpr = this.calcLightGeneratorExpr(mu)){
+        this.player.lightmoney = Nig.calcAfterNtick(lexpr[0], tick);
+        for (let i = 0; i < 8; i++) this.player.lightgenerators[i] = Nig.calcAfterNtick(lexpr[i + 1], tick);
+    }
 
     spendShine(num) {
         if (this.player.shine < num) return;
@@ -757,6 +777,16 @@ class Nig {
         this.updateAccelerators(val);
         this.updateDarkGenerators(vald);
     };
+    spendFlicker(num) {
+        if (this.player.flicker < num) return;
+        this.player.flicker -= num;
+        const val = D(11 + this.player.setchip[50]).pow(D(num * 10000).log10());
+        const vald = D(10 + this.player.setchip[51] * 0.25).pow(D(num).log10());
+        this.updateGenerators(val);
+        this.updateAccelerators(val);
+        this.updateDarkGenerators(vald);
+        this.updateLightGenerators(vald);
+    }
 
     isChallengeActive(index) {
         return this.player.onchallenge && this.player.challenges[index]
@@ -888,6 +918,17 @@ class Nig {
         this.player.ranktoken = t - spent;
 
     };
+    checkPChallengeCleared(){
+      let cnt = 0;
+      for (let i = 0; i < 1024; i++) {
+        cnt += this.player.pchallengecleared[i]
+        cnt += this.player.prchallengecleared[i]
+      }
+
+      cnt /= 510;
+      this.pchallengestage = Math.floor(cnt);
+    }
+
     isRewardToggleable(index) {
         return this.player.challengebonuses[index] || (this.player.token >= itemdata.rewardcost[index]);
     };
@@ -1038,7 +1079,7 @@ class Nig {
             if (this.player.challenges[3])
                 this.player.generatorsMode = new Array(8).fill(0);
         }
-        if (this.isPerfectChallengeActive(9) && (!_force) && (!exit) && (!is_challenge_clear)) {
+        if (this.isPerfectChallengeActive(9) && (!exit) && (!is_challenge_clear)) {
             const random_int = Math.floor(Math.random() * 100);
             this.configChip(random_int, 0);
             this.player.disabledchip[random_int] = true;
@@ -1170,6 +1211,7 @@ class Nig {
         }
         this.player.disabledchip = new Array(setchipnum).fill(false);
         this.calcToken();
+        this.checkPChallengeCleared();
     };
 
     moveWorld(i) {
@@ -1838,6 +1880,7 @@ const app = Vue.createApp({
             itemdata: itemdata,
             shinechallengelength: [64, 96, 128, 160, 192, 224],
             brightnessrankchallengelength: [32, 64, 128, 255],
+            flickerpchallengestage: [1],
             simulatedcheckpoints: Array.from(new Array(10), () => new Map()),
             challengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             rankchallengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
@@ -2055,6 +2098,10 @@ const app = Vue.createApp({
         },
         spendBrightness(num) {
             this.nig.spendBrightness(num);
+            this.clearAllCache();
+        },
+        spendFlicker(num) {
+            this.nig.spendFlicker(num);
             this.clearAllCache();
         },
         buyGenerator(i) {
