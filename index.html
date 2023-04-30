@@ -487,7 +487,7 @@
                   </span>
                 </td>
               </tr>
-              <tr v-for="i in 3" :key="i" v-if="nig.player.crownresettime.gt(0)">
+              <tr :key="i" v-for="i in 6" v-if="nig.player.crownresettime.gt(0)">
                 <td v-for="j in 10" :key="j" class="tooltipcell">
                   <span>{{ nig.player.smalltrophies2nd[i*10+j-11] ? 100+(i-1)*10+j : '　' }}</span>
                   <span class="uptooltip" v-if="spoiler">

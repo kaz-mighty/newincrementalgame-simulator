@@ -75,7 +75,8 @@ class ItemData {
             '煌く者',
             '想い出す者',
             '有冠者',
-            '天上の者'
+            '天上の者',
+            '瞬く者',
         ];
         this.smalltrophytext = [
             'ポイントを0より大きくする',
@@ -203,7 +204,36 @@ class ItemData {
             '銅像を10個以上にする',
             '銀像を10個以上にする',
             '金像を10個以上にする',
-            '白金像を10個以上にする'
+            '白金像を10個以上にする',
+            '冠位を100以上にする',
+            '冠位を10000以上にする',
+            '冠位を1e8以上にする',
+            '天上ポイントを1以上にする',
+            '天上ポイントを1e9以上にする',
+            '天上ポイントを1e18以上にする',
+            '天上ポイントを1e36以上にする',
+            '10以上の瞬きを所持する',
+            '100以上の瞬きを所持する',
+            '1000以上の瞬きを所持する',
+            '10000以上の瞬きを所持する',
+            '100000以上の瞬きを所持する',
+            '1000000以上の瞬きを所持する',
+            '朱鋼片を1個以上にする',
+            '朱鋼片を210個以上にする',
+            '朱鋼片を1275個以上にする',
+            '蒼鋼片を1個以上にする',
+            '蒼鋼片を210個以上にする',
+            '蒼鋼片を1275個以上にする',
+            '紫鋼像を10個以上にする',
+            '朱鋼像を10個以上にする',
+            '蒼鋼像を10個以上にする',
+            '銅像を64個以上にする',
+            '銀像を64個以上にする',
+            '金像を64個以上にする',
+            '白金像を64個以上にする',
+            '紫鋼像を64個以上にする',
+            '朱鋼像を64個以上にする',
+            '蒼鋼像を64個以上にする',
         ]
         this.chipname = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipbonusname = [
@@ -323,7 +353,7 @@ class MaximumBonuses {
 
 const mbcache = new MaximumBonuses();
 
-const trophynum = 9;
+const trophynum = 10;
 const setchipkind = 10;
 const setchipnum = 100;
 
@@ -583,9 +613,10 @@ class Nig {
 
         let camp = this.player.accelevelused;
         let d = new Date();
-        if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
+        // if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
         // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
         // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
+        if (d.getMonth() == 4 && 3 <= d.getDate() && d.getDate() <= 7) camp = camp + 1;
         // if ((d.getMonth() == 6 && 27 <= d.getDate()) || ((d.getMonth() == 7 && d.getDate() < 27))) camp = camp + 2;
 
         if (camp > 7) camp = 7;
@@ -1222,6 +1253,7 @@ class Nig {
     openPipe(i) {
         let maxpipe = 1;
         if (this.player.trophies[7]) maxpipe = 2;
+        if (this.player.trophies[9]) maxpipe = 3;
         if (this.player.worldpipe[i] >= maxpipe) return;
         let havepipe = Math.floor((this.smallmemory - 72) / 3);
         for (let j = 0; j < 10; j++) {
@@ -1255,6 +1287,7 @@ class Nig {
         if (this.world == 0 && this.countRemembers() > 0) this.player.trophies[6] = true;
         if (this.player.crownresettime.gt(0)) this.player.trophies[7] = true;
         if (this.player.lightgenerators[0].gt(0)) this.player.trophies[8] = true;
+        if (this.player.flicker > 0) this.player.trophies[9] = true;
 
         if (this.player.money.gt(0)) this.player.smalltrophies[0] = true;
         if (this.player.money.gt(777)) this.player.smalltrophies[1] = true;
@@ -1384,6 +1417,35 @@ class Nig {
             if (this.player.statue[1] >= 10) this.player.smalltrophies2nd[23] = true;
             if (this.player.statue[2] >= 10) this.player.smalltrophies2nd[24] = true;
             if (this.player.statue[3] >= 10) this.player.smalltrophies2nd[25] = true;
+            if (this.player.crown.gte(100)) this.player.smalltrophies2nd[26] = true
+            if (this.player.crown.gte(10000)) this.player.smalltrophies2nd[27] = true
+            if (this.player.crown.gte("1e8")) this.player.smalltrophies2nd[28] = true
+            if (this.player.lightmoney.gte(1)) this.player.smalltrophies2nd[29] = true
+            if (this.player.lightmoney.gte("1e9")) this.player.smalltrophies2nd[30] = true
+            if (this.player.lightmoney.gte("1e18")) this.player.smalltrophies2nd[31] = true
+            if (this.player.lightmoney.gte("1e36")) this.player.smalltrophies2nd[32] = true
+            if (this.player.flicker >= 10) this.player.smalltrophies2nd[33] = true
+            if (this.player.flicker >= 100) this.player.smalltrophies2nd[34] = true
+            if (this.player.flicker >= 1000) this.player.smalltrophies2nd[35] = true
+            if (this.player.flicker >= 10000) this.player.smalltrophies2nd[36] = true
+            if (this.player.flicker >= 100000) this.player.smalltrophies2nd[37] = true
+            if (this.player.flicker >= 1000000) this.player.smalltrophies2nd[38] = true
+            if (this.player.chip[5] > 0) this.player.smalltrophies2nd[39] = true
+            if (this.player.chip[5] >= 210) this.player.smalltrophies2nd[40] = true
+            if (this.player.chip[5] >= 1275) this.player.smalltrophies2nd[41] = true
+            if (this.player.chip[6] > 0) this.player.smalltrophies2nd[42] = true
+            if (this.player.chip[6] >= 210) this.player.smalltrophies2nd[43] = true
+            if (this.player.chip[6] >= 1275) this.player.smalltrophies2nd[44] = true
+            if (this.player.statue[4] >= 10) this.player.smalltrophies2nd[45] = true
+            if (this.player.statue[5] >= 10) this.player.smalltrophies2nd[46] = true
+            if (this.player.statue[6] >= 10) this.player.smalltrophies2nd[47] = true
+            if (this.player.statue[0] >= 64) this.player.smalltrophies2nd[48] = true
+            if (this.player.statue[1] >= 64) this.player.smalltrophies2nd[49] = true
+            if (this.player.statue[2] >= 64) this.player.smalltrophies2nd[50] = true
+            if (this.player.statue[3] >= 64) this.player.smalltrophies2nd[51] = true
+            if (this.player.statue[4] >= 64) this.player.smalltrophies2nd[52] = true
+            if (this.player.statue[5] >= 64) this.player.smalltrophies2nd[53] = true
+            if (this.player.statue[6] >= 64) this.player.smalltrophies2nd[54] = true
         }
     };
     checkMemories() {
