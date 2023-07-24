@@ -369,6 +369,7 @@ class Nig {
                 shine: 0,
                 brightness: 0,
                 flicker: 0,
+                residue: 0,
 
                 rank: D(0),
                 rankresettime: D(0),
@@ -474,6 +475,7 @@ class Nig {
             shine: playerData.shine ?? 0,
             brightness: playerData.brightness ?? 0,
             flicker: playerData.flicker ?? 0,
+            residue: playerData.residue ?? 0,
 
             rank: D(playerData.rank ?? 0),
             rankresettime: D(playerData.rankresettime ?? 0),
@@ -800,6 +802,9 @@ class Nig {
         const val = D(11 + this.player.setchip[31]).pow(D(num).log10());
         this.updateGenerators(val);
         this.updateAccelerators(val);
+        if (this.player.trophies[9]) {
+            this.player.residue += Math.floor(num / 1000000);
+        }
     };
     spendBrightness(num) {
         if (this.player.brightness < num) return;
@@ -1253,10 +1258,13 @@ class Nig {
         this.world = i;
         this.loadPlayer(this.players[this.world]);
     };
+    calcMaxPipe() {
+        if (this.player.trophies[9]) return 3;
+        if (this.player.trophies[7]) return 2;
+        return 1;
+    };
     openPipe(i) {
-        let maxpipe = 1;
-        if (this.player.trophies[7]) maxpipe = 2;
-        if (this.player.trophies[9]) maxpipe = 3;
+        let maxpipe = this.calcMaxPipe();
         if (this.player.worldpipe[i] >= maxpipe) return;
         let havepipe = Math.floor((this.smallmemory - 72) / 3);
         for (let j = 0; j < 10; j++) {

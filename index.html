@@ -356,6 +356,12 @@
               輝き消費: {{ Math.pow(10, i) }}
             </button>
           </span>
+          <span>
+            <button :disabled="nig.player.shine<1000000" @click="spendShine(1000000)" class="btn btn-outline-dark"
+              type="button" v-if="nig.pchallengestage >= 10">
+              輝き消費: 1000000
+            </button>
+          </span>
         </div>
         <div v-if="nig.player.rankchallengecleared.length>=32">
           煌き所持数: {{ nig.player.brightness }}
@@ -374,6 +380,9 @@
               瞬き消費: {{ Math.pow(10, i) }}
             </button>
           </span>
+        </div>
+        <div v-if="nig.pchallengestage>=10">
+          残滓: {{ nig.player.residue }}
         </div>
       </div>
     </div>
