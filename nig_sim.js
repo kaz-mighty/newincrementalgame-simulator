@@ -2010,25 +2010,25 @@ const app = Vue.createApp({
             SET_CHIP_KIND: SET_CHIP_KIND,
             SET_CHIP_NUM: SET_CHIP_NUM,
             nig: new Nig(),
-            itemdata: itemData,
-            shinechallengelength: [64, 96, 128, 160, 192, 224],
-            brightnessrankchallengelength: [32, 64, 128, 255],
-            flickerpchallengestage: [1],
-            simulatedcheckpoints: Array.from(new Array(10), () => new Map()),
-            challengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            rankchallengesimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
+            itemData: itemData,
+            shineChallengeLength: [64, 96, 128, 160, 192, 224],
+            brightnessRankChallengeLength: [32, 64, 128, 255],
+            flickerPChallengeStage: [1],
+            simulatedCheckpoints: Array.from(new Array(10), () => new Map()),
+            challengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
+            rankChallengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
             checkpoints: [D('1e18'), D('1e72')],
-            simulated_dark_checkpoints: Array.from(new Array(10), () => new Map()),
-            dark_checkpoints: [D('1e18')],
-            cpsimulatedtime: Date.now(),
-            sampletick: [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
-            sampleticklabel: ['1', '1e1', '1e2', '1e3', '1e4', '1e5', '1e6', '1e7', '1e8', '1e9'],
-            sampletime: [1, 60, 3600, 86400, 2592000, 31536000, 3153600000],
-            sampletimelabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
-            do_perfect_challenge_reset: true,
-            hideclearedchallenge: false,
-            hidechallengecolor: false,
-            showtickminimum: false,
+            simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
+            darkCheckpoints: [D('1e18')],
+            cpSimulatedTime: Date.now(),
+            sampleTick: [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
+            sampleTickLabel: ['1', '1e1', '1e2', '1e3', '1e4', '1e5', '1e6', '1e7', '1e8', '1e9'],
+            sampleTime: [1, 60, 3600, 86400, 2592000, 31536000, 3153600000],
+            sampleTimeLabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
+            isPerfectChallengeReset: true,
+            hideClearedChallenge: false,
+            hideChallengeColor: false,
+            showTickMinimum: false,
             challengeConfig: {
                 searchChallengeBonuses: true,
                 searchRankChallengeBonuses: true,
@@ -2036,16 +2036,16 @@ const app = Vue.createApp({
                 toggleBonuses: true,
             },
             searchClearChallenge: true,
-            autosimulatecheckpoints: false,
+            autoSimulateCheckpoints: false,
             auto_simulate_dark_checkpoints: false,
-            checkpointtarget: 'point',
-            checkpointvalue: '',
-            dark_checkpoint_target: 'point',
-            dark_checkpoint_value: '',
-            procmspertick: 0,
+            checkpointTarget: 'point',
+            checkpointValue: '',
+            darkCheckpointTarget: 'point',
+            darkCheckpointValue: '',
+            procMsPerTick: 0,
             verbose: false,
             spoiler: false,
-            simulatetablewidth: 80,
+            simulateTableWidth: 80,
         }
     },
     computed: {
@@ -2092,9 +2092,9 @@ const app = Vue.createApp({
             return function (i, j, rank = false) {
                 const id = this.challengeId(i, j);
                 let color = 'transparent';
-                const res = rank ? this.rankchallengesimulated[this.nig.world][id] : this.challengesimulated[this.nig.world][id];
+                const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 if (res !== null) {
-                    if (this.showtickminimum) {
+                    if (this.showTickMinimum) {
                         const tick = res.tickminimum.tick;
                         if (tick.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
@@ -2103,7 +2103,7 @@ const app = Vue.createApp({
                             color = colorbarPower(f);
                         }
                     } else {
-                        const sec = res.secminimum.sec.add(res.secminimum.tick.mul(this.procmspertick * 0.001));
+                        const sec = res.secminimum.sec.add(res.secminimum.tick.mul(this.procMsPerTick * 0.001));
                         if (sec.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
@@ -2118,11 +2118,11 @@ const app = Vue.createApp({
         challengeMessage: function () {
             return function (i, j, rank = false) {
                 const id = this.challengeId(i, j);
-                const res = rank ? this.rankchallengesimulated[this.nig.world][id] : this.challengesimulated[this.nig.world][id];
+                const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 let message = 'Uncalculated';
                 if (res !== null) {
-                    let mres = this.showtickminimum ? res.tickminimum : res.secminimum;
-                    const sec = mres.sec.add(mres.tick.mul(this.procmspertick * 0.001));
+                    let mres = this.showTickMinimum ? res.tickminimum : res.secminimum;
+                    const sec = mres.sec.add(mres.tick.mul(this.procMsPerTick * 0.001));
                     message = mres.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
                     if ((this.verbose || this.challengeConfig.searchChallengeBonuses) && mres.challengebonuses.length > 0) message += '<br/>効力' + mres.challengebonuses.map(x => x + 1);
@@ -2135,30 +2135,30 @@ const app = Vue.createApp({
         },
         checkpointMessages() {
             return this.checkpoints.map(checkpoint => {
-                const res = this.simulatedcheckpoints[this.nig.world].get(checkpoint);
+                const res = this.simulatedCheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
-                const sec = res.sec.add(res.tick.mul(this.procmspertick * 0.001));
+                const sec = res.sec.add(res.tick.mul(this.procMsPerTick * 0.001));
                 let content = checkpoint.toExponential(3) + ' ポイントまで ' + res.tick.toExponential(3) + ' ticks';
                 content += ' (' + sec.toExponential(3) + ' sec)';
-                content += ' ' + (new Date(this.cpsimulatedtime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
+                content += ' ' + (new Date(this.cpSimulatedTime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
                 return content;
             });
         },
         darkCheckpointMessages() {
-            return this.dark_checkpoints.map(checkpoint => {
-                const res = this.simulated_dark_checkpoints[this.nig.world].get(checkpoint);
+            return this.darkCheckpoints.map(checkpoint => {
+                const res = this.simulatedDarkCheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
             });
         },
         targetMoneys() {
-            return this.commonTargetMoneys(this.checkpointvalue, this.checkpointtarget);
+            return this.commonTargetMoneys(this.checkpointValue, this.checkpointTarget);
         },
         targetMoneysDesc() {
             return this.commonTargetMoneysDesc(this.targetMoneys);
         },
         targetDarkMoneys() {
-            return this.commonTargetMoneys(this.dark_checkpoint_value, this.dark_checkpoint_target);
+            return this.commonTargetMoneys(this.darkCheckpointValue, this.darkCheckpointTarget);
         },
         targetDarkMoneysDesc() {
             return this.commonTargetMoneysDesc(this.targetDarkMoneys);
@@ -2245,7 +2245,7 @@ const app = Vue.createApp({
         selectWorld(i) {
             this.nig.save();
             this.nig.moveWorld(i);
-            if (this.autosimulatecheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
         },
         spendShine(num) {
             this.nig.spendShine(num);
@@ -2310,7 +2310,7 @@ const app = Vue.createApp({
             if (this.nig.player.onpchallenge) {
                 this.nig.exitPerfectChallenge();
             } else {
-                this.nig.startPerfectChallenge(this.do_perfect_challenge_reset);
+                this.nig.startPerfectChallenge(this.isPerfectChallengeReset);
             }
             this.clearAllCache();
         },
@@ -2327,19 +2327,19 @@ const app = Vue.createApp({
             this.clearCheckpointsCache();
         },
         clearCheckpointsCache() {
-            this.simulatedcheckpoints[this.nig.world].clear();
-            this.simulated_dark_checkpoints[this.nig.world].clear();
-            if (this.autosimulatecheckpoints) this.simulateCheckpoints();
+            this.simulatedCheckpoints[this.nig.world].clear();
+            this.simulatedDarkCheckpoints[this.nig.world].clear();
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
             if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
-                this.simulatedcheckpoints[i].clear();
-                this.simulated_dark_checkpoints[i].clear();
-                this.challengesimulated[i] = new Array(256).fill(null);
-                this.rankchallengesimulated[i] = new Array(256).fill(null);
+                this.simulatedCheckpoints[i].clear();
+                this.simulatedDarkCheckpoints[i].clear();
+                this.challengeSimulated[i] = new Array(256).fill(null);
+                this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
-            if (this.autosimulatecheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
             if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         addCheckpoint() {
@@ -2352,13 +2352,13 @@ const app = Vue.createApp({
             setTimeout(() => {
                 if (this.checkpoints.length == 0) return;
                 const res = this.nig.clone().simulate(this.checkpoints);
-                this.cpsimulatedtime = Date.now();
-                res.forEach((r, i) => this.simulatedcheckpoints[this.nig.world].set(this.checkpoints[i], r));
+                this.cpSimulatedTime = Date.now();
+                res.forEach((r, i) => this.simulatedCheckpoints[this.nig.world].set(this.checkpoints[i], r));
             }, 0);
         },
         simulateChallenges(challengeid, rank, rec) {
             if (challengeid <= 0 || 256 <= challengeid) return;
-            let sim = rank ? this.rankchallengesimulated : this.challengesimulated;
+            let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeid] === null;
             if (!update) update ||= sim[this.nig.world][challengeid].config !== this.challengeConfig;
             if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeid].secminimum.challengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengebonuses[i]);
@@ -2386,16 +2386,16 @@ const app = Vue.createApp({
             this.simulateChallenges(1, rank, true);
         },
         addDarkCheckpoint() {
-            this.targetDarkMoneys.forEach(target_money => this.dark_checkpoints.push(target_money));
+            this.targetDarkMoneys.forEach(target_money => this.darkCheckpoints.push(target_money));
         },
         removeDarkCheckpoint(i) {
-            this.dark_checkpoints.splice(i, 1);
+            this.darkCheckpoints.splice(i, 1);
         },
         simulateDarkCheckpoints() {
             setTimeout(() => {
-                if (this.dark_checkpoints.length === 0) return;
-                const res = this.nig.clone().simulateDark(this.dark_checkpoints);
-                res.forEach((r, i) => this.simulated_dark_checkpoints[this.nig.world].set(this.dark_checkpoints[i], r));
+                if (this.darkCheckpoints.length === 0) return;
+                const res = this.nig.clone().simulateDark(this.darkCheckpoints);
+                res.forEach((r, i) => this.simulatedDarkCheckpoints[this.nig.world].set(this.darkCheckpoints[i], r));
             }, 0);
         },
         scaleSampleTime(t) {
@@ -2436,8 +2436,8 @@ const app = Vue.createApp({
             }
         },
         scaleChallengeTable(c) {
-            this.simulatetablewidth = Math.max(20, Math.min(100, this.simulatetablewidth * c));
-            document.querySelector(':root').style.setProperty('--chal-width', `${this.simulatetablewidth}vh`);
+            this.simulateTableWidth = Math.max(20, Math.min(100, this.simulateTableWidth * c));
+            document.querySelector(':root').style.setProperty('--chal-width', `${this.simulateTableWidth}vh`);
         },
     },
     mounted() {

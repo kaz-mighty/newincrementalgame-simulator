@@ -265,7 +265,7 @@
               :class="buttonSelectedClass(nig.player.challenges[i-1])" :disabled="nig.player.onchallenge">
               {{ i }}
             </button>
-            <span class="uptooltip">{{ itemdata.challengetext[i-1] }}</span>
+            <span class="uptooltip">{{ itemData.challengetext[i-1] }}</span>
           </div>
           <div class="tooltipcell">
             <button type="button" class="btn btn-outline-dark" @click="toggleChallenge"
@@ -284,7 +284,7 @@
               {{ i }}
             </button>
             <span class="uptooltip">
-              コスト: {{ itemdata.rewardcost[i-1] }} <br /> {{ itemdata.rewardtext[i-1] }}
+              コスト: {{ itemData.rewardcost[i-1] }} <br /> {{ itemData.rewardtext[i-1] }}
             </span>
           </div>
         </div>
@@ -298,7 +298,7 @@
               {{ i }}
             </button>
             <span class="uptooltip">
-              コスト: {{ itemdata.rewardcost[i-1] }} <br /> {{ itemdata.rankrewardtext[i-1] }}
+              コスト: {{ itemData.rewardcost[i-1] }} <br /> {{ itemData.rankrewardtext[i-1] }}
             </span>
           </div>
         </div>
@@ -315,7 +315,7 @@
               購入コスト: {{ nig.calcLevelItemCost(i - 1).toExponential(1) }}
             </button>
             <span class="uptooltip">
-              {{ itemdata.levelitemtext[i-1] }}
+              {{ itemData.levelitemtext[i-1] }}
             </span>
           </span>
           <span> 所持数: {{ nig.player.levelitems[i-1] }}</span>
@@ -327,7 +327,7 @@
     <div class="collapse" id="crownInfo">
       <div class="card card-body">
         <div class="form-check">
-          <input class="form-check-input" id="doPC_reset" type="checkbox" v-model="do_perfect_challenge_reset">
+          <input class="form-check-input" id="doPC_reset" type="checkbox" v-model="isPerfectChallengeReset">
           <label class="form-check-label" for="doPC_reset">挑戦開始時に状態をリセットする</label>
         </div>
         <div class="d-flex align-items-center flex-wrap">
@@ -337,7 +337,7 @@
               :class="buttonSelectedClass(nig.player.pchallenges[i-1])" :disabled="nig.player.onpchallenge">
               {{ i }}
             </button>
-            <span class="uptooltip">{{ itemdata.perfect_challengetext[i-1] }}</span>
+            <span class="uptooltip">{{ itemData.perfect_challengetext[i-1] }}</span>
           </div>
           <div class="tooltipcell">
             <button type="button" class="btn btn-outline-dark" @click="togglePerfectChallenge"
@@ -355,7 +355,7 @@
       <div class="card card-body">
         <div>
           輝き所持数: {{ nig.player.shine }}
-          <span v-for="(length, i) in shinechallengelength">
+          <span v-for="(length, i) in shineChallengeLength">
             <button type="button" class="btn btn-outline-dark" v-if="nig.player.challengecleared.length >= length"
               @click="spendShine(Math.pow(10, i))" :disabled="nig.player.shine<Math.pow(10, i)">
               輝き消費: {{ Math.pow(10, i) }}
@@ -370,7 +370,7 @@
         </div>
         <div v-if="nig.player.rankchallengecleared.length>=32">
           煌き所持数: {{ nig.player.brightness }}
-          <span v-for="(length, i) in brightnessrankchallengelength">
+          <span v-for="(length, i) in brightnessRankChallengeLength">
             <button type="button" class="btn btn-outline-dark" v-if="nig.player.rankchallengecleared.length >= length"
               @click="spendBrightness(Math.pow(10, i))" :disabled="nig.player.brightness<Math.pow(10, i)">
               煌き消費: {{ Math.pow(10, i) }}
@@ -379,7 +379,7 @@
         </div>
         <div v-if="nig.pchallengestage>=1">
           瞬き所持数: {{ nig.player.flicker }}
-          <span v-for="(length, i) in flickerpchallengestage">
+          <span v-for="(length, i) in flickerPChallengeStage">
             <button :disabled="nig.player.flicker<Math.pow(10, i)" @click="spendFlicker(Math.pow(10, i))" class="btn btn-outline-dark"
               type="button" v-if="nig.pchallengestage >= length">
               瞬き消費: {{ Math.pow(10, i) }}
@@ -430,7 +430,7 @@
           所持鋳片
           <span v-for="i in SET_CHIP_KIND" :key="i">
             <span v-show="nig.player.chip[i-1]>0">
-              {{ ' ' }} {{ itemdata.chipname[i-1] + '片' }}: {{ nig.player.chip[i-1] }}
+              {{ ' ' }} {{ itemData.chipname[i-1] + '片' }}: {{ nig.player.chip[i-1] }}
             </span>
           </span>
         </div>
@@ -438,7 +438,7 @@
           コスト
           <span v-for="i in SET_CHIP_KIND" :key="i">
             <span v-show="nig.player.chip[i-1]>0">
-              {{ ' ' }} {{ itemdata.chipname[i-1] + '片' }}: {{ nig.chipused[i-1]+1 }}
+              {{ ' ' }} {{ itemData.chipname[i-1] + '片' }}: {{ nig.chipused[i-1]+1 }}
             </span>
           </span>
         </div>
@@ -449,8 +449,8 @@
               <button :style="chipColoredButtonClass(nig.player.setchip[i-1])" class="btn btn-outline-dark" type="button"
                 @click="toggleChip(i-1)"
                 :disabled="nig.player.disabledchip[i-1]">{{ i }} {{ nig.player.setchip[i-1]==0 ? '　' :
-                itemdata.chipname[nig.player.setchip[i-1]-1] }}</button>
-              <span class="uptooltip">{{ itemdata.chipbonusname[i-1] }}</span>
+                itemData.chipname[nig.player.setchip[i-1]-1] }}</button>
+              <span class="uptooltip">{{ itemData.chipbonusname[i-1] }}</span>
             </span>
           </div>
         </div>
@@ -461,7 +461,7 @@
       <div class="card card-body">
         <div v-for="i in SET_CHIP_KIND" :key="i">
           <div v-show="nig.player.chip[i-1] > 0 || nig.chipused[i-1] > 0">
-            <span>{{itemdata.chipname[i-1] + "像 "}}</span>
+            <span>{{itemData.chipname[i-1] + "像 "}}</span>
             <span class="tooltipcell">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
                 :disabled="!nig.isStatueBuildable(i-1)">
@@ -483,7 +483,7 @@
             <tbody>
               <tr>
                 <td v-for="i in TROPHY_NUM" :key="i">
-                  <span>{{ nig.player.trophies[i-1] ? itemdata.trophytext[i-1] : '???' }}</span>
+                  <span>{{ nig.player.trophies[i-1] ? itemData.trophytext[i-1] : '???' }}</span>
                 </td>
               </tr>
             </tbody>
@@ -497,7 +497,7 @@
                 <td v-for="j in 10" :key="j" class="tooltipcell">
                   <span>{{ nig.player.smalltrophies[i*10+j-11] ? (i-1)*10+j : '　' }}</span>
                   <span class="uptooltip" v-if="spoiler">
-                    {{ itemdata.smalltrophytext[i*10+j-11] }}
+                    {{ itemData.smalltrophytext[i*10+j-11] }}
                   </span>
                 </td>
               </tr>
@@ -505,7 +505,7 @@
                 <td v-for="j in 10" :key="j" class="tooltipcell">
                   <span>{{ nig.player.smalltrophies2nd[i*10+j-11] ? 100+(i-1)*10+j : '　' }}</span>
                   <span class="uptooltip" v-if="spoiler">
-                    {{ itemdata.smalltrophytext[100+i*10+j-11] }}
+                    {{ itemData.smalltrophytext[100+i*10+j-11] }}
                   </span>
                 </td>
               </tr>
@@ -518,15 +518,15 @@
     <div class="collapse card card-body" id="challengeView">
       <div>
         <div class="form-check form-check-inline">
-          <input type="checkbox" class="form-check-input" id="hideclearedchallenge" v-model="hideclearedchallenge">
+          <input class="form-check-input" id="hideclearedchallenge" type="checkbox" v-model="hideClearedChallenge">
           <label class="form-check-label" for="hideclearedchallenge">クリア済を非表示</label>
         </div>
         <div class="form-check form-check-inline">
-          <input type="checkbox" class="form-check-input" id="hidechallengecolor" v-model="hidechallengecolor">
+          <input class="form-check-input" id="hidechallengecolor" type="checkbox" v-model="hideChallengeColor">
           <label class="form-check-label" for="hidechallengecolor">クリア時間を非表示</label>
         </div>
         <div class="form-check form-check-inline">
-          <input type="checkbox" class="form-check-input" id="showtickminimum" v-model="showtickminimum">
+          <input class="form-check-input" id="showtickminimum" type="checkbox" v-model="showTickMinimum">
           <label class="form-check-label" for="showtickminimum">最小tickを表示（デフォルト：最小時間）</label>
         </div>
       </div>
@@ -565,7 +565,7 @@
         </div>
       </nav>
       <div class="tab-content" id="challengeTabContent"
-        :class="{ showclearedchallenge: !hideclearedchallenge, hidechallengecolor: hidechallengecolor }">
+        :class="{ showclearedchallenge: !hideClearedChallenge, hidechallengecolor: hideChallengeColor }">
         <div class="tab-pane fade show active" id="challengePanel" role="tabpanel" aria-labelledby="challengePanelTab">
           <div>
             <button @click="simulateChallengesAll(false)" class="btn btn-outline-dark" type="button">シミュレート</button>
@@ -598,11 +598,11 @@
               </tr>
             </tbody>
           </table>
-          <div class="chalcolorbar" v-if="showtickminimum">
-            <span :key="i" :style="scaleSampleTime(sampletick[i-1])" v-for="i in 10">{{ sampleticklabel[i-1] }}</span>
+          <div class="chalcolorbar" v-if="showTickMinimum">
+            <span :key="i" :style="scaleSampleTime(sampleTick[i-1])" v-for="i in 10">{{ sampleTickLabel[i-1] }}</span>
           </div>
-          <div class="chalcolorbar" v-if="!showtickminimum">
-            <span :key="i" :style="scaleSampleTime(sampletime[i-1])" v-for="i in 7">{{ sampletimelabel[i-1] }}</span>
+          <div class="chalcolorbar" v-if="!showTickMinimum">
+            <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>
         <div class="tab-pane fade" id="rankchallengePanel" role="tabpanel" aria-labelledby="rankchallengePanelTab">
@@ -638,11 +638,11 @@
               </tr>
             </tbody>
           </table>
-          <div class="chalcolorbar" v-if="showtickminimum">
-            <span :key="i" :style="scaleSampleTime(sampletick[i-1])" v-for="i in 10">{{ sampleticklabel[i-1] }}</span>
+          <div class="chalcolorbar" v-if="showTickMinimum">
+            <span :key="i" :style="scaleSampleTime(sampleTick[i-1])" v-for="i in 10">{{ sampleTickLabel[i-1] }}</span>
           </div>
-          <div class="chalcolorbar" v-if="!showtickminimum">
-            <span :key="i" :style="scaleSampleTime(sampletime[i-1])" v-for="i in 7">{{ sampletimelabel[i-1] }}</span>
+          <div class="chalcolorbar" v-if="!showTickMinimum">
+            <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>
       </div>
@@ -652,23 +652,23 @@
       <div class="card-body">
         <div>
           <button @click="simulateCheckpoints" class="btn btn-outline-dark" type="button">シミュレート</button>
-          <button type="button" class="btn" @click="autosimulatecheckpoints = !autosimulatecheckpoints;"
-            :class="buttonSelectedClass(autosimulatecheckpoints)">自動</button>
+          <button :class="buttonSelectedClass(autoSimulateCheckpoints)" @click="autoSimulateCheckpoints = !autoSimulateCheckpoints;" class="btn"
+            type="button">自動</button>
         </div>
         <div class="input-group">
-          <select class="form-select" v-model="checkpointtarget" aria-label="checkpoint target">
+          <select aria-label="checkpoint target" class="form-select" v-model="checkpointTarget">
             <option value="point" selected>ポイント</option>
             <option value="levelreset">段位リセット</option>
             <option value="rankreset">階位リセット</option>
             <option value="crownreset">冠位リセット</option>
           </select>
           <span class="input-group-text"
-            v-if="checkpointtarget=='levelreset' || checkpointtarget=='rankreset' || checkpointtarget=='crownreset'">で</span>
-          <input type="text" class="form-control" v-model="checkpointvalue" placeholder="start[:stop[:[*]step]]"
+            v-if="checkpointTarget=='levelreset' || checkpointTarget=='rankreset' || checkpointTarget=='crownreset'">で</span>
+          <input class="form-control" placeholder="start[:stop[:[*]step]]" type="text" v-model="checkpointValue"
             @keydown="(event)=>{if(event.key==='Enter')addCheckpoint()}" aria-label="Text input">
           <span class="input-group-text"
-            v-if="checkpointtarget=='levelreset' || checkpointtarget=='rankreset' || checkpointtarget=='crownreset'">
-            {{ {levelreset: '段位', rankreset: '階位', crownreset: '冠位'}[checkpointtarget] }}獲得する
+            v-if="checkpointTarget=='levelreset' || checkpointTarget=='rankreset' || checkpointTarget=='crownreset'">
+            {{ {levelreset: '段位', rankreset: '階位', crownreset: '冠位'}[checkpointTarget] }}獲得する
           </span>
           <span class="input-group-text">{{ targetMoneysDesc }} </span>
           <button @click="addCheckpoint" class="btn btn-outline-dark" type="button">追加</button>
@@ -690,24 +690,24 @@
             :class="buttonSelectedClass(auto_simulate_dark_checkpoints)">自動</button>
         </div>
         <div class="input-group">
-          <select class="form-select" v-model="dark_checkpoint_target" aria-label="checkpoint target">
+          <select aria-label="checkpoint target" class="form-select" v-model="darkCheckpointTarget">
             <option value="point" selected>ポイント</option>
             <option value="dark_levelreset">裏段位リセット</option>
           </select>
           <span class="input-group-text"
-            v-if="dark_checkpoint_target==='dark_levelreset'">で</span>
-          <input type="text" class="form-control" v-model="dark_checkpoint_value" placeholder="start[:stop[:[*]step]]"
+            v-if="darkCheckpointTarget==='dark_levelreset'">で</span>
+          <input class="form-control" placeholder="start[:stop[:[*]step]]" type="text" v-model="darkCheckpointValue"
             aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addDarkCheckpoint()}">
           <span class="input-group-text"
-            v-if="dark_checkpoint_target==='dark_levelreset'">
-            {{ {dark_levelreset: '裏段位'}[dark_checkpoint_target] }}獲得する
+            v-if="darkCheckpointTarget==='dark_levelreset'">
+            {{ {dark_levelreset: '裏段位'}[darkCheckpointTarget] }}獲得する
           </span>
           <span class="input-group-text">{{ targetDarkMoneysDesc }} </span>
           <button class="btn btn-outline-dark" type="button" @click="addDarkCheckpoint">追加</button>
         </div>
       </div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item" v-for="(_, i) in dark_checkpoints">
+        <li class="list-group-item" v-for="(_, i) in darkCheckpoints">
           <span>{{ darkCheckpointMessages[i] }}</span>
           <button type="button" class="btn-close float-end" @click="removeDarkCheckpoint(i)"></button>
         </li>
@@ -753,8 +753,8 @@
         </p>
         <div class="input-group">
           <span class="input-group-text">1tickあたりの遅延時間</span>
-          <input type="text" class="form-control" v-model.number="procmspertick" placeholder="0"
-            aria-label="procmspertick">
+          <input aria-label="procMsPerTick" class="form-control" placeholder="0" type="text"
+            v-model.number="procMsPerTick">
           <span class="input-group-text">ms</span>
         </div>
       </div>
