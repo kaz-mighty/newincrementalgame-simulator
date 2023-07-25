@@ -2079,11 +2079,11 @@ const app = Vue.createApp({
         challengeCell: function () {
             return function (i, j, rank = false) {
                 const id = this.challengeId(i, j);
-                const nowchallenging = this.nig.player.onchallenge && this.nig.calcChallengeId() == id;
-                const clearedchallenge = rank ? this.nig.player.rankchallengecleared.includes(id) : this.nig.player.challengecleared.includes(id);
+                const nowChallenging = this.nig.player.onchallenge && this.nig.calcChallengeId() == id;
+                const clearedChallenge = rank ? this.nig.player.rankchallengecleared.includes(id) : this.nig.player.challengecleared.includes(id);
                 return {
-                    nowchallenging: nowchallenging,
-                    clearedchallenge: clearedchallenge,
+                    nowchallenging: nowChallenging,
+                    clearedchallenge: clearedChallenge,
                     unchallengeable: i == 0 && j == 0,
                 };
             };
@@ -2121,13 +2121,13 @@ const app = Vue.createApp({
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 let message = 'Uncalculated';
                 if (res !== null) {
-                    let mres = this.showTickMinimum ? res.tickminimum : res.secminimum;
-                    const sec = mres.sec.add(mres.tick.mul(this.procMsPerTick * 0.001));
-                    message = mres.tick.toExponential(3) + ' ticks';
+                    let minResult = this.showTickMinimum ? res.tickminimum : res.secminimum;
+                    const sec = minResult.sec.add(minResult.tick.mul(this.procMsPerTick * 0.001));
+                    message = minResult.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
-                    if ((this.verbose || this.challengeConfig.searchChallengeBonuses) && mres.challengebonuses.length > 0) message += '<br/>効力' + mres.challengebonuses.map(x => x + 1);
-                    if ((this.verbose || this.challengeConfig.searchRankChallengeBonuses) && mres.rankchallengebonuses.length > 0) message += '<br/>上位効力' + mres.rankchallengebonuses.map(x => x + 1);
-                    if ((this.verbose || this.challengeConfig.searchAccelLevel) && this.nig.player.accelevel > 0) message += '<br/>起動時間回帰力' + mres.accelevelused;
+                    if ((this.verbose || this.challengeConfig.searchChallengeBonuses) && minResult.challengebonuses.length > 0) message += '<br/>効力' + minResult.challengebonuses.map(x => x + 1);
+                    if ((this.verbose || this.challengeConfig.searchRankChallengeBonuses) && minResult.rankchallengebonuses.length > 0) message += '<br/>上位効力' + minResult.rankchallengebonuses.map(x => x + 1);
+                    if ((this.verbose || this.challengeConfig.searchAccelLevel) && this.nig.player.accelevel > 0) message += '<br/>起動時間回帰力' + minResult.accelevelused;
                     // message += '<br/>id: ' + id;
                 }
                 return message;
@@ -2200,8 +2200,8 @@ const app = Vue.createApp({
             }
         },
         commonTargetMoneys(values, target) {
-            let [start, stop, opstep] = values.split(':', 3);
-            let [op, step] = opstep === undefined ? (target === 'point' ? ['*', '10'] : ['+', '1']) : opstep.startsWith('*') ? [opstep[0], opstep.slice(1)] : ['+', opstep];
+            let [start, stop, opStep] = values.split(':', 3);
+            let [op, step] = opStep === undefined ? (target === 'point' ? ['*', '10'] : ['+', '1']) : opStep.startsWith('*') ? [opStep[0], opStep.slice(1)] : ['+', opStep];
             try {
                 if (start !== undefined) start = D(start.trim());
                 if (stop !== undefined) stop = D(stop.trim());
@@ -2233,13 +2233,13 @@ const app = Vue.createApp({
             }
         },
         importSave() {
-            const prevworld = this.nig.world;
+            const prevWorld = this.nig.world;
             const input = window.prompt('データを入力', '');
             if (input == '') return;
             let nig = new Nig();
             nig.loadB(input);
             this.nig = nig;
-            this.selectWorld(prevworld);
+            this.selectWorld(prevWorld);
             this.clearAllCache();
         },
         selectWorld(i) {
@@ -2343,7 +2343,7 @@ const app = Vue.createApp({
             if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
         },
         addCheckpoint() {
-            this.targetMoneys.forEach(tmoney => this.checkpoints.push(tmoney));
+            this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));
         },
         removeCheckpoint(i) {
             this.checkpoints.splice(i, 1);
@@ -2356,27 +2356,27 @@ const app = Vue.createApp({
                 res.forEach((r, i) => this.simulatedCheckpoints[this.nig.world].set(this.checkpoints[i], r));
             }, 0);
         },
-        simulateChallenges(challengeid, rank, rec) {
-            if (challengeid <= 0 || 256 <= challengeid) return;
+        simulateChallenges(challengeId, rank, rec) {
+            if (challengeId <= 0 || 256 <= challengeId) return;
             let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
-            let update = sim[this.nig.world][challengeid] === null;
-            if (!update) update ||= sim[this.nig.world][challengeid].config !== this.challengeConfig;
-            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeid].secminimum.challengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengebonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeid].secminimum.rankchallengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankchallengebonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeid].secminimum.accelevelused !== this.nig.player.accelevelused;
+            let update = sim[this.nig.world][challengeId] === null;
+            if (!update) update ||= sim[this.nig.world][challengeId].config !== this.challengeConfig;
+            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secminimum.challengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengebonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secminimum.rankchallengebonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankchallengebonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeId].secminimum.accelevelused !== this.nig.player.accelevelused;
             if (!this.searchClearChallenge && rec) {
                 let cleared = rank ? this.nig.player.rankchallengecleared : this.nig.player.challengecleared;
-                update &&= !cleared.includes(challengeid);
+                update &&= !cleared.includes(challengeId);
             }
 
             // simulateする場合のみsetTimeoutを挟む
             if (update) {
                 setTimeout(() => {
-                    sim[this.nig.world][challengeid] = this.nig.clone().simulateChallenges(challengeid, rank, JSON.parse(JSON.stringify(this.challengeConfig)));
-                    if (rec) this.simulateChallenges(challengeid + 1, rank, rec);
+                    sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, rank, JSON.parse(JSON.stringify(this.challengeConfig)));
+                    if (rec) this.simulateChallenges(challengeId + 1, rank, rec);
                 }, 0);
             } else {
-                if (rec) this.simulateChallenges(challengeid + 1, rank, rec);
+                if (rec) this.simulateChallenges(challengeId + 1, rank, rec);
             }
         },
         simulateChallengeOne(i, j, rank) {
