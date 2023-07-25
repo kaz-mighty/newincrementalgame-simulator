@@ -260,30 +260,30 @@
       <div class="card card-body">
         <div class="d-flex align-items-center flex-wrap">
           <div>挑戦</div>
-          <div v-for="i in 8" :key="i" class="tooltipcell">
+          <div :key="i" class="tooltip-cell" v-for="i in 8">
             <button type="button" class="btn" @click="nig.configChallenge(i-1)"
               :class="buttonSelectedClass(nig.player.challenges[i-1])" :disabled="nig.player.onchallenge">
               {{ i }}
             </button>
-            <span class="uptooltip">{{ itemData.challengetext[i-1] }}</span>
+            <span class="up-tooltip">{{ itemData.challengetext[i-1] }}</span>
           </div>
-          <div class="tooltipcell">
+          <div class="tooltip-cell">
             <button type="button" class="btn btn-outline-dark" @click="toggleChallenge"
               :disabled="nig.calcChallengeId()==0">
               {{ nig.player.onchallenge ? '挑戦放棄' : '挑戦開始' }}
             </button>
-            <span v-if="nig.calcChallengeId()!=0" class="uptooltip" v-html="startChallengeMessage"></span>
+            <span class="up-tooltip" v-html="startChallengeMessage" v-if="nig.calcChallengeId()!=0"></span>
           </div>
         </div>
         <div>勲章: {{ nig.player.token }}</div>
         <div class="d-flex align-items-center flex-wrap">
           <div>効力</div>
-          <div v-for="i in 15" :key="i" class="tooltipcell">
+          <div :key="i" class="tooltip-cell" v-for="i in 15">
             <button type="button" class="btn" @click="toggleReward(i-1)"
               :class="buttonSelectedClass(nig.player.challengebonuses[i-1])" :disabled="!nig.isRewardToggleable(i-1)">
               {{ i }}
             </button>
-            <span class="uptooltip">
+            <span class="up-tooltip">
               コスト: {{ itemData.rewardcost[i-1] }} <br /> {{ itemData.rewardtext[i-1] }}
             </span>
           </div>
@@ -291,13 +291,13 @@
         <div v-if="nig.player.rankchallengecleared.length>0">大勲章: {{ nig.player.ranktoken }}</div>
         <div v-if="nig.player.rankchallengecleared.length>0" class="d-flex align-items-center flex-wrap">
           <div>上位効力</div>
-          <div v-for="i in 15" :key="i" class="tooltipcell">
+          <div :key="i" class="tooltip-cell" v-for="i in 15">
             <button type="button" class="btn" @click="toggleRankReward(i-1)"
               :class="buttonSelectedClass(nig.player.rankchallengebonuses[i-1])"
               :disabled="!nig.isRankRewardToggleable(i-1)">
               {{ i }}
             </button>
-            <span class="uptooltip">
+            <span class="up-tooltip">
               コスト: {{ itemData.rewardcost[i-1] }} <br /> {{ itemData.rankrewardtext[i-1] }}
             </span>
           </div>
@@ -309,12 +309,12 @@
       <div class="card card-body">
         <div v-for="i in 5" :key="i">
           <span>段位効力{{ i }}{{ ' ' }}</span>
-          <span class="tooltipcell">
+          <span class="tooltip-cell">
             <button @click="buyLevelItems(i-1)" class="btn btn-outline-dark btn-sm" type="button"
               :disabled="!nig.isLevelItemBuyable(i-1)">
               購入コスト: {{ nig.calcLevelItemCost(i - 1).toExponential(1) }}
             </button>
-            <span class="uptooltip">
+            <span class="up-tooltip">
               {{ itemData.levelitemtext[i-1] }}
             </span>
           </span>
@@ -332,19 +332,19 @@
         </div>
         <div class="d-flex align-items-center flex-wrap">
           <div>完全挑戦</div>
-          <div v-for="i in 10" :key="i" class="tooltipcell">
+          <div :key="i" class="tooltip-cell" v-for="i in 10">
             <button type="button" class="btn" @click="nig.configPerfectChallenge(i-1)"
               :class="buttonSelectedClass(nig.player.pchallenges[i-1])" :disabled="nig.player.onpchallenge">
               {{ i }}
             </button>
-            <span class="uptooltip">{{ itemData.perfect_challengetext[i-1] }}</span>
+            <span class="up-tooltip">{{ itemData.perfect_challengetext[i-1] }}</span>
           </div>
-          <div class="tooltipcell">
+          <div class="tooltip-cell">
             <button type="button" class="btn btn-outline-dark" @click="togglePerfectChallenge"
               :disabled="!(nig.isStartPerfectChallenge() || nig.player.onpchallenge)">
               {{ nig.player.onpchallenge ? '挑戦終了' : '挑戦開始' }}
             </button>
-            <span class="uptooltip" v-html="startPerfectChallengeMessage"></span>
+            <span class="up-tooltip" v-html="startPerfectChallengeMessage"></span>
           </div>
         </div>
         <div>完全挑戦段階: {{ nig.pchallengestage }}</div>
@@ -444,13 +444,13 @@
         </div>
         <div class="d-flex align-items-center flex-wrap">
           鋳片効力
-          <div v-for="i in 52" :key="i" class="tooltipcell">
+          <div :key="i" class="tooltip-cell" v-for="i in 52">
             <span v-if="i<=32||nig.countRemembers()>=16">
               <button :style="chipColoredButtonClass(nig.player.setchip[i-1])" class="btn btn-outline-dark" type="button"
                 @click="toggleChip(i-1)"
                 :disabled="nig.player.disabledchip[i-1]">{{ i }} {{ nig.player.setchip[i-1]==0 ? '　' :
                 itemData.chipname[nig.player.setchip[i-1]-1] }}</button>
-              <span class="uptooltip">{{ itemData.chipbonusname[i-1] }}</span>
+              <span class="up-tooltip">{{ itemData.chipbonusname[i-1] }}</span>
             </span>
           </div>
         </div>
@@ -462,7 +462,7 @@
         <div v-for="i in SET_CHIP_KIND" :key="i">
           <div v-show="nig.player.chip[i-1] > 0 || nig.chipused[i-1] > 0">
             <span>{{itemData.chipname[i-1] + "像 "}}</span>
-            <span class="tooltipcell">
+            <span class="tooltip-cell">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
                 :disabled="!nig.isStatueBuildable(i-1)">
                 設像コスト: {{ nig.calcStatueCost(i-1) }}
@@ -494,17 +494,17 @@
           <table class="table-bordered table-sm">
             <tbody>
               <tr v-for="i in 10" :key="i">
-                <td v-for="j in 10" :key="j" class="tooltipcell">
+                <td :key="j" class="tooltip-cell" v-for="j in 10">
                   <span>{{ nig.player.smalltrophies[i*10+j-11] ? (i-1)*10+j : '　' }}</span>
-                  <span class="uptooltip" v-if="spoiler">
+                  <span class="up-tooltip" v-if="spoiler">
                     {{ itemData.smalltrophytext[i*10+j-11] }}
                   </span>
                 </td>
               </tr>
               <tr :key="i" v-for="i in 6" v-if="nig.player.crownresettime.gt(0)">
-                <td v-for="j in 10" :key="j" class="tooltipcell">
+                <td :key="j" class="tooltip-cell" v-for="j in 10">
                   <span>{{ nig.player.smalltrophies2nd[i*10+j-11] ? 100+(i-1)*10+j : '　' }}</span>
-                  <span class="uptooltip" v-if="spoiler">
+                  <span class="up-tooltip" v-if="spoiler">
                     {{ itemData.smalltrophytext[100+i*10+j-11] }}
                   </span>
                 </td>
@@ -565,20 +565,20 @@
         </div>
       </nav>
       <div class="tab-content" id="challengeTabContent"
-        :class="{ showclearedchallenge: !hideClearedChallenge, hidechallengecolor: hideChallengeColor }">
+        :class="{ 'show-cleared-challenge': !hideClearedChallenge, 'hide-challenge-color': hideChallengeColor }">
         <div class="tab-pane fade show active" id="challengePanel" role="tabpanel" aria-labelledby="challengePanelTab">
           <div>
             <button @click="simulateChallengesAll(false)" class="btn btn-outline-dark" type="button">シミュレート</button>
             ⚠重いので注意　クリックで1マスずつシミュレート
           </div>
-          <table class="chaltable">
+          <table class="challenge-table">
             <thead>
               <tr v-for="i in 4" :key="i">
                 <th colspan="4" rowspan="4" v-if="i==1">
-                  <div class="chalcell">挑戦達成: {{ nig.player.challengecleared.length }}</div>
+                  <div class="challenge-cell">挑戦達成: {{ nig.player.challengecleared.length }}</div>
                 </th>
                 <th v-for="j in 16" :key="j">
-                  <div class="chalcell d-flex align-items-center justify-content-center">
+                  <div class="challenge-cell d-flex align-items-center justify-content-center">
                     {{ (j - 1) % (1 << i)>= (1 << i - 1) ? i : '' }}</div>
                 </th>
               </tr>
@@ -586,22 +586,22 @@
             <tbody>
               <tr v-for="i in 16" :key="i">
                 <th v-for="j in 4" :key="j">
-                  <div class="chalcell  d-flex align-items-center justify-content-center">
+                  <div class="challenge-cell  d-flex align-items-center justify-content-center">
                     {{ (i - 1) % (1 << j)>= (1 << j - 1) ? j + 4 : '' }}</div>
                 </th>
                 <td v-for="j in 16" :key="j">
-                  <div :class="challengeCell(i-1,j-1)" @click="simulateChallengeOne(i-1,j-1,false)" class="chalcell">
-                    <div :style="challengesColor(i-1,j-1)" class="chalcolor"></div>
-                    <span class="chaltooltip" v-html="challengeMessage(i-1,j-1)" v-if="i>1||j>1"></span>
+                  <div :class="challengeCell(i-1,j-1)" @click="simulateChallengeOne(i-1,j-1,false)" class="challenge-cell">
+                    <div :style="challengesColor(i-1,j-1)" class="challenge-color"></div>
+                    <span class="challenge-tooltip" v-html="challengeMessage(i-1,j-1)" v-if="i>1||j>1"></span>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
-          <div class="chalcolorbar" v-if="showTickMinimum">
+          <div class="challenge-colorbar" v-if="showTickMinimum">
             <span :key="i" :style="scaleSampleTime(sampleTick[i-1])" v-for="i in 10">{{ sampleTickLabel[i-1] }}</span>
           </div>
-          <div class="chalcolorbar" v-if="!showTickMinimum">
+          <div class="challenge-colorbar" v-if="!showTickMinimum">
             <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>
@@ -610,14 +610,14 @@
             <button @click="simulateChallengesAll(true)" class="btn btn-outline-dark" type="button">シミュレート</button>
             ⚠重いので注意　クリックで1マスずつシミュレート
           </div>
-          <table class="chaltable">
+          <table class="challenge-table">
             <thead>
               <tr v-for="i in 4" :key="i">
                 <th colspan="4" rowspan="4" v-if="i==1">
-                  <div class="chalcell">階位挑戦達成: {{ nig.player.rankchallengecleared.length }}</div>
+                  <div class="challenge-cell">階位挑戦達成: {{ nig.player.rankchallengecleared.length }}</div>
                 </th>
                 <th v-for="j in 16" :key="j">
-                  <div class="chalcell d-flex align-items-center justify-content-center">
+                  <div class="challenge-cell d-flex align-items-center justify-content-center">
                     {{ (j - 1) % (1 << i)>= (1 << i - 1) ? i : '' }}</div>
                 </th>
               </tr>
@@ -625,23 +625,23 @@
             <tbody>
               <tr v-for="i in 16" :key="i">
                 <th v-for="j in 4" :key="j">
-                  <div class="chalcell d-flex align-items-center justify-content-center">
+                  <div class="challenge-cell d-flex align-items-center justify-content-center">
                     {{ (i - 1) % (1 << j)>= (1 << j - 1) ? j + 4 : '' }}</div>
                 </th>
                 <td v-for="j in 16" :key="j">
                   <div :class="challengeCell(i-1,j-1,true)" @click="simulateChallengeOne(i-1,j-1,true)"
-                    class="chalcell">
-                    <div :style="challengesColor(i-1,j-1,true)" class="chalcolor"></div>
-                    <span class="chaltooltip" v-html="challengeMessage(i-1,j-1,true)" v-if="i>1||j>1"></span>
+                    class="challenge-cell">
+                    <div :style="challengesColor(i-1,j-1,true)" class="challenge-color"></div>
+                    <span class="challenge-tooltip" v-html="challengeMessage(i-1,j-1,true)" v-if="i>1||j>1"></span>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
-          <div class="chalcolorbar" v-if="showTickMinimum">
+          <div class="challenge-colorbar" v-if="showTickMinimum">
             <span :key="i" :style="scaleSampleTime(sampleTick[i-1])" v-for="i in 10">{{ sampleTickLabel[i-1] }}</span>
           </div>
-          <div class="chalcolorbar" v-if="!showTickMinimum">
+          <div class="challenge-colorbar" v-if="!showTickMinimum">
             <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>

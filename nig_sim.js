@@ -2082,8 +2082,8 @@ const app = Vue.createApp({
                 const nowChallenging = this.nig.player.onchallenge && this.nig.calcChallengeId() == id;
                 const clearedChallenge = rank ? this.nig.player.rankchallengecleared.includes(id) : this.nig.player.challengecleared.includes(id);
                 return {
-                    nowchallenging: nowChallenging,
-                    clearedchallenge: clearedChallenge,
+                    'now-challenging': nowChallenging,
+                    'cleared-challenge': clearedChallenge,
                     unchallengeable: i == 0 && j == 0,
                 };
             };
@@ -2437,7 +2437,7 @@ const app = Vue.createApp({
         },
         scaleChallengeTable(c) {
             this.simulateTableWidth = Math.max(20, Math.min(100, this.simulateTableWidth * c));
-            document.querySelector(':root').style.setProperty('--chal-width', `${this.simulateTableWidth}vh`);
+            document.querySelector(':root').style.setProperty('--challenge-width', `${this.simulateTableWidth}vh`);
         },
     },
     mounted() {
