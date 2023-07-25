@@ -311,8 +311,8 @@
           <span>段位効力{{ i }}{{ ' ' }}</span>
           <span class="tooltipcell">
             <button @click="buyLevelItems(i-1)" class="btn btn-outline-dark btn-sm" type="button"
-              :disabled="!nig.isLevelitemBuyable(i-1)">
-              購入コスト: {{ nig.calcLevelitemCost(i-1).toExponential(1) }}
+              :disabled="!nig.isLevelItemBuyable(i-1)">
+              購入コスト: {{ nig.calcLevelItemCost(i - 1).toExponential(1) }}
             </button>
             <span class="uptooltip">
               {{ itemdata.levelitemtext[i-1] }}
