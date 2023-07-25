@@ -305,7 +305,7 @@ class ItemData {
     }
 };
 
-const itemdata = new ItemData();
+const itemData = new ItemData();
 
 class MaximumBonuses {
     constructor() {
@@ -321,7 +321,7 @@ class MaximumBonuses {
             let ok = true;
             for (let j = 0; j < effectivechallengebonuses.length; j++) {
                 if (!(i & 1 << j)) {
-                    costs[i ^ 1 << j] = costs[i] + itemdata.rewardcost[effectivechallengebonuses[j]];
+                    costs[i ^ 1 << j] = costs[i] + itemData.rewardcost[effectivechallengebonuses[j]];
                     ok &= costs[i ^ 1 << j] > mxtoken || (rank && effectivechallengebonuses[j] === 9);
                 }
             }
@@ -352,11 +352,11 @@ class MaximumBonuses {
     };
 };
 
-const mbcache = new MaximumBonuses();
+const mbCache = new MaximumBonuses();
 
-const trophynum = 10;
-const setchipkind = 10;
-const setchipnum = 100;
+const TROPHY_NUM = 10;
+const SET_CHIP_KIND = 10;
+const SET_CHIP_NUM = 100;
 
 class Nig {
     constructor() {
@@ -416,7 +416,7 @@ class Nig {
                 rankchallengecleared: [],
                 rankchallengebonuses: new Array(15).fill(false),
 
-                trophies: new Array(trophynum).fill(false),
+                trophies: new Array(TROPHY_NUM).fill(false),
                 smalltrophies: new Array(100).fill(false),
                 smalltrophies2nd: new Array(100).fill(false),
 
@@ -426,11 +426,11 @@ class Nig {
                 remember: 0,
                 rememberspent: 0,
 
-                chip: new Array(setchipkind).fill(0),
-                setchip: new Array(setchipnum).fill(0),
-                disabledchip: new Array(setchipnum).fill(false),
+                chip: new Array(SET_CHIP_KIND).fill(0),
+                setchip: new Array(SET_CHIP_NUM).fill(0),
+                disabledchip: new Array(SET_CHIP_NUM).fill(false),
 
-                statue: new Array(setchipkind).fill(0),
+                statue: new Array(SET_CHIP_KIND).fill(0),
 
                 worldpipe: new Array(10).fill(null).map(() => 0),
             };
@@ -447,7 +447,7 @@ class Nig {
         this.eachpipedsmallmemory = new Array(10).fill(null).map(() => 0);
         this.pipedsmallmemory = 0;
         this.worldopened = new Array(10).fill().map(() => false);
-        this.chipused = new Array(setchipkind).fill(0);
+        this.chipused = new Array(SET_CHIP_KIND).fill(0);
         this.pchallengestage = 0;
         this.world = 0;
     };
@@ -558,7 +558,7 @@ class Nig {
             rankchallengecleared: playerData.rankchallengecleared ?? [],
             rankchallengebonuses: numArray2BoolArray(playerData.rankchallengebonuses ?? [], 15),
 
-            trophies: playerData.trophies ?? new Array(trophynum).fill(false),
+            trophies: playerData.trophies ?? new Array(TROPHY_NUM).fill(false),
             smalltrophies: playerData.smalltrophies ?? new Array(100).fill(false),
             smalltrophies2nd: playerData.smalltrophies2nd ?? new Array(100).fill(false),
 
@@ -568,11 +568,11 @@ class Nig {
             remember: playerData.remember ?? 0,
             rememberspent: playerData.rememberspent ?? 0,
 
-            chip: playerData.chip ?? new Array(setchipkind).fill(0),
-            setchip: playerData.setchip ?? new Array(setchipnum).fill(0),
-            disabledchip: playerData.disabledchip ?? new Array(setchipnum).fill(false),
+            chip: playerData.chip ?? new Array(SET_CHIP_KIND).fill(0),
+            setchip: playerData.setchip ?? new Array(SET_CHIP_NUM).fill(0),
+            disabledchip: playerData.disabledchip ?? new Array(SET_CHIP_NUM).fill(false),
 
-            statue: playerData.statue ?? new Array(setchipkind).fill(0),
+            statue: playerData.statue ?? new Array(SET_CHIP_KIND).fill(0),
 
             worldpipe: playerData.worldpipe ?? new Array(10).fill(null).map(() => 0),
         };
@@ -949,7 +949,7 @@ class Nig {
         let spent = 0;
         this.player.challengebonuses.forEach((value, index) => {
             if (value) {
-                spent += itemdata.rewardcost[index];
+                spent += itemData.rewardcost[index];
             }
         });
         let t = this.player.challengecleared.length;
@@ -961,7 +961,7 @@ class Nig {
         spent = 0;
         this.player.rankchallengebonuses.forEach((value, index) => {
             if (value) {
-                spent += itemdata.rewardcost[index];
+                spent += itemData.rewardcost[index];
             }
         });
         t = this.player.rankchallengecleared.length;
@@ -983,27 +983,27 @@ class Nig {
     }
 
     isRewardToggleable(index) {
-        return this.player.challengebonuses[index] || (this.player.token >= itemdata.rewardcost[index]);
+        return this.player.challengebonuses[index] || (this.player.token >= itemData.rewardcost[index]);
     };
     toggleReward(index) {
         if (this.isRewardToggleable(index)) {
             if (this.player.challengebonuses[index])
-                this.player.token += itemdata.rewardcost[index];
+                this.player.token += itemData.rewardcost[index];
             else
-                this.player.token -= itemdata.rewardcost[index];
+                this.player.token -= itemData.rewardcost[index];
             this.player.challengebonuses[index] = !this.player.challengebonuses[index];
             this.updateTickSpeed();
         }
     };
     isRankRewardToggleable(index) {
-        return this.player.rankchallengebonuses[index] || (this.player.ranktoken >= itemdata.rewardcost[index]);
+        return this.player.rankchallengebonuses[index] || (this.player.ranktoken >= itemData.rewardcost[index]);
     };
     toggleRankReward(index) {
         if (this.isRankRewardToggleable(index)) {
             if (this.player.rankchallengebonuses[index])
-                this.player.ranktoken += itemdata.rewardcost[index];
+                this.player.ranktoken += itemData.rewardcost[index];
             else
-                this.player.ranktoken -= itemdata.rewardcost[index];
+                this.player.ranktoken -= itemData.rewardcost[index];
             this.player.rankchallengebonuses[index] = !this.player.rankchallengebonuses[index];
             this.updateTickSpeed();
         }
@@ -1016,7 +1016,7 @@ class Nig {
     };
     calcLevelItemCost(index) {
         const d = index + 1;
-        const cost = itemdata.levelitemcost[index].pow(this.player.levelitems[index] + 1);
+        const cost = itemData.levelitemcost[index].pow(this.player.levelitems[index] + 1);
         let dec = 0;
         for (let i = 1; i <= 5; i++) {
             if (4 * i * i * d * d * d <= this.player.levelitembought) dec = i;
@@ -1268,7 +1268,7 @@ class Nig {
             this.player.challengecleared.push(i);
             this.player.rankchallengecleared.push(i);
         }
-        this.player.disabledchip = new Array(setchipnum).fill(false);
+        this.player.disabledchip = new Array(SET_CHIP_NUM).fill(false);
         this.calcToken();
         this.checkPChallengeCleared();
     };
@@ -1533,7 +1533,7 @@ class Nig {
     };
     toggleChip(i) {
         let oldchip = this.player.setchip[i];
-        for (let j = oldchip + 1; j <= setchipkind; j++) if (this.configChip(i, j)) return true;
+        for (let j = oldchip + 1; j <= SET_CHIP_KIND; j++) if (this.configChip(i, j)) return true;
         for (let j = 0; j < oldchip; j++) if (this.configChip(i, j)) return true;
         return false;
     };
@@ -1910,10 +1910,10 @@ class Nig {
             ? Array.from(new Array(this.player.accelevel + 1).keys())
             : [this.player.accelevelused];
         let challengebonusescandidates = config.searchChallengeBonuses
-            ? mbcache.get(this.player.challengecleared.length, false, true)
+            ? mbCache.get(this.player.challengecleared.length, false, true)
             : [new Array(15).fill().map((_, i) => i).filter(i => this.player.challengebonuses[i])];
         let rankchallengebonusescandidates = config.searchRankChallengeBonuses
-            ? mbcache.get(this.player.rankchallengecleared.length, true, true)
+            ? mbCache.get(this.player.rankchallengecleared.length, true, true)
             : [new Array(15).fill().map((_, i) => i).filter(i => this.player.rankchallengebonuses[i])];
         accelevelcandidates.forEach(accelevel => {
             challengebonusescandidates.forEach(challengebonuses => {
@@ -2006,11 +2006,11 @@ const colorbarPower = f => {
 const app = Vue.createApp({
     data() {
         return {
-            TROPHY_NUM: trophynum,
-            SET_CHIP_KIND: setchipkind,
-            SET_CHIP_NUM: setchipnum,
+            TROPHY_NUM: TROPHY_NUM,
+            SET_CHIP_KIND: SET_CHIP_KIND,
+            SET_CHIP_NUM: SET_CHIP_NUM,
             nig: new Nig(),
-            itemdata: itemdata,
+            itemdata: itemData,
             shinechallengelength: [64, 96, 128, 160, 192, 224],
             brightnessrankchallengelength: [32, 64, 128, 255],
             flickerpchallengestage: [1],
