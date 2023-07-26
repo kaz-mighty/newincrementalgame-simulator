@@ -2037,7 +2037,7 @@ const app = Vue.createApp({
             },
             searchClearChallenge: true,
             autoSimulateCheckpoints: false,
-            auto_simulate_dark_checkpoints: false,
+            autoSimulateDarkCheckpoints: false,
             checkpointTarget: 'point',
             checkpointValue: '',
             darkCheckpointTarget: 'point',
@@ -2330,7 +2330,7 @@ const app = Vue.createApp({
             this.simulatedCheckpoints[this.nig.world].clear();
             this.simulatedDarkCheckpoints[this.nig.world].clear();
             if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
@@ -2340,7 +2340,7 @@ const app = Vue.createApp({
                 this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
             if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.auto_simulate_dark_checkpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
         },
         addCheckpoint() {
             this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));

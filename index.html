@@ -686,8 +686,8 @@
       <div class="card-body">
         <div>
           <button type="button" class="btn btn-outline-dark" @click="simulateDarkCheckpoints">シミュレート</button>
-          <button type="button" class="btn" @click="auto_simulate_dark_checkpoints = !auto_simulate_dark_checkpoints;"
-            :class="buttonSelectedClass(auto_simulate_dark_checkpoints)">自動</button>
+          <button :class="buttonSelectedClass(autoSimulateDarkCheckpoints)" @click="autoSimulateDarkCheckpoints = !autoSimulateDarkCheckpoints;" class="btn"
+            type="button">自動</button>
         </div>
         <div class="input-group">
           <select aria-label="checkpoint target" class="form-select" v-model="darkCheckpointTarget">
