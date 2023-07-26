@@ -1,14 +1,14 @@
 const D = (value) => new Decimal(value);
-const numArray2BoolArray = (numarr, length) => {
-    let boolarr = new Array(length).fill(false);
-    numarr.forEach((n, i) => {
+const numArray2BoolArray = (numArray, length) => {
+    let boolArray = new Array(length).fill(false);
+    numArray.forEach((n, i) => {
         if (typeof n == 'boolean') {
-            boolarr[i] = n;
+            boolArray[i] = n;
         } else {
-            boolarr[n] = true;
+            boolArray[n] = true;
         }
     });
-    return boolarr;
+    return boolArray;
 };
 
 class ItemData {
@@ -311,41 +311,41 @@ class MaximumBonuses {
     constructor() {
         this.cache = new Map();
     };
-    static maximumBonuses(mxtoken, rank, onchallenge) {
-        const effectivechallengebonuses = rank ? [3, 4, 6, 7, 9, 10, 11, 13] : [2, 3, 6, 7, 10, 11, 13];
-        const m = 1 << effectivechallengebonuses.length;
-        if (!rank && onchallenge) mxtoken = Math.max(mxtoken - 8, 0);
+    static maximumBonuses(maxToken, rank, onChallenge) {
+        const effectiveChallengeBonuses = rank ? [3, 4, 6, 7, 9, 10, 11, 13] : [2, 3, 6, 7, 10, 11, 13];
+        const m = 1 << effectiveChallengeBonuses.length;
+        if (!rank && onChallenge) maxToken = Math.max(maxToken - 8, 0);
         let costs = new Array(m).fill(0);
-        let challengebonusescandidates = [];
+        let challengeBonusesCandidates = [];
         for (let i = 0; i < m; i++) {
             let ok = true;
-            for (let j = 0; j < effectivechallengebonuses.length; j++) {
+            for (let j = 0; j < effectiveChallengeBonuses.length; j++) {
                 if (!(i & 1 << j)) {
-                    costs[i ^ 1 << j] = costs[i] + itemData.rewardcost[effectivechallengebonuses[j]];
-                    ok &= costs[i ^ 1 << j] > mxtoken || (rank && effectivechallengebonuses[j] === 9);
+                    costs[i ^ 1 << j] = costs[i] + itemData.rewardcost[effectiveChallengeBonuses[j]];
+                    ok &= costs[i ^ 1 << j] > maxToken || (rank && effectiveChallengeBonuses[j] === 9);
                 }
             }
-            if (ok && costs[i] <= mxtoken) {
+            if (ok && costs[i] <= maxToken) {
                 let cs = [];
-                for (let j = 0; j < effectivechallengebonuses.length; j++) {
+                for (let j = 0; j < effectiveChallengeBonuses.length; j++) {
                     if (i & 1 << j) {
-                        cs.push(effectivechallengebonuses[j]);
+                        cs.push(effectiveChallengeBonuses[j]);
                     }
                 }
                 /* 上位効力4は上位効力5の上位互換 */
                 if (rank && !cs.includes(3) && cs.includes(4)) { } else {
-                    challengebonusescandidates.push(cs);
+                    challengeBonusesCandidates.push(cs);
                 }
             }
         }
-        return challengebonusescandidates;
+        return challengeBonusesCandidates;
     }
 
-    get(mxtoken, rank, onchallenge) {
-        const key = { mxtoken: mxtoken, rank: rank, onchallenge: onchallenge };
+    get(maxToken, rank, onChallenge) {
+        const key = { maxToken: maxToken, rank: rank, onChallenge: onChallenge };
         let res = this.cache.get(key);
         if (res === undefined) {
-            res = MaximumBonuses.maximumBonuses(mxtoken, rank, onchallenge);
+            res = MaximumBonuses.maximumBonuses(maxToken, rank, onChallenge);
             this.cache.set(key, res);
         }
         return res;
