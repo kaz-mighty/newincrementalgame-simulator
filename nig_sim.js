@@ -1792,7 +1792,7 @@ class Nig {
                 }
 
                 if (Nig.calcAfterNTick(gExpr[0], ok.sub(curTick)).gte(targetMoney)) {
-                    ng = curTick.add(1);
+                    ng = curTick;
                     cnt = 0;
                     while (ng.add(1).lt(ok) && cnt < 60) {
                         const m = ok.sub(ng).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
