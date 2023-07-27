@@ -496,11 +496,6 @@ class Nig {
         return nig;
     };
 
-    softCap(num, cap) {
-        if (num.lte(cap)) return num;
-        return cap.mul(D(num.div(cap).log2()).add(1)).min(num);
-    };
-
     loadPlayer(playerData) {
         this.player = {
             money: D(playerData.money),
@@ -590,6 +585,16 @@ class Nig {
         for (let i = 0; i < 8; i++) this.calcLightGeneratorCost(i, this.player.lightgeneratorsBought[i], true);
     };
 
+    softCap(num, cap) {
+        if (num.lte(cap)) return num;
+        return cap.mul(D(num.div(cap).log2()).add(1)).min(num);
+    };
+
+    strongSoftCap(num, cap) {
+        if (num.lte(cap)) return num;
+        return cap.mul(D(D(num.div(cap).log2()).add(1).log2()).add(1)).min(num);
+    };
+
     calcCommonMult() {
         let mult = D(1);
         if (!this.isChallengeActive(7)) {
@@ -644,11 +649,6 @@ class Nig {
 
 
         this.commonmult = mult;
-    };
-
-    strongSoftCap(num, cap) {
-        if (num.lte(cap)) return num;
-        return cap.mul(D(D(num.div(cap).log2()).add(1).log2()).add(1)).min(num);
     };
 
     calcIncrementMult(mu, i, to) {
