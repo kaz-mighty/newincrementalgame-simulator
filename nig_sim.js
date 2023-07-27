@@ -1562,13 +1562,13 @@ class Nig {
 
     searchLowerBound(value, l, target) {
         const f = x => {
-            if (target === 'levelreset') {
+            if (target === 'levelReset') {
                 return this.calcGainLevel(x);
-            } else if (target === 'rankreset') {
+            } else if (target === 'rankReset') {
                 return this.calcGainRank(x);
-            } else if (target === 'crownreset') {
+            } else if (target === 'crownReset') {
                 return this.calcGainCrown(x);
-            } else if (target === 'dark_levelreset') {
+            } else if (target === 'darkLevelReset') {
                 return this.calcGainDarkLevel(x);
             }
         };
@@ -1591,16 +1591,16 @@ class Nig {
         try {
             let value = D(input);
             const hasChallenge0 = this.isChallengeActive(0);
-            if (target === 'levelreset') {
+            if (target === 'levelReset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, D(hasChallenge0 ? '1e24' : '1e18'), target);
-            } else if (target == 'rankreset') {
+            } else if (target == 'rankReset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetRankBorder(), target);
-            } else if (target == 'crownreset') {
+            } else if (target == 'crownReset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetCrownBorder(), target);
-            } else if (target == 'dark_levelreset') {
+            } else if (target == 'darkLevelReset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, D('1e18'), target);
             } else if (target == 'point') {

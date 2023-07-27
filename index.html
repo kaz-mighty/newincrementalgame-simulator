@@ -658,17 +658,17 @@
         <div class="input-group">
           <select aria-label="checkpoint target" class="form-select" v-model="checkpointTarget">
             <option value="point" selected>ポイント</option>
-            <option value="levelreset">段位リセット</option>
-            <option value="rankreset">階位リセット</option>
-            <option value="crownreset">冠位リセット</option>
+            <option value="levelReset">段位リセット</option>
+            <option value="rankReset">階位リセット</option>
+            <option value="crownReset">冠位リセット</option>
           </select>
           <span class="input-group-text"
-            v-if="checkpointTarget=='levelreset' || checkpointTarget=='rankreset' || checkpointTarget=='crownreset'">で</span>
+            v-if="checkpointTarget=='levelReset' || checkpointTarget=='rankReset' || checkpointTarget=='crownReset'">で</span>
           <input class="form-control" placeholder="start[:stop[:[*]step]]" type="text" v-model="checkpointValue"
             @keydown="(event)=>{if(event.key==='Enter')addCheckpoint()}" aria-label="Text input">
           <span class="input-group-text"
-            v-if="checkpointTarget=='levelreset' || checkpointTarget=='rankreset' || checkpointTarget=='crownreset'">
-            {{ {levelreset: '段位', rankreset: '階位', crownreset: '冠位'}[checkpointTarget] }}獲得する
+            v-if="checkpointTarget=='levelReset' || checkpointTarget=='rankReset' || checkpointTarget=='crownReset'">
+            {{ {levelReset: '段位', rankReset: '階位', crownReset: '冠位'}[checkpointTarget] }}獲得する
           </span>
           <span class="input-group-text">{{ targetMoneysDesc }} </span>
           <button @click="addCheckpoint" class="btn btn-outline-dark" type="button">追加</button>
@@ -692,15 +692,15 @@
         <div class="input-group">
           <select aria-label="checkpoint target" class="form-select" v-model="darkCheckpointTarget">
             <option value="point" selected>ポイント</option>
-            <option value="dark_levelreset">裏段位リセット</option>
+            <option value="darkLevelReset">裏段位リセット</option>
           </select>
           <span class="input-group-text"
-            v-if="darkCheckpointTarget==='dark_levelreset'">で</span>
+            v-if="darkCheckpointTarget==='darkLevelReset'">で</span>
           <input class="form-control" placeholder="start[:stop[:[*]step]]" type="text" v-model="darkCheckpointValue"
             aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addDarkCheckpoint()}">
           <span class="input-group-text"
-            v-if="darkCheckpointTarget==='dark_levelreset'">
-            {{ {dark_levelreset: '裏段位'}[darkCheckpointTarget] }}獲得する
+            v-if="darkCheckpointTarget==='darkLevelReset'">
+            {{ {darkLevelReset: '裏段位'}[darkCheckpointTarget] }}獲得する
           </span>
           <span class="input-group-text">{{ targetDarkMoneysDesc }} </span>
           <button class="btn btn-outline-dark" type="button" @click="addDarkCheckpoint">追加</button>
