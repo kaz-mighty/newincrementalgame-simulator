@@ -92,7 +92,7 @@ td .unchallengeable {
 .hide-challenge-color .challenge-color, .hide-challenge-color .challenge-colorbar {
     visibility: hidden;
 }
-#gabought .btn-sm {
+#gaBought .btn-sm {
     padding: 0.25rem;
 }
 @media screen and (max-width: 700px) {

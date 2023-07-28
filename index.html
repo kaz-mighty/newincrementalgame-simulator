@@ -25,13 +25,13 @@
       <label class="btn btn-outline-dark" for="basicInfoB" data-bs-toggle="collapse" data-bs-target="#basicInfo"
         aria-expanded="false" aria-controls="basicInfo">基本</label>
 
-      <input type="checkbox" class="btn-check" id="gaboughtB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="gaboughtB" data-bs-toggle="collapse" data-bs-target="#gabought"
-        aria-expanded="false" aria-controls="gabought">器</label>
+      <input autocomplete="off" class="btn-check" id="gaBoughtB" type="checkbox">
+      <label aria-controls="gaBought" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#gaBought"
+             data-bs-toggle="collapse" for="gaBoughtB">器</label>
 
-      <input type="checkbox" class="btn-check" id="dboughtB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="dboughtB" data-bs-toggle="collapse" data-bs-target="#dbought"
-        aria-expanded="false" aria-controls="dbought"
+      <input autocomplete="off" class="btn-check" id="darkBoughtB" type="checkbox">
+      <label aria-controls="darkBought" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#darkBought"
+        data-bs-toggle="collapse" for="darkBoughtB"
         v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏</label>
 
       <input type="checkbox" class="btn-check" id="timeInfoB" autocomplete="off">
@@ -77,18 +77,18 @@
       <label class="btn btn-outline-dark" for="challengeViewB" data-bs-toggle="collapse" data-bs-target="#challengeView"
         aria-expanded="false" aria-controls="challengeView">挑戦</label>
 
-      <input type="checkbox" class="btn-check" id="simulatedChkpsB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="simulatedChkpsB" data-bs-toggle="collapse"
-        data-bs-target="#simulatedChkps" aria-expanded="false" aria-controls="simulatedChkps">到達</label>
+      <input autocomplete="off" class="btn-check" id="simulatedCheckpointsB" type="checkbox">
+      <label aria-controls="simulatedCheckpoints" aria-expanded="false" class="btn btn-outline-dark"
+        data-bs-target="#simulatedCheckpoints" data-bs-toggle="collapse" for="simulatedCheckpointsB">到達</label>
 
       <input type="checkbox" class="btn-check" id="simulatedDarkB" autocomplete="off">
       <label aria-controls="simulatedDark" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#simulatedDark"
         data-bs-toggle="collapse" for="simulatedDarkB"
         v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏到達</label>
 
-      <input type="checkbox" class="btn-check" id="gaexpressionB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="gaexpressionB" data-bs-toggle="collapse" data-bs-target="#gaexpression"
-        aria-expanded="false" aria-controls="gaexpression">式</label>
+      <input autocomplete="off" class="btn-check" id="gaExpressionB" type="checkbox">
+      <label aria-controls="gaExpression" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#gaExpression"
+        data-bs-toggle="collapse" for="gaExpressionB">式</label>
 
       <input type="checkbox" class="btn-check" id="helpMessageB" autocomplete="off">
       <label class="btn btn-outline-dark" for="helpMessageB" data-bs-toggle="collapse" data-bs-target="#helpMessage"
@@ -122,7 +122,7 @@
       </div>
     </div>
 
-    <div class="collapse" id="gabought">
+    <div class="collapse" id="gaBought">
       <table class="table table-bordered table-sm text-center" style="margin-bottom: 0;">
         <thead>
           <tr>
@@ -182,7 +182,7 @@
       </table>
     </div>
 
-    <div class="collapse" id="dbought">
+    <div class="collapse" id="darkBought">
       <table class="table table-bordered table-sm text-center" style="margin-bottom: 0;">
         <thead>
           <tr>
@@ -519,16 +519,16 @@
     <div class="collapse card card-body" id="challengeView">
       <div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" id="hideclearedchallenge" type="checkbox" v-model="hideClearedChallenge">
-          <label class="form-check-label" for="hideclearedchallenge">クリア済を非表示</label>
+          <input class="form-check-input" id="hideClearedChallenge" type="checkbox" v-model="hideClearedChallenge">
+          <label class="form-check-label" for="hideClearedChallenge">クリア済を非表示</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" id="hidechallengecolor" type="checkbox" v-model="hideChallengeColor">
-          <label class="form-check-label" for="hidechallengecolor">クリア時間を非表示</label>
+          <input class="form-check-input" id="hideChallengeColor" type="checkbox" v-model="hideChallengeColor">
+          <label class="form-check-label" for="hideChallengeColor">クリア時間を非表示</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" id="showtickminimum" type="checkbox" v-model="showTickMinimum">
-          <label class="form-check-label" for="showtickminimum">最小tickを表示（デフォルト：最小時間）</label>
+          <input class="form-check-input" id="showTickMinimum" type="checkbox" v-model="showTickMinimum">
+          <label class="form-check-label" for="showTickMinimum">最小tickを表示（デフォルト：最小時間）</label>
         </div>
       </div>
       <div>
@@ -560,8 +560,8 @@
         <div class="nav nav-tabs" id="challengeTab" role="tablist">
           <a class="nav-link active" id="challengePanelTab" data-bs-toggle="tab" href="#challengePanel" role="tab"
             aria-controls="challengePanel" aria-selected="true">挑戦</a>
-          <a class="nav-link" id="rankchallengePanelTab" data-bs-toggle="tab" href="#rankchallengePanel" role="tab"
-            aria-controls="rankchallengePanel" aria-selected="true"
+          <a aria-controls="rankChallengePanel" aria-selected="true" class="nav-link" data-bs-toggle="tab" href="#rankChallengePanel"
+            id="rankChallengePanelTab" role="tab"
             v-if="nig.player.challengeCleared.length>=128">階位挑戦</a>
         </div>
       </nav>
@@ -606,7 +606,7 @@
             <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>
-        <div class="tab-pane fade" id="rankchallengePanel" role="tabpanel" aria-labelledby="rankchallengePanelTab">
+        <div aria-labelledby="rankChallengePanelTab" class="tab-pane fade" id="rankChallengePanel" role="tabpanel">
           <div>
             <button @click="simulateChallengesAll(true)" class="btn btn-outline-dark" type="button">シミュレート</button>
             ⚠重いので注意　クリックで1マスずつシミュレート
@@ -649,7 +649,7 @@
       </div>
     </div>
 
-    <div class="collapse card" id="simulatedChkps">
+    <div class="collapse card" id="simulatedCheckpoints">
       <div class="card-body">
         <div>
           <button @click="simulateCheckpoints" class="btn btn-outline-dark" type="button">シミュレート</button>
@@ -715,7 +715,7 @@
       </ul>
     </div>
 
-    <div class="collapse card" id="gaexpression">
+    <div class="collapse card" id="gaExpression">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">\(N\)tick 後の数</li>
         <li class="list-group-item" v-for="i in 9">{{ expression(i-1,0) }}</li>

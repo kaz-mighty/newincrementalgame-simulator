@@ -2494,10 +2494,10 @@ const app = Vue.createApp({
         },
     },
     mounted() {
-        setTimeout(() => renderMathInElement(document.getElementById('gaexpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
+        setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
     },
     updated() {
-        setTimeout(() => renderMathInElement(document.getElementById('gaexpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
+        setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
     },
 });
 app.config.isCustomElement = tag => {
