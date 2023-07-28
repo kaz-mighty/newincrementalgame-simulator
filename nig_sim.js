@@ -25,7 +25,7 @@ const combineMerge = (target, source, options) => {
     return destination;
 };
 const deepMergeWithoutUndefined = (target, source, options) => {
-  source = Object.entries(source).filter(([key, value]) => value !== undefined);
+  source = Object.entries(source).filter(([_, value]) => value !== undefined);
   return deepmerge(target, source, options);
 };
 
@@ -321,7 +321,7 @@ class ItemData {
             '鋳片効力は、新規挑戦達成でない段位リセットを行うごとにランダムで1つが無効になります。',
         ];
     }
-};
+}
 
 const itemData = new ItemData();
 
@@ -368,7 +368,7 @@ class MaximumBonuses {
         }
         return res;
     };
-};
+}
 
 const mbCache = new MaximumBonuses();
 
@@ -379,7 +379,7 @@ const SET_CHIP_NUM = 100;
 class Nig {
     constructor() {
         this.player = Nig.initialData();
-        this.players = new Array(10).fill().map(() => Nig.initialData());
+        this.players = new Array(10).fill(null).map(() => Nig.initialData());
         this.highest = 0;
         this.commonMult = D(1);
         this.incrementalMults = new Array(8).fill(D(1));
@@ -387,9 +387,9 @@ class Nig {
         this.memory = 0;
         this.smallMemory = 0;
         this.smallMemories = new Array(10).fill(0);
-        this.eachPipedSmallMemory = new Array(10).fill(null).map(() => 0);
+        this.eachPipedSmallMemory = new Array(10).fill(0);
         this.pipedSmallMemory = 0;
-        this.worldOpened = new Array(10).fill().map(() => false);
+        this.worldOpened = new Array(10).fill(false);
         this.chipUsed = new Array(SET_CHIP_KIND).fill(0);
         this.pChallengeStage = 0;
         this.world = 0;
@@ -445,7 +445,7 @@ class Nig {
             generators: new Array(8).fill(D(0)),
             generatorsBought: new Array(8).fill(D(0)),
             generatorsCost: [D(1), D('1e4'), D('1e9'), D('1e16'), D('1e25'), D('1e36'), D('1e49'), D('1e64')],
-            generatorsMode: new Array(8).fill().map((_, i) => i),
+            generatorsMode: new Array(8).fill(null).map((_, i) => i),
 
             accelerators: new Array(8).fill(D(0)),
             acceleratorsBought: new Array(8).fill(D(0)),
@@ -495,7 +495,7 @@ class Nig {
 
             statue: new Array(SET_CHIP_KIND).fill(0),
 
-            worldPipe: new Array(10).fill(null).map(() => 0),
+            worldPipe: new Array(10).fill(0),
         };
     };
 
@@ -527,11 +527,6 @@ class Nig {
             });
         }
         this.loadPlayer(this.players[this.world]);
-    };
-
-    loadPlayerB(playerDatab) {
-        const saveData = JSON.parse(atob(playerDatab));
-        this.loadPlayer(saveData);
     };
 
     clone() {
@@ -1102,7 +1097,7 @@ class Nig {
         return !this.isChallengeActive(3) && !this.isChallengeBonusActive(13);
     };
     resetGeneratorMode() {
-        if (this.isGeneratorModeChangeable()) this.player.generatorsMode = new Array(8).fill().map((_, i) => i);
+        if (this.isGeneratorModeChangeable()) this.player.generatorsMode = new Array(8).fill(null).map((_, i) => i);
     };
     changeMode(index) {
         if (this.isChallengeActive(3)) return;
@@ -1694,7 +1689,7 @@ class Nig {
     };
 
     calcTickFromExpr(aExpr, tick) {
-        let acNum = Nig.calcAfterNTick(aExpr[0], tick).mul(D(1.5).pow(this.player.setChip[10]));;
+        let acNum = Nig.calcAfterNTick(aExpr[0], tick).mul(D(1.5).pow(this.player.setChip[10]));
         if (this.isRankChallengeBonusActive(13)) {
             for (let i = 1; i < 8; i++) acNum = acNum.mul(Nig.calcAfterNTick(aExpr[i], tick).add(1));
         }
@@ -1709,7 +1704,7 @@ class Nig {
         const baseTick = D(this.baseTick()).div(1000);
         const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
         let curTick = D(0);
-        let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));;
+        let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
         if (this.isRankChallengeBonusActive(13)) {
             for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
         }
@@ -1753,7 +1748,7 @@ class Nig {
             const baseTick = D(this.baseTick());
             const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
             let curTick = D(0);
-            let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));;
+            let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
             if (this.isRankChallengeBonusActive(13)) {
                 for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
             }
@@ -1968,10 +1963,10 @@ class Nig {
             : [this.player.accelLevelUsed];
         let challengeBonusesCandidates = config.searchChallengeBonuses
             ? mbCache.get(this.player.challengeCleared.length, false, true)
-            : [new Array(15).fill().map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
+            : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
         let rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
             ? mbCache.get(this.player.rankChallengeCleared.length, true, true)
-            : [new Array(15).fill().map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
+            : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
         accelLevelCandidates.forEach(accelLevel => {
             challengeBonusesCandidates.forEach(challengeBonuses => {
                 rankChallengeBonusesCandidates.forEach(rankChallengeBonuses => {
@@ -1981,7 +1976,7 @@ class Nig {
                     for (let i = 0; i < 15; i++) if (this.player.rankChallengeBonuses[i]) this.toggleRankReward(i);
                     for (let i = 0; i < 8; i++) this.player.generatorsMode[i] = i;
 
-                    for (let i = 0; i < 8; i++) if (challengeId & (1 << 7 - i)) this.configChallenge(i);
+                    for (let i = 0; i < 8; i++) if ((challengeId & (1 << 7 - i)) !== 0) this.configChallenge(i);
                     this.toggleReward(4);
                     if (config.toggleBonuses) {
                         this.toggleReward(1);
@@ -2041,7 +2036,7 @@ class Nig {
         return result;
     };
 
-};
+}
 
 const colors = ['#00ff00', '#11ff52', '#23ff9b', '#34ffda', '#46eeff', '#57c2ff', '#699fff', '#7a86ff', '#a18cff', '#ca9dff', '#e9afff', '#ffc0ff'];
 const colorbarPower = f => {
@@ -2418,8 +2413,8 @@ const app = Vue.createApp({
             let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
             if (!update) update ||= sim[this.nig.world][challengeId].config !== this.challengeConfig;
-            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
             if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
             if (!this.searchClearChallenge && rec) {
                 let cleared = rank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
