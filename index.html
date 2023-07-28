@@ -58,7 +58,7 @@
 
       <input type="checkbox" class="btn-check" id="worldInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="worldInfoB" data-bs-toggle="collapse" data-bs-target="#worldInfo"
-        aria-expanded="false" aria-controls="worldInfo" v-if="nig.worldopened.slice(1).some(b => b)">世界</label>
+        aria-controls="worldInfo" aria-expanded="false" v-if="nig.worldOpened.slice(1).some(b => b)">世界</label>
 
       <input type="checkbox" class="btn-check" id="chipInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="chipInfoB" data-bs-toggle="collapse" data-bs-target="#chipInfo"
@@ -96,7 +96,7 @@
 
     <div class="collapse" id="basicInfo">
       <div class="card card-body">
-        <div v-if="nig.worldopened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
+        <div v-if="nig.worldOpened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
         <div
           v-if="nig.player.leveResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
@@ -114,10 +114,10 @@
         </div>
         <div v-if="nig.player.challengeCleared.length>0">挑戦達成: {{ nig.player.challengeCleared.length }}</div>
         <div v-if="nig.player.rankChallengeCleared.length>0">階位挑戦達成: {{ nig.player.rankChallengeCleared.length }}</div>
-        <div v-if="nig.worldopened[1] || nig.worldopened[2]">記憶: {{ nig.memory }}</div>
-        <div>里程: {{ nig.smallmemory }}</div>
-        <div v-if="nig.worldopened[1] || nig.worldopened[2]">合計思い出: {{ nig.countRemembers() }}</div>
-        <div v-if="nig.smallmemory>=75">世界管所持数: {{ Math.floor((nig.smallmemory-72)/3) }}</div>
+        <div v-if="nig.worldOpened[1] || nig.worldOpened[2]">記憶: {{ nig.memory }}</div>
+        <div>里程: {{ nig.smallMemory }}</div>
+        <div v-if="nig.worldOpened[1] || nig.worldOpened[2]">合計思い出: {{ nig.countRemembers() }}</div>
+        <div v-if="nig.smallMemory>=75">世界管所持数: {{ Math.floor((nig.smallMemory - 72) / 3) }}</div>
       </div>
     </div>
 
@@ -265,7 +265,7 @@
               :class="buttonSelectedClass(nig.player.challenges[i-1])" :disabled="nig.player.onChallenge">
               {{ i }}
             </button>
-            <span class="up-tooltip">{{ itemData.challengetext[i-1] }}</span>
+            <span class="up-tooltip">{{ itemData.challengeText[i - 1] }}</span>
           </div>
           <div class="tooltip-cell">
             <button type="button" class="btn btn-outline-dark" @click="toggleChallenge"
@@ -284,7 +284,7 @@
               {{ i }}
             </button>
             <span class="up-tooltip">
-              コスト: {{ itemData.rewardcost[i-1] }} <br /> {{ itemData.rewardtext[i-1] }}
+              コスト: {{ itemData.rewardCost[i - 1] }} <br /> {{ itemData.rewardText[i - 1] }}
             </span>
           </div>
         </div>
@@ -298,7 +298,7 @@
               {{ i }}
             </button>
             <span class="up-tooltip">
-              コスト: {{ itemData.rewardcost[i-1] }} <br /> {{ itemData.rankrewardtext[i-1] }}
+              コスト: {{ itemData.rewardCost[i - 1] }} <br /> {{ itemData.rankRewardText[i - 1] }}
             </span>
           </div>
         </div>
@@ -315,7 +315,7 @@
               購入コスト: {{ nig.calcLevelItemCost(i - 1).toExponential(1) }}
             </button>
             <span class="up-tooltip">
-              {{ itemData.levelitemtext[i-1] }}
+              {{ itemData.levelItemText[i - 1] }}
             </span>
           </span>
           <span> 所持数: {{ nig.player.levelItems[i - 1] }}</span>
@@ -337,7 +337,7 @@
                     :class="buttonSelectedClass(nig.player.pChallenges[i-1])" :disabled="nig.player.onPChallenge">
               {{ i }}
             </button>
-            <span class="up-tooltip">{{ itemData.perfect_challengetext[i-1] }}</span>
+            <span class="up-tooltip">{{ itemData.perfectChallengetext[i - 1] }}</span>
           </div>
           <div class="tooltip-cell">
             <button type="button" class="btn btn-outline-dark" @click="togglePerfectChallenge"
@@ -347,7 +347,7 @@
             <span class="up-tooltip" v-html="startPerfectChallengeMessage"></span>
           </div>
         </div>
-        <div>完全挑戦段階: {{ nig.pchallengestage }}</div>
+        <div>完全挑戦段階: {{ nig.pChallengeStage }}</div>
       </div>
     </div>
 
@@ -363,7 +363,7 @@
           </span>
           <span>
             <button :disabled="nig.player.shine<1000000" @click="spendShine(1000000)" class="btn btn-outline-dark"
-              type="button" v-if="nig.pchallengestage >= 10">
+              type="button" v-if="nig.pChallengeStage >= 10">
               輝き消費: 1000000
             </button>
           </span>
@@ -377,16 +377,16 @@
             </button>
           </span>
         </div>
-        <div v-if="nig.pchallengestage>=1">
+        <div v-if="nig.pChallengeStage>=1">
           瞬き所持数: {{ nig.player.flicker }}
           <span v-for="(length, i) in flickerPChallengeStage">
             <button :disabled="nig.player.flicker<Math.pow(10, i)" @click="spendFlicker(Math.pow(10, i))" class="btn btn-outline-dark"
-              type="button" v-if="nig.pchallengestage >= length">
+              type="button" v-if="nig.pChallengeStage >= length">
               瞬き消費: {{ Math.pow(10, i) }}
             </button>
           </span>
         </div>
-        <div v-if="nig.pchallengestage>=10">
+        <div v-if="nig.pChallengeStage>=10">
           残滓: {{ nig.player.residue }}
         </div>
       </div>
@@ -401,21 +401,21 @@
             <td class="align-middle">思い出</td>
             <td class="align-middle">里程</td>
             <td class="align-middle">世界管</td>
-            <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldopened[j-1]">{{ j }}</td>
+            <td :key="j" class="align-middle" v-for="j in 10" v-show="nig.worldOpened[j-1]">{{ j }}</td>
           </tr>
         </thead>
         <tbody>
           <tr v-for="i in 10" :key="i">
             <td class="d-grid">
-              <button type="button" class="btn btn-sm" v-if="nig.worldopened[i-1]"
-                :class="buttonSelectedClass(nig.world == i-1)" :disabled="!nig.worldopened[i-1]"
+              <button :class="buttonSelectedClass(nig.world == i-1)" :disabled="!nig.worldOpened[i-1]" class="btn btn-sm"
+                type="button" v-if="nig.worldOpened[i-1]"
                 @click="selectWorld(i - 1)">世界{{ i }}</button>
             </td>
             <td class="align-middle">{{ nig.players[i-1].trophies.reduce((x, y) => x + (y ? 1 : 0), 0) }}</td>
             <td class="align-middle">{{ nig.players[i-1].remember }}</td>
-            <td class="align-middle">{{ nig.smallmemories[i-1] }}</td>
-            <td class="align-middle">{{ Math.max(0, Math.floor((nig.smallmemories[i-1] - 72) / 3)) }}</td>
-            <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldopened[j-1]"
+            <td class="align-middle">{{ nig.smallMemories[i - 1] }}</td>
+            <td class="align-middle">{{ Math.max(0, Math.floor((nig.smallMemories[i - 1] - 72) / 3)) }}</td>
+            <td :key="j" class="align-middle" v-for="j in 10" v-show="nig.worldOpened[j-1]"
               :style="{ 'background-color': i==j ? 'lightgray' : 'transparent' }">
               {{ nig.players[i - 1].worldPipe[j - 1] ? nig.players[i - 1].worldPipe[j - 1] : '' }}
             </td>
@@ -430,7 +430,7 @@
           所持鋳片
           <span v-for="i in SET_CHIP_KIND" :key="i">
             <span v-show="nig.player.chip[i-1]>0">
-              {{ ' ' }} {{ itemData.chipname[i-1] + '片' }}: {{ nig.player.chip[i-1] }}
+              {{ ' ' }} {{ itemData.chipName[i - 1] + '片' }}: {{ nig.player.chip[i - 1] }}
             </span>
           </span>
         </div>
@@ -438,7 +438,7 @@
           コスト
           <span v-for="i in SET_CHIP_KIND" :key="i">
             <span v-show="nig.player.chip[i-1]>0">
-              {{ ' ' }} {{ itemData.chipname[i-1] + '片' }}: {{ nig.chipused[i-1]+1 }}
+              {{ ' ' }} {{ itemData.chipName[i - 1] + '片' }}: {{ nig.chipUsed[i - 1] + 1 }}
             </span>
           </span>
         </div>
@@ -449,8 +449,8 @@
               <button :disabled="nig.player.disabledChip[i-1]" :style="chipColoredButtonClass(nig.player.setChip[i-1])" @click="toggleChip(i-1)"
                       class="btn btn-outline-dark"
                       type="button">{{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' :
-                      itemData.chipname[nig.player.setChip[i - 1] - 1] }}</button>
-              <span class="up-tooltip">{{ itemData.chipbonusname[i-1] }}</span>
+                      itemData.chipName[nig.player.setChip[i - 1] - 1] }}</button>
+              <span class="up-tooltip">{{ itemData.chipBonusName[i - 1] }}</span>
             </span>
           </div>
         </div>
@@ -460,8 +460,8 @@
     <div class="collapse" id="statueInfo">
       <div class="card card-body">
         <div v-for="i in SET_CHIP_KIND" :key="i">
-          <div v-show="nig.player.chip[i-1] > 0 || nig.chipused[i-1] > 0">
-            <span>{{itemData.chipname[i-1] + "像 "}}</span>
+          <div v-show="nig.player.chip[i-1] > 0 || nig.chipUsed[i-1] > 0">
+            <span>{{itemData.chipName[i - 1] + "像 "}}</span>
             <span class="tooltip-cell">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
                 :disabled="!nig.isStatueBuildable(i-1)">
@@ -483,21 +483,21 @@
             <tbody>
               <tr>
                 <td v-for="i in TROPHY_NUM" :key="i">
-                  <span>{{ nig.player.trophies[i-1] ? itemData.trophytext[i-1] : '???' }}</span>
+                  <span>{{ nig.player.trophies[i - 1] ? itemData.trophyText[i - 1] : '???' }}</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         <div>
-          里程: {{ nig.smallmemory }}
+          里程: {{ nig.smallMemory }}
           <table class="table-bordered table-sm">
             <tbody>
               <tr v-for="i in 10" :key="i">
                 <td :key="j" class="tooltip-cell" v-for="j in 10">
                   <span>{{ nig.player.smallTrophies[i * 10 + j - 11] ? (i - 1) * 10 + j : '　' }}</span>
                   <span class="up-tooltip" v-if="spoiler">
-                    {{ itemData.smalltrophytext[i*10+j-11] }}
+                    {{ itemData.smallTrophyText[i * 10 + j - 11] }}
                   </span>
                 </td>
               </tr>
@@ -505,7 +505,7 @@
                 <td :key="j" class="tooltip-cell" v-for="j in 10">
                   <span>{{ nig.player.smallTrophies2nd[i * 10 + j - 11] ? 100 + (i - 1) * 10 + j : '　' }}</span>
                   <span class="up-tooltip" v-if="spoiler">
-                    {{ itemData.smalltrophytext[100+i*10+j-11] }}
+                    {{ itemData.smallTrophyText[100 + i * 10 + j - 11] }}
                   </span>
                 </td>
               </tr>
