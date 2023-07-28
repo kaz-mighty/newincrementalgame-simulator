@@ -1747,7 +1747,7 @@ class Nig {
                 money: this.player.money,
                 generators: this.player.generators.slice(),
                 tickSpeed: this.player.tickSpeed,
-                multbyac: this.multbyac,
+                multByAc: this.multbyac,
             };
             const aExpr = this.calcAcceleratorExpr();
             const baseTick = D(this.baseTick());
@@ -1824,7 +1824,7 @@ class Nig {
                 this.player.money = prevInfo.money;
                 this.player.generators = prevInfo.generators;
                 this.player.tickSpeed = prevInfo.tickSpeed;
-                this.multbyac = prevInfo.multbyac;
+                this.multbyac = prevInfo.multByAc;
             }
             const sec = curTick.mul(0.05);
             return { tick: curTick, sec: sec };
@@ -1947,14 +1947,14 @@ class Nig {
 
     simulateChallenges(challengeId, rank, config) {
         let minRes = {
-            tickminimum: {
+            tickMinimum: {
                 tick: D(Infinity),
                 sec: D(Infinity),
                 challengeBonuses: [],
                 rankChallengeBonuses: [],
                 accelLevelUsed: 0,
             },
-            secminimum: {
+            secMinimum: {
                 tick: D(Infinity),
                 sec: D(Infinity),
                 challengeBonuses: [],
@@ -2001,8 +2001,8 @@ class Nig {
 
                     let checkpoints = [rank ? this.resetRankBorder() : D(this.isChallengeActive(0) ? '1e24' : '1e18')];
                     let res = this.simulate(checkpoints)[0];
-                    if (res.tick.lt(minRes.tickminimum.tick)) {
-                        minRes.tickminimum = {
+                    if (res.tick.lt(minRes.tickMinimum.tick)) {
+                        minRes.tickMinimum = {
                             tick: res.tick,
                             sec: res.sec,
                             challengeBonuses: challengeBonuses.slice(),
@@ -2010,8 +2010,8 @@ class Nig {
                             accelLevelUsed: this.player.accelLevelUsed,
                         };
                     }
-                    if (res.sec.lt(minRes.secminimum.sec)) {
-                        minRes.secminimum = {
+                    if (res.sec.lt(minRes.secMinimum.sec)) {
+                        minRes.secMinimum = {
                             tick: res.tick,
                             sec: res.sec,
                             challengeBonuses: challengeBonuses.slice(),
@@ -2152,7 +2152,7 @@ const app = Vue.createApp({
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 if (res !== null) {
                     if (this.showTickMinimum) {
-                        const tick = res.tickminimum.tick;
+                        const tick = res.tickMinimum.tick;
                         if (tick.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
@@ -2160,7 +2160,7 @@ const app = Vue.createApp({
                             color = colorbarPower(f);
                         }
                     } else {
-                        const sec = res.secminimum.sec.add(res.secminimum.tick.mul(this.procMsPerTick * 0.001));
+                        const sec = res.secMinimum.sec.add(res.secMinimum.tick.mul(this.procMsPerTick * 0.001));
                         if (sec.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
@@ -2178,7 +2178,7 @@ const app = Vue.createApp({
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 let message = 'Uncalculated';
                 if (res !== null) {
-                    let minResult = this.showTickMinimum ? res.tickminimum : res.secminimum;
+                    let minResult = this.showTickMinimum ? res.tickMinimum : res.secMinimum;
                     const sec = minResult.sec.add(minResult.tick.mul(this.procMsPerTick * 0.001));
                     message = minResult.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
@@ -2418,9 +2418,9 @@ const app = Vue.createApp({
             let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
             if (!update) update ||= sim[this.nig.world][challengeId].config !== this.challengeConfig;
-            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secminimum.challengeBonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secminimum.rankChallengeBonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeId].secminimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
+            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill().map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
+            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
             if (!this.searchClearChallenge && rec) {
                 let cleared = rank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
