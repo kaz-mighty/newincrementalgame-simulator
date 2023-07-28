@@ -10,6 +10,24 @@ const numArray2BoolArray = (numArray, length) => {
     });
     return boolArray;
 };
+const combineMerge = (target, source, options) => {
+    const destination = target.slice();
+
+    source.forEach((item, index) => {
+        if (typeof destination[index] === 'undefined') {
+            destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
+        } else if (options.isMergeableObject(item)) {
+            destination[index] = deepmerge(target[index], item, options);
+        } else if (target.indexOf(item) === -1) {
+            destination.push(item);
+        }
+    })
+    return destination;
+};
+const deepMergeWithoutUndefined = (target, source, options) => {
+  source = Object.entries(source).filter(([key, value]) => value !== undefined);
+  return deepmerge(target, source, options);
+};
 
 class ItemData {
     constructor() {
@@ -453,6 +471,32 @@ class Nig {
         };
     };
 
+    static decimalProperties = [
+        'money',
+        'level',
+        'levelresettime',
+        'maxlevelgained',
+        'rank',
+        'rankresettime',
+        'crown',
+        'crownresettime',
+        'generators',
+        'generatorsBought',
+        'generatorsCost',
+        'accelerators',
+        'acceleratorsBought',
+        'acceleratorsCost',
+        'darkmoney',
+        'darkgenerators',
+        'darkgeneratorsBought',
+        'darkgeneratorsCost',
+        'darklevel',
+        'lightmoney',
+        'lightgenerators',
+        'lightgeneratorsBought',
+        'lightgeneratorsCost'
+    ]
+
     save() {
         this.players[this.world] = this.player;
     };
@@ -468,18 +512,14 @@ class Nig {
     };
 
     loadB(worldDatab) {
-        this.players = JSON.parse(atob(worldDatab));
+        let players = JSON.parse(atob(worldDatab));
         for (let i = 0; i < 10; i++) {
-            let player = this.players[i];
-            if (!('worldpipe' in player)) {
-                player.worldpipe = new Array(10).fill(null).map(() => 0);
-            }
-            if (!('smalltrophies' in player)) {
-                player.smalltrophies = new Array(100).fill(false);
-            }
-            if (!('smalltrophies2nd' in player)) {
-                player.smalltrophies2nd = new Array(100).fill(false);
-            }
+            let player = players[i];
+            this.players[i] = deepmerge(Nig.initialData(), player, {
+                arrayMerge: combineMerge,
+                isMergeableObject: isPlainObject,
+                customMerge: (_) => deepMergeWithoutUndefined,
+            });
         }
         this.loadPlayer(this.players[this.world]);
     };
@@ -497,81 +537,92 @@ class Nig {
         return nig;
     };
 
-    loadPlayer(playerData) {
-        this.player = {
-            money: D(playerData.money),
-            level: D(playerData.level),
-            levelresettime: D(playerData.levelresettime),
-            maxlevelgained: D(playerData.maxlevelgained ?? 1),
-            token: playerData.token ?? 0,
-            shine: playerData.shine ?? 0,
-            brightness: playerData.brightness ?? 0,
-            flicker: playerData.flicker ?? 0,
-            residue: playerData.residue ?? 0,
+    loadPlayerFromOriginal(playerData) {
+        return {
+            money: playerData.money,
+            level: playerData.level,
+            levelresettime: playerData.levelresettime,
+            maxlevelgained: playerData.maxlevelgained,
+            token: playerData.token,
+            shine: playerData.shine,
+            brightness: playerData.brightness,
+            flicker: playerData.flicker,
+            residue: playerData.residue,
 
-            rank: D(playerData.rank ?? 0),
-            rankresettime: D(playerData.rankresettime ?? 0),
-            ranktoken: playerData.ranktoken ?? 0,
+            rank: playerData.rank,
+            rankresettime: playerData.rankresettime,
+            ranktoken: playerData.ranktoken,
 
-            crown: D(playerData.crown ?? 0),
-            crownresettime: D(playerData.crownresettime ?? 0),
+            crown: playerData.crown,
+            crownresettime: playerData.crownresettime,
 
-            generators: playerData.generators.map(D),
-            generatorsBought: playerData.generatorsBought.map(D),
-            generatorsCost: playerData.generatorsCost.map(D),
-            generatorsMode: playerData.generatorsMode.map(v => parseInt(v)),
+            generators: playerData.generators,
+            generatorsBought: playerData.generatorsBought,
+            generatorsCost: playerData.generatorsCost,
+            generatorsMode: playerData.generatorsMode,
 
-            accelerators: playerData.accelerators.map(D),
-            acceleratorsBought: playerData.acceleratorsBought.map(D),
-            acceleratorsCost: playerData.acceleratorsCost.map(D),
+            accelerators: playerData.accelerators,
+            acceleratorsBought: playerData.acceleratorsBought,
+            acceleratorsCost: playerData.acceleratorsCost,
 
-            darkmoney: D(playerData.darkmoney ?? 0),
-            darkgenerators: playerData.darkgenerators?.map(D) ?? new Array(8).fill(D(0)),
-            darkgeneratorsBought: playerData.darkgeneratorsBought?.map(D) ?? new Array(8).fill(D(0)),
-            darkgeneratorsCost: playerData.darkgeneratorsCost?.map(D) ?? new Array(8).fill(D(0)),
-            darklevel: D(playerData.darklevel ?? 0),
+            darkmoney: playerData.darkmoney,
+            darkgenerators: playerData.darkgenerators,
+            darkgeneratorsBought: playerData.darkgeneratorsBought,
+            darkgeneratorsCost: playerData.darkgeneratorsCost,
+            darklevel: playerData.darklevel,
 
-            lightmoney: D(playerData.lightmoney ?? 0),
-            lightgenerators: playerData.lightgenerators?.map(D) ?? new Array(8).fill(D(0)),
-            lightgeneratorsBought: playerData.lightgeneratorsBought?.map(D) ?? new Array(8).fill(D(0)),
-            lightgeneratorsCost: playerData.lightgeneratorsCost?.map(D) ?? new Array(8).fill(D(0)),
+            lightmoney: playerData.lightmoney,
+            lightgenerators: playerData.lightgenerators,
+            lightgeneratorsBought: playerData.lightgeneratorsBought,
+            lightgeneratorsCost: playerData.lightgeneratorsCost,
 
+            tickspeed: playerData.tickspeed,
+            accelevel: playerData.accelevel,
+            accelevelused: playerData.accelevelused,
 
-            tickspeed: parseFloat(playerData.tickspeed),
-            accelevel: playerData.accelevel ?? 0,
-            accelevelused: playerData.accelevelused ?? 0,
-
-            onchallenge: playerData.onchallenge ?? false,
+            onchallenge: playerData.onchallenge,
             challenges: numArray2BoolArray(playerData.challenges ?? [], 8),
-            challengecleared: playerData.challengecleared ?? [],
+            challengecleared: playerData.challengecleared,
             challengebonuses: numArray2BoolArray(playerData.challengebonuses ?? [], 15),
 
-            onpchallenge: playerData.onpchallenge ?? false,
+            onpchallenge: playerData.onpchallenge,
             pchallenges: numArray2BoolArray(playerData.pchallenges ?? [], 8),
-            pchallengecleared: playerData.pchallengecleared ?? new Array(1024).fill(0),
-            prchallengecleared: playerData.prchallengecleared ?? new Array(1024).fill(0),
+            pchallengecleared: playerData.pchallengecleared,
+            prchallengecleared: playerData.prchallengecleared,
 
-            rankchallengecleared: playerData.rankchallengecleared ?? [],
+            rankchallengecleared: playerData.rankchallengecleared,
             rankchallengebonuses: numArray2BoolArray(playerData.rankchallengebonuses ?? [], 15),
 
-            trophies: playerData.trophies ?? new Array(TROPHY_NUM).fill(false),
-            smalltrophies: playerData.smalltrophies ?? new Array(100).fill(false),
-            smalltrophies2nd: playerData.smalltrophies2nd ?? new Array(100).fill(false),
+            trophies: playerData.trophies,
+            smalltrophies: playerData.smalltrophies,
+            smalltrophies2nd: playerData.smalltrophies2nd,
 
-            levelitems: playerData.levelitems ?? new Array(5).fill(0),
-            levelitembought: playerData.levelitembought ?? 0,
+            levelitems: playerData.levelitems,
+            levelitembought: playerData.levelitembought,
 
-            remember: playerData.remember ?? 0,
-            rememberspent: playerData.rememberspent ?? 0,
+            remember: playerData.remember,
+            rememberspent: playerData.rememberspent,
 
-            chip: playerData.chip ?? new Array(SET_CHIP_KIND).fill(0),
-            setchip: playerData.setchip ?? new Array(SET_CHIP_NUM).fill(0),
-            disabledchip: playerData.disabledchip ?? new Array(SET_CHIP_NUM).fill(false),
+            chip: playerData.chip,
+            setchip: playerData.setchip,
+            disabledchip: playerData.disabledchip,
 
-            statue: playerData.statue ?? new Array(SET_CHIP_KIND).fill(0),
+            statue: playerData.statue,
 
-            worldpipe: playerData.worldpipe ?? new Array(10).fill(null).map(() => 0),
+            worldpipe: playerData.worldpipe,
         };
+    };
+    loadPlayer(playerData) {
+        this.player = deepmerge({}, playerData, {
+            isMergeableObject: isPlainObject,
+        });
+        for (const property of Nig.decimalProperties) {
+            if (this.player[property] instanceof Array) {
+                this.player[property] = this.player[property].map(D)
+            } else {
+                this.player[property] = D(this.player[property])
+            }
+        }
         this.checkTrophies();
         this.checkMemories();
         this.checkSmallMemories();
