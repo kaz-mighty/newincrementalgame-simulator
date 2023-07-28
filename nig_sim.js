@@ -538,6 +538,7 @@ class Nig {
     };
 
     loadPlayerFromOriginal(playerData) {
+        // noinspection JSUnresolvedReference
         return {
             money: playerData.money,
             level: playerData.level,
