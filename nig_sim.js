@@ -360,83 +360,8 @@ const SET_CHIP_NUM = 100;
 
 class Nig {
     constructor() {
-        const initialData = () => {
-            return {
-                money: D(1),
-                level: D(0),
-                levelresettime: D(0),
-                maxlevelgained: D(1),
-                token: 0,
-                shine: 0,
-                brightness: 0,
-                flicker: 0,
-                residue: 0,
-
-                rank: D(0),
-                rankresettime: D(0),
-                ranktoken: 0,
-
-                crown: D(0),
-                crownresettime: D(0),
-
-                generators: new Array(8).fill(D(0)),
-                generatorsBought: new Array(8).fill(D(0)),
-                generatorsCost: [D(1), D('1e4'), D('1e9'), D('1e16'), D('1e25'), D('1e36'), D('1e49'), D('1e64')],
-                generatorsMode: new Array(8).fill().map((_, i) => i),
-
-                accelerators: new Array(8).fill(D(0)),
-                acceleratorsBought: new Array(8).fill(D(0)),
-                acceleratorsCost: [D(10), D('1e10'), D('1e20'), D('1e40'), D('1e80'), D('1e160'), D('1e320'), D('1e640')],
-
-                darkmoney: D(0),
-                darkgenerators: new Array(8).fill(D(0)),
-                darkgeneratorsBought: new Array(8).fill(D(0)),
-                darkgeneratorsCost: [D('1e100'), D('1e108'), D('1e127'), D('1e164'), D('1e225'), D('1e316'), D('1e443'), D('1e612')],
-                darklevel: D(0),
-
-                lightmoney: D(0),
-                lightgenerators: new Array(8).fill(D(0)),
-                lightgeneratorsBought: new Array(8).fill(D(0)),
-                lightgeneratorsCost: [D('1e200'), D('1e216'), D('1e281'), D('1e456'), D('1e825'), D('1e1496'), D('1e2601'), D('1e4296')],
-
-                tickspeed: 1000,
-                accelevel: 0,
-                accelevelused: 0,
-
-                onchallenge: false,
-                challenges: new Array(8).fill(false),
-                challengecleared: [],
-                challengebonuses: new Array(15).fill(false),
-
-                onpchallenge: false,
-                pchallenges: [],
-                pchallengecleared: new Array(1024).fill(0),
-                prchallengecleared: new Array(1024).fill(0),
-
-                rankchallengecleared: [],
-                rankchallengebonuses: new Array(15).fill(false),
-
-                trophies: new Array(TROPHY_NUM).fill(false),
-                smalltrophies: new Array(100).fill(false),
-                smalltrophies2nd: new Array(100).fill(false),
-
-                levelitems: new Array(5).fill(0),
-                levelitembought: 0,
-
-                remember: 0,
-                rememberspent: 0,
-
-                chip: new Array(SET_CHIP_KIND).fill(0),
-                setchip: new Array(SET_CHIP_NUM).fill(0),
-                disabledchip: new Array(SET_CHIP_NUM).fill(false),
-
-                statue: new Array(SET_CHIP_KIND).fill(0),
-
-                worldpipe: new Array(10).fill(null).map(() => 0),
-            };
-        };
-        this.player = initialData();
-        this.players = new Array(10).fill().map(() => initialData());
+        this.player = Nig.initialData();
+        this.players = new Array(10).fill().map(() => Nig.initialData());
         this.highest = 0;
         this.commonmult = D(1);
         this.incrementalmults = new Array(8).fill(D(1));
@@ -450,6 +375,82 @@ class Nig {
         this.chipused = new Array(SET_CHIP_KIND).fill(0);
         this.pchallengestage = 0;
         this.world = 0;
+    };
+
+    static initialData(){
+        return {
+            money: D(1),
+            level: D(0),
+            levelresettime: D(0),
+            maxlevelgained: D(1),
+            token: 0,
+            shine: 0,
+            brightness: 0,
+            flicker: 0,
+            residue: 0,
+
+            rank: D(0),
+            rankresettime: D(0),
+            ranktoken: 0,
+
+            crown: D(0),
+            crownresettime: D(0),
+
+            generators: new Array(8).fill(D(0)),
+            generatorsBought: new Array(8).fill(D(0)),
+            generatorsCost: [D(1), D('1e4'), D('1e9'), D('1e16'), D('1e25'), D('1e36'), D('1e49'), D('1e64')],
+            generatorsMode: new Array(8).fill().map((_, i) => i),
+
+            accelerators: new Array(8).fill(D(0)),
+            acceleratorsBought: new Array(8).fill(D(0)),
+            acceleratorsCost: [D(10), D('1e10'), D('1e20'), D('1e40'), D('1e80'), D('1e160'), D('1e320'), D('1e640')],
+
+            darkmoney: D(0),
+            darkgenerators: new Array(8).fill(D(0)),
+            darkgeneratorsBought: new Array(8).fill(D(0)),
+            darkgeneratorsCost: [D('1e100'), D('1e108'), D('1e127'), D('1e164'), D('1e225'), D('1e316'), D('1e443'), D('1e612')],
+            darklevel: D(0),
+
+            lightmoney: D(0),
+            lightgenerators: new Array(8).fill(D(0)),
+            lightgeneratorsBought: new Array(8).fill(D(0)),
+            lightgeneratorsCost: [D('1e200'), D('1e216'), D('1e281'), D('1e456'), D('1e825'), D('1e1496'), D('1e2601'), D('1e4296')],
+
+            tickspeed: 1000,
+            accelevel: 0,
+            accelevelused: 0,
+
+            onchallenge: false,
+            challenges: new Array(8).fill(false),
+            challengecleared: [],
+            challengebonuses: new Array(15).fill(false),
+
+            onpchallenge: false,
+            pchallenges: [],
+            pchallengecleared: new Array(1024).fill(0),
+            prchallengecleared: new Array(1024).fill(0),
+
+            rankchallengecleared: [],
+            rankchallengebonuses: new Array(15).fill(false),
+
+            trophies: new Array(TROPHY_NUM).fill(false),
+            smalltrophies: new Array(100).fill(false),
+            smalltrophies2nd: new Array(100).fill(false),
+
+            levelitems: new Array(5).fill(0),
+            levelitembought: 0,
+
+            remember: 0,
+            rememberspent: 0,
+
+            chip: new Array(SET_CHIP_KIND).fill(0),
+            setchip: new Array(SET_CHIP_NUM).fill(0),
+            disabledchip: new Array(SET_CHIP_NUM).fill(false),
+
+            statue: new Array(SET_CHIP_KIND).fill(0),
+
+            worldpipe: new Array(10).fill(null).map(() => 0),
+        };
     };
 
     save() {
