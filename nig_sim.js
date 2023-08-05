@@ -10,23 +10,28 @@ const numArray2BoolArray = (numArray, length) => {
     });
     return boolArray;
 };
+
+// Different from deepmerge sample code
 const combineMerge = (target, source, options) => {
     const destination = target.slice();
 
     source.forEach((item, index) => {
-        if (typeof destination[index] === 'undefined') {
-            destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
-        } else if (options.isMergeableObject(item)) {
+        if (item === undefined) {
+            return;
+        }
+        if (options.isMergeableObject(item)) {
             destination[index] = deepmerge(target[index], item, options);
-        } else if (target.indexOf(item) === -1) {
-            destination.push(item);
+        } else {
+            destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
         }
     })
     return destination;
 };
 const deepMergeWithoutUndefined = (target, source, options) => {
-  source = Object.entries(source).filter(([_, value]) => value !== undefined);
-  return deepmerge(target, source, options);
+    if (!Array.isArray(source)) {
+        source = Object.fromEntries(Object.entries(source).filter(([_, value]) => value !== undefined));
+    }
+    return deepmerge(target, source, options);
 };
 
 class ItemData {
@@ -520,9 +525,9 @@ class Nig {
             if (!player.useCamelCase) {
                 player = this.loadPlayerFromOriginal(player);
             }
-            this.players[i] = deepmerge(Nig.initialData(), player, {
+            this.players[i] = deepMergeWithoutUndefined(Nig.initialData(), player, {
                 arrayMerge: combineMerge,
-                isMergeableObject: isPlainObject,
+                isMergeableObject: (target) => Array.isArray(target) || isPlainObject(target),
                 customMerge: (_) => deepMergeWithoutUndefined,
             });
         }
@@ -540,6 +545,8 @@ class Nig {
     loadPlayerFromOriginal(playerData) {
         // noinspection JSUnresolvedReference
         return {
+            useCamelCase: true,
+
             money: playerData.money,
             level: playerData.level,
             leveResetTime: playerData.levelresettime,
@@ -614,9 +621,7 @@ class Nig {
         };
     };
     loadPlayer(playerData) {
-        this.player = deepmerge({}, playerData, {
-            isMergeableObject: isPlainObject,
-        });
+        this.player = playerData;
         for (const property of Nig.decimalProperties) {
             if (this.player[property] instanceof Array) {
                 this.player[property] = this.player[property].map(D)
