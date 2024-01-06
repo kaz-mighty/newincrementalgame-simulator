@@ -615,7 +615,7 @@ class Nig {
 
         let camp = this.player.accelevelused;
         let d = new Date();
-        // if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
+        if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
         // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
         // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
         if (d.getMonth() == 4 && 3 <= d.getDate() && d.getDate() <= 7) camp = camp + 1;
@@ -804,7 +804,7 @@ class Nig {
         this.updateGenerators(val);
         this.updateAccelerators(val);
         if (this.player.trophies[9]) {
-            this.player.residue += Math.floor(num / 1000000);
+            this.player.residue += Math.floor(num * (1 + this.pchallengestage) / 1000000);
         }
     };
     spendBrightness(num) {
