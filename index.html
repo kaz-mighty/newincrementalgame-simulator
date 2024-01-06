@@ -29,7 +29,7 @@
       <label aria-controls="gaBought" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#gaBought"
              data-bs-toggle="collapse" for="gaBoughtB">器</label>
 
-      <input autocomplete="off" class="btn-check" id="darkBoughtB" type="checkbox">
+      <input autocomplete="off"class="btn-check" id="darkBoughtB" type="checkbox" >
       <label aria-controls="darkBought" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#darkBought"
         data-bs-toggle="collapse" for="darkBoughtB"
         v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏</label>
@@ -448,9 +448,9 @@
           <div :key="i" class="tooltip-cell" v-for="i in 52">
             <span v-if="i<=32||nig.countRemembers()>=16">
               <button :disabled="nig.player.disabledChip[i-1]" :style="chipColoredButtonClass(nig.player.setChip[i-1])" @click="toggleChip(i-1)"
-                      class="btn btn-outline-dark"
-                      type="button">{{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' :
-                      itemData.chipName[nig.player.setChip[i - 1] - 1] }}</button>
+                class="btn btn-outline-dark"
+                type="button">{{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' :
+                itemData.chipName[nig.player.setChip[i - 1] - 1] }}</button>
               <span class="up-tooltip">{{ itemData.chipBonusName[i - 1] }}</span>
             </span>
           </div>
@@ -665,8 +665,8 @@
           </select>
           <span class="input-group-text"
             v-if="checkpointTarget=='levelReset' || checkpointTarget=='rankReset' || checkpointTarget=='crownReset'">で</span>
-          <input class="form-control" placeholder="start[:stop[:[*]step]]" type="text" v-model="checkpointValue"
-            @keydown="(event)=>{if(event.key==='Enter')addCheckpoint()}" aria-label="Text input">
+          <input @keydown="(event)=>{if(event.key==='Enter')addCheckpoint()}" aria-label="Text input" class="form-control" placeholder="start[:stop[:[*]step]]"
+            type="text" v-model="checkpointValue">
           <span class="input-group-text"
             v-if="checkpointTarget=='levelReset' || checkpointTarget=='rankReset' || checkpointTarget=='crownReset'">
             {{ {levelReset: '段位', rankReset: '階位', crownReset: '冠位'}[checkpointTarget] }}獲得する
