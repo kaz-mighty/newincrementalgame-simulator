@@ -71,6 +71,11 @@ class Ring:
             if level > self.level:
                 continue
             self.skills.append(skill_id)
+        
+    def print_status(self) -> None:
+        str_power = ", ".join(map(lambda x: f"{x:3}", self.powers))
+        str_multi = ", ".join(map(lambda x: f"{x:3}", self.multipliers))
+        print(f"輪{self.ring_id + 1} lv{self.level}  power: {str_power}  add_multi: {str_multi}  tp: {self.tp}")
 
 
 class FieldEffect:
@@ -194,7 +199,7 @@ class Skill:
 
 SKILL_DATA = [
     Skill(  # 0
-        name="通常",
+        name="通常　",
         tp=0,
         effect=Skill.effect_normal,
     ),
@@ -299,12 +304,13 @@ class State:
         
         self.max_turn = max_turn
         self.field_effects = list(map(int, input().split()))
+        assert 1 <= self.max_turn
         assert all(map(lambda effect_id: 1 <= effect_id <= 3, self.field_effects))
         
         self.use_skills = [[0] * ring_num for _ in range(max_turn)]
         self.use_tp = [0] * ring_num
         
-        self._undo: tuple[int, int, int, int] | None = None
+        self._undo: tuple[int, tuple] | None = None
     
     def simulate(self) -> int:
         state = SubState()
@@ -329,44 +335,72 @@ class State:
     def calc_score(self) -> float:
         return float(self.simulate())
     
-    def calc_output(self) -> str:
+    def calc_output(self, best_score: float) -> str:
         output = []
         for turn, use_skills in enumerate(self.use_skills):
-            output.append(f"{turn + 1:2}:" + " ".join(map(lambda skill_id: SKILL_DATA[skill_id].name, use_skills)))
+            output.append(f"{turn + 1:2}: " + " ".join(map(lambda skill_id: f"{SKILL_DATA[skill_id].name}", use_skills)))
+        output.append(f"score: {best_score}")
+        for i in range(len(self.rings)):
+            output.append(f"消費TP 輪{i}: {self.use_tp[i]} / {self.rings[i].tp}")
+        
         return "\n".join(output)
     
     def transition(self) -> bool:
-        ring_index = random.randrange(len(self.rings))
-        turn = random.randrange(self.max_turn)
-        skill_id = random.choice(self.rings[ring_index].skills)
-        before_skill = self.use_skills[turn][ring_index]
-        if skill_id == before_skill:
-            return False
-        tp = SKILL_DATA[skill_id].tp
-        before_tp = SKILL_DATA[before_skill].tp
-        if self.use_tp[ring_index] + tp - before_tp > self.rings[ring_index].tp:
-            return False
-        
-        self._undo = (turn, ring_index, before_skill, self.use_tp[ring_index])
-        self.use_skills[turn][ring_index] = skill_id
-        self.use_tp[ring_index] += tp - before_tp
-        return True
+        rand = random.random()
+        if rand < 0.7:
+            # ランダムに1つの行動を変更する
+            ring_index = random.randrange(len(self.rings))
+            turn = random.randrange(self.max_turn)
+            skill_id = random.choice(self.rings[ring_index].skills)
+            before_skill = self.use_skills[turn][ring_index]
+            if skill_id == before_skill:
+                return False
+            tp = SKILL_DATA[skill_id].tp
+            before_tp = SKILL_DATA[before_skill].tp
+            if self.use_tp[ring_index] + tp - before_tp > self.rings[ring_index].tp:
+                return False
+            
+            self._undo = (0, (turn, ring_index, before_skill, self.use_tp[ring_index]))
+            self.use_skills[turn][ring_index] = skill_id
+            self.use_tp[ring_index] += tp - before_tp
+            return True
+        else:
+            # ランダムな隣接するターンの2つの行動を入れ替える
+            if self.max_turn == 1:
+                return False
+            ring_index = random.randrange(len(self.rings))
+            turn = random.randrange(self.max_turn - 1)
+            skill1 = self.use_skills[turn][ring_index]
+            skill2 = self.use_skills[turn + 1][ring_index]
+            if skill1 == skill2:
+                return False
+            
+            self._undo = (1, (turn, ring_index))
+            self.use_skills[turn][ring_index] = skill2
+            self.use_skills[turn + 1][ring_index] = skill1
+            return True
     
     def undo(self) -> 'State':
         assert self._undo is not None
-        turn, ring_index, before_skill, before_tp = self._undo
-        self.use_skills[turn][ring_index] = before_skill
-        self.use_tp[ring_index] = before_tp
+        mode, action = self._undo
+        if mode == 0:
+            turn, ring_index, before_skill, before_tp = action
+            self.use_skills[turn][ring_index] = before_skill
+            self.use_tp[ring_index] = before_tp
+        elif mode == 1:
+            turn, ring_index = action
+            self.use_skills[turn][ring_index], self.use_skills[turn + 1][ring_index] = \
+                self.use_skills[turn + 1][ring_index], self.use_skills[turn][ring_index]
         return self
 
 
 def annealing(state: 'State') -> None:
     """焼きなましを行う"""
-    START_TEMP = 20000.0
-    END_TEMP = 100.0
+    START_TEMP = 6000.0
+    END_TEMP = 80.0
     before_score = state.calc_score()
     best_score = before_score
-    best_answer: str = state.calc_output()
+    best_answer: str = state.calc_output(best_score)
     while (time_ratio := (time.perf_counter() - begin_time) / TIME_LIMIT) < 1.0:
         if not state.transition():
             continue
@@ -385,18 +419,17 @@ def annealing(state: 'State') -> None:
             # スコア最大化
             if score > best_score:
                 best_score = score
-                best_answer = state.calc_output()
+                best_answer = state.calc_output(best_score)
         else:
             state: 'State' = state.undo()
     
     print(best_answer)
-    print(f"score: {best_score}")
-    for i in range(len(state.rings)):
-        print(f"消費TP 輪{i}: {state.use_tp[i]} / {state.rings[i].tp}")
 
 
 def main() -> None:
     state = State()
+    for ring in state.rings:
+        ring.print_status()
     annealing(state)
     # score = state.simulate()
     # print(score)
