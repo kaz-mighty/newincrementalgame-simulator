@@ -470,6 +470,7 @@ class Nig {
             tickSpeed: 1000,
             accelLevel: 0,
             accelLevelUsed: 0,
+            timeCrystal: new Array(8).fill(null).map(() => 0),
 
             onChallenge: false,
             challenges: new Array(8).fill(false),
@@ -501,6 +502,39 @@ class Nig {
             statue: new Array(SET_CHIP_KIND).fill(0),
 
             worldPipe: new Array(10).fill(0),
+            rings: {
+                setRings: [],
+                ringsExp: new Array(13).fill(null).map(() => 0),
+                onMission: false,
+                missionId: 0,
+                missionState: {
+                    turn: 0,
+                    activeRing: 0,
+                    skillLog: [],
+                    flowerPoint: 0,
+                    snowPoint: 0,
+                    moonPoint: 0,
+                    flowerMultiplier: 1,
+                    snowMultiplier: 1,
+                    moonMultiplier: 1,
+                    tps: [],
+                    fieldEffect: [],
+                },
+                clearedMission: [],
+                auto: {
+                    doAuto: false,
+                    autoMissionId: 0,
+                },
+                outsideAuto: {
+                    autoSpendShine: false,
+                    autoSpendShineNumber: 0,
+                    autoSpendBright: false,
+                    autoSpendBrightNumber: 0,
+                    autoDarkLevelReset: false,
+                    autoDarkLevelResetBorder: 2,
+                    autoDoChallenge: false
+                },
+            },
         };
     };
 
@@ -618,8 +652,46 @@ class Nig {
             statue: playerData.statue,
 
             worldPipe: playerData.worldpipe,
+            rings: this.loadRingFromOriginal(playerData.rings),
         };
     };
+    loadRingFromOriginal(rings) {
+        // noinspection JSUnresolvedReference
+        return {
+            setRings: rings.setrings,
+            ringsExp: rings.ringsexp,
+            onMission: rings.onmission,
+            missionId: rings.missionid,
+            missionState: {
+                turn: rings.missionstate.turn,
+                activeRing: rings.missionstate.activering,
+                skillLog: rings.missionstate.skilllog,
+                flowerPoint: rings.missionstate.flowerpoint,
+                snowPoint: rings.missionstate.snowpoint,
+                moonPoint: rings.missionstate.moonpoint,
+                flowerMultiplier: rings.missionstate.flowermultiplier,
+                snowMultiplier: rings.missionstate.snowmultiplier,
+                moonMultiplier: rings.missionstate.moonmultiplier,
+                tps: rings.missionstate.tps,
+                fieldEffect: rings.missionstate.fieldeffect,
+            },
+            clearedMission: rings.clearedmission,
+            auto: {
+                doAuto: rings.auto.doauto,
+                autoMissionId: rings.auto.automissionid,
+            },
+            outsideAuto: {
+                autoSpendShine: rings.outsideauto.autospendshine,
+                autoSpendShineNumber: rings.outsideauto.autospendshinenumber,
+                autoSpendBright: rings.outsideauto.autospendbright,
+                autoSpendBrightNumber: rings.outsideauto.autospendbrightnumber,
+                autoDarkLevelReset: rings.outsideauto.autodarklevelreset,
+                autoDarkLevelResetBorder: rings.outsideauto.autodarklevelresetborder,
+                autoDoChallenge: rings.outsideauto.autodochallenge,
+            },
+        }
+    };
+
     loadPlayer(playerData) {
         this.player = playerData;
         for (const property of Nig.decimalProperties) {
@@ -706,6 +778,9 @@ class Nig {
         if (camp > 7) camp = 7;
         mult = mult.mul(1 + 4 * camp);
 
+        if (this.player.rings.outsideAuto.autoDoChallenge) {
+            mult = mult.mul(0.001);
+        }
 
         this.commonMult = mult;
     };
@@ -844,7 +919,13 @@ class Nig {
         let tickSpeed = 1000;
         if (this.isPerfectChallengeActive(1)) tickSpeed = 10000;
         tickSpeed += 500 * this.player.accelLevelUsed;
-        return tickSpeed - this.player.setChip[9] * 50 - this.player.levelItems[1] * challengeBonusesCount * (1 + this.player.setChip[27] * 0.5);
+        tickSpeed -= this.player.setChip[9] * 50;
+        tickSpeed -= this.player.levelItems[1] * challengeBonusesCount * (1 + this.player.setChip[27] * 0.5);
+        for (let i = 0; i < 8; i++) {
+            tickSpeed -= this.player.timeCrystal[i];
+        }
+        if (tickSpeed < 1) {tickSpeed = 1;}
+        return tickSpeed;
     };
     updateTickSpeed() {
         const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
@@ -936,7 +1017,8 @@ class Nig {
 
     isAcceleratorOpened(index) {
         if (index >= 1 && this.player.leveResetTime.lte(0)) return false;
-        if (index >= 2 && this.player.levelItems[3] + 1 < index) return false;
+        if (index >= 2 && index < 7 && this.player.levelItems[3] + 1 < index) return false;
+        if (index == 7 && (this.player.levelItems[3] != 5 || this.player.accelLevel <= 0)) return false;
         return true;
     };
     isAcceleratorBuyable(index) {
@@ -1169,6 +1251,9 @@ class Nig {
         return D(money.log10()).div(dv).pow_base(2).round();
     };
 
+    resetLevelBorder() {
+        return D(this.isChallengeActive(0) ? '1e24' : '1e18');
+    };
     resetRankBorder() {
         let remember = this.countRemembers();
         if (this.isPerfectChallengeActive(7)) remember = Math.pow(remember, 0.5);
@@ -1206,6 +1291,14 @@ class Nig {
         this.player.level = this.player.level.add(exit ? D(0) : gainLevel);
         this.player.leveResetTime = this.player.leveResetTime.add(gainLevelReset);
         this.player.maxLevelGained = this.player.maxLevelGained.max(exit ? D(0) : gainLevel);
+        if (this.player.accelLevel > 0) {
+            for (let i = 0; i < 8; i++) {
+                let crystalNum = Math.floor(this.player.accelerators[i].log10()) - 10;
+                if (crystalNum < 0) {crystalNum = 0;}
+                if (crystalNum > 100) {crystalNum = 100;}
+                this.player.timeCrystal[i] = Math.max(this.player.timeCrystal[i], crystalNum);
+            }
+        }
         this.resetLevelData()
     };
     //TODO: resetRank is not tested.
@@ -1649,10 +1742,9 @@ class Nig {
     targetMoney(target, input) {
         try {
             let value = D(input);
-            const hasChallenge0 = this.isChallengeActive(0);
             if (target === 'levelReset') {
                 value = value.ceil();
-                return this.searchLowerBound(value, D(hasChallenge0 ? '1e24' : '1e18'), target);
+                return this.searchLowerBound(value, this.resetLevelBorder(), target);
             } else if (target == 'rankReset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetRankBorder(), target);
@@ -2001,7 +2093,7 @@ class Nig {
                     rankChallengeBonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelLevelUsed = accelLevel;
 
-                    let checkpoints = [rank ? this.resetRankBorder() : D(this.isChallengeActive(0) ? '1e24' : '1e18')];
+                    let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
                     let res = this.simulate(checkpoints)[0];
                     if (res.tick.lt(minRes.tickMinimum.tick)) {
                         minRes.tickMinimum = {
