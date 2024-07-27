@@ -11,6 +11,8 @@ const numarr2boolarr = (numarr, length) => {
     return boolarr;
 };
 
+const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+
 class ItemData {
     constructor() {
         this.challengetext = [
@@ -433,6 +435,39 @@ class Nig {
                 statue: new Array(setchipkind).fill(0),
 
                 worldpipe: new Array(10).fill(null).map(() => 0),
+                rings: {
+                    setrings: [],
+                    ringsexp: new Array(13).fill(null).map(() => 0),
+                    onmission: false,
+                    missionid: 0,
+                    missionstate: {
+                        turn: 0,
+                        activering: 0,
+                        skilllog: [],
+                        flowerpoint: 0,
+                        snowpoint: 0,
+                        moonpoint: 0,
+                        flowermultiplier: 1,
+                        snowmultiplier: 1,
+                        moonmultiplier: 1,
+                        tps: [],
+                        fieldeffect: [],
+                    },
+                    clearedmission: [],
+                    auto: {
+                        doauto: false,
+                        automissionid: 0,
+                    },
+                    outsideauto: {
+                        autospendshine: false,
+                        autospendshinenumber: 0,
+                        autospendbright: false,
+                        autospendbrightnumber: 0,
+                        autodarklevelreset: false,
+                        autodarklevelresetborder: 2,
+                        autodochallenge: false
+                    },
+                },
             };
         };
         this.player = initialData();
@@ -472,15 +507,9 @@ class Nig {
             level: D(playerData.level),
             levelresettime: D(playerData.levelresettime),
             maxlevelgained: D(playerData.maxlevelgained ?? 1),
-            token: playerData.token ?? 0,
-            shine: playerData.shine ?? 0,
-            brightness: playerData.brightness ?? 0,
-            flicker: playerData.flicker ?? 0,
-            residue: playerData.residue ?? 0,
 
             rank: D(playerData.rank ?? 0),
             rankresettime: D(playerData.rankresettime ?? 0),
-            ranktoken: playerData.ranktoken ?? 0,
 
             crown: D(playerData.crown ?? 0),
             crownresettime: D(playerData.crownresettime ?? 0),
@@ -488,7 +517,6 @@ class Nig {
             generators: playerData.generators.map(D),
             generatorsBought: playerData.generatorsBought.map(D),
             generatorsCost: playerData.generatorsCost.map(D),
-            generatorsMode: playerData.generatorsMode.map(v => parseInt(v)),
 
             accelerators: playerData.accelerators.map(D),
             acceleratorsBought: playerData.acceleratorsBought.map(D),
@@ -505,43 +533,19 @@ class Nig {
             lightgeneratorsBought: playerData.lightgeneratorsBought.map(D),
             lightgeneratorsCost: playerData.lightgeneratorsCost.map(D),
 
-
-            tickspeed: parseFloat(playerData.tickspeed),
-            accelevel: playerData.accelevel ?? 0,
-            accelevelused: playerData.accelevelused ?? 0,
-            timecrystal: playerData.timecrystal ?? new Array(8).fill(null).map(() => 0),
-
-            onchallenge: playerData.onchallenge ?? false,
             challenges: numarr2boolarr(playerData.challenges, 8) ?? new Array(8).fill(false),
-            challengecleared: playerData.challengecleared ?? [],
             challengebonuses: numarr2boolarr(playerData.challengebonuses, 15) ?? new Array(15).fill(false),
 
-            onpchallenge: playerData.onpchallenge ?? false,
             pchallenges: numarr2boolarr(playerData.pchallenges, 8) ?? new Array(8).fill(false),
-            pchallengecleared: playerData.pchallengecleared ?? new Array(1024).fill(0),
-            prchallengecleared: playerData.prchallengecleared ?? new Array(1024).fill(0),
 
-            rankchallengecleared: playerData.rankchallengecleared ?? [],
             rankchallengebonuses: numarr2boolarr(playerData.rankchallengebonuses, 15) ?? new Array(15).fill(false),
-
-            trophies: playerData.trophies ?? new Array(trophynum).fill(false),
-            smalltrophies: playerData.smalltrophies ?? new Array(100).fill(false),
-            smalltrophies2nd: playerData.smalltrophies2nd ?? new Array(100).fill(false),
-
-            levelitems: playerData.levelitems ?? new Array(5).fill(0),
-            levelitembought: playerData.levelitembought ?? 0,
-
-            remember: playerData.remember ?? 0,
-            rememberspent: playerData.rememberspent ?? 0,
-
-            chip: playerData.chip ?? new Array(setchipkind).fill(0),
-            setchip: playerData.setchip ?? new Array(setchipnum).fill(0),
-            disabledchip: playerData.disabledchip ?? new Array(setchipnum).fill(false),
-
-            statue: playerData.statue ?? new Array(setchipkind).fill(0),
-
-            worldpipe: playerData.worldpipe ?? new Array(10).fill(null).map(() => 0),
         };
+
+        this.player = deepmerge(playerData, this.player, {
+            arraymerge: overwriteMerge,
+            isMergeableObject: isPlainObject
+        });
+
         this.checkTrophies();
         this.checkMemories();
         this.checkSmallMemories();
@@ -627,6 +631,9 @@ class Nig {
         if (camp > 7) camp = 7;
         mult = mult.mul(1 + 4 * camp);
 
+        if (this.player.rings.outsideauto.autodochallenge) {
+            mult = mult.mul(0.001);
+        }
 
         this.commonmult = mult;
     };
@@ -1098,6 +1105,10 @@ class Nig {
         const money = x === undefined ? this.player.money : x;
         let dv = 72;
         return D(2).pow(money.log10() / dv).round();
+    };
+
+    resetLevelborder() {
+        return D(this.isChallengeActive(0) ? '1e24' : '1e18');
     };
 
     resetRankborder() {
@@ -1586,10 +1597,9 @@ class Nig {
     targetmoney(target, input) {
         try {
             let value = D(input);
-            const hasc0 = this.isChallengeActive(0);
             if (target === 'levelreset') {
                 value = value.ceil();
-                return this.searchLowerBound(value, D(hasc0 ? '1e24' : '1e18'), target);
+                return this.searchLowerBound(value, this.resetLevelborder(), target);
             } else if (target == 'rankreset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetRankborder(), target);
@@ -1917,7 +1927,7 @@ class Nig {
                     rankchallengebonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelevelused = accelevel;
 
-                    let checkpoints = [rank ? this.resetRankborder() : D(this.isChallengeActive(0) ? '1e24' : '1e18')];
+                    let checkpoints = [rank ? this.resetRankborder() : this.resetLevelborder()];
                     let res = this.simulate(checkpoints)[0];
                     if (res.tick.lt(minres.tickminimum.tick)) {
                         minres.tickminimum = {
