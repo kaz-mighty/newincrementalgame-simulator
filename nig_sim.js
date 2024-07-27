@@ -2386,7 +2386,7 @@ const app = Vue.createApp({
         importSave() {
             const prevWorld = this.nig.world;
             const input = window.prompt('データを入力', '');
-            if (input == '') return;
+            if (input == '' || input === null) return;
             let nig = new Nig();
             nig.loadB(input);
             this.nig = nig;
