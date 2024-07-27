@@ -621,6 +621,7 @@ class Nig {
             tickSpeed: playerData.tickspeed,
             accelLevel: playerData.accelevel,
             accelLevelUsed: playerData.accelevelused,
+            timeCrystal: playerData.timecrystal,
 
             onChallenge: playerData.onchallenge,
             challenges: numArray2BoolArray(playerData.challenges ?? [], 8),
