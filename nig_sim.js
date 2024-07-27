@@ -401,6 +401,7 @@ class Nig {
                 tickspeed: 1000,
                 accelevel: 0,
                 accelevelused: 0,
+                timecrystal: new Array(8).fill(null).map(() => 0),
 
                 onchallenge: false,
                 challenges: new Array(8).fill(false),
@@ -508,6 +509,7 @@ class Nig {
             tickspeed: parseFloat(playerData.tickspeed),
             accelevel: playerData.accelevel ?? 0,
             accelevelused: playerData.accelevelused ?? 0,
+            timecrystal: playerData.timecrystal ?? new Array(8).fill(null).map(() => 0),
 
             onchallenge: playerData.onchallenge ?? false,
             challenges: numarr2boolarr(playerData.challenges, 8) ?? new Array(8).fill(false),
@@ -772,7 +774,13 @@ class Nig {
         let tick_speed = 1000;
         if (this.isPerfectChallengeActive(1)) tick_speed = 10000;
         tick_speed += 500 * this.player.accelevelused;
-        return tick_speed - this.player.setchip[9] * 50 - this.player.levelitems[1] * challengebonusescount * (1 + this.player.setchip[27] * 0.5);
+        tick_speed -= this.player.setchip[9] * 50;
+        tick_speed -= this.player.levelitems[1] * challengebonusescount * (1 + this.player.setchip[27] * 0.5);
+        for (let i = 0; i < 8; i++) {
+            tick_speed -= this.player.timecrystal[i];
+        }
+        if (tick_speed < 1) {tick_speed = 1;}
+        return tick_speed;
     };
     updateTickspeed() {
         const amult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
@@ -864,7 +872,8 @@ class Nig {
 
     isAcceleratorOpened(index) {
         if (index >= 1 && this.player.levelresettime.lte(0)) return false;
-        if (index >= 2 && this.player.levelitems[3] + 1 < index) return false;
+        if (index >= 2 && index < 7 && this.player.levelitems[3] + 1 < index) return false;
+        if (index == 7 && (this.player.levelitems[3] != 5 || this.player.accelevel <= 0)) return false;
         return true;
     };
     isAcceleratorBuyable(index) {
@@ -1128,6 +1137,14 @@ class Nig {
         this.player.level = this.player.level.add(exit ? D(0) : gainlevel);
         this.player.levelresettime = this.player.levelresettime.add(gainlevelreset);
         this.player.maxlevelgained = this.player.maxlevelgained.max(exit ? D(0) : gainlevel);
+        if (this.player.accelevel > 0) {
+            for (let i = 0; i < 8; i++) {
+                let crystal_num = Math.floor(this.player.accelerators[i].log10()) - 10;
+                if (crystal_num < 0) {crystal_num = 0;}
+                if (crystal_num > 100) {crystal_num = 100;}
+                this.player.timecrystal[i] = Math.max(this.player.timecrystal[i], crystal_num);
+            }
+        }
         this.resetLevelData()
     };
     //TODO: resetRank is not tested.

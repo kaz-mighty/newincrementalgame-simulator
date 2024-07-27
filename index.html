@@ -248,6 +248,13 @@
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelevelused+1)"
             :disabled="nig.player.accelevelused>=nig.player.accelevel">+</button>
         </div>
+        <div>
+          時の結晶
+          <span :key="i" v-for="i in 8">
+             &thinsp; 結晶{{ i }}: {{ nig.player.timecrystal[i-1] }}
+          </span>
+        </div>
+
       </div>
     </div>
 
