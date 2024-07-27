@@ -1,35 +1,35 @@
 :root {
-    --chal-width: 80vh;
+    --challenge-width: 80vh;
 }
 
-table.chaltable {
-    width: min(100%, var(--chal-width));
+table.challenge-table {
+    width: min(100%, var(--challenge-width));
     border-collapse: collapse;
 }
-.chaltable td, .chaltable th {
+.challenge-table td, .challenge-table th {
     position: relative;
     border: 1px solid lightslategrey;
-    padding: 0px;
+    padding: 0;
 }
-.chaltable thead tr:first-of-type th, .chaltable tbody tr:first-of-type th, .chaltable tbody tr:first-of-type td {
+.challenge-table thead tr:first-of-type th, .challenge-table tbody tr:first-of-type th, .challenge-table tbody tr:first-of-type td {
     border-top: 1px solid black;
 }
-.chaltable tbody tr:last-of-type th, .chaltable tbody tr:last-of-type td {
+.challenge-table tbody tr:last-of-type th, .challenge-table tbody tr:last-of-type td {
     border-bottom: 1px solid black;
 }
-.chaltable tr th:first-of-type, .chaltable tr td:first-of-type {
+.challenge-table tr th:first-of-type, .challenge-table tr td:first-of-type {
     border-left: 1px solid black;
 }
-.chaltable tr td:last-of-type, .chaltable tr th:last-of-type, .chaltable thead tr:first-of-type th:first-of-type {
+.challenge-table tr td:last-of-type, .challenge-table tr th:last-of-type, .challenge-table thead tr:first-of-type th:first-of-type {
     border-right: 1px solid black;
 }
-.chaltable td::after, .chaltable th::after {
+.challenge-table td::after, .challenge-table th::after {
     content: '';
     display: block;
     width: 100%;
     margin-top: 100%;
 }
-td .chalcell, th .chalcell {
+td .challenge-cell, th .challenge-cell {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -38,34 +38,33 @@ td .chalcell, th .chalcell {
     text-align: center;
     vertical-align: middle;
     font-weight: normal;
-    border-width: 0px;
+    border-width: 0;
 }
-.showclearedchallenge td .clearedchallenge {
+.show-cleared-challenge td .cleared-challenge {
     background-color: orange;
 }
-.showclearedchallenge td .nowchallenging {
+.show-cleared-challenge td .now-challenging {
     background-color: red;
 }
 td .unchallengeable {
     background-color: darkgray;
 }
-.chalcolor {
+.challenge-color {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
     z-index: 1;
 }
-.showclearedchallenge .clearedchallenge .chalcolor, .showclearedchallenge .nowchallenging .chalcolor {
+.show-cleared-challenge .cleared-challenge .challenge-color, .show-cleared-challenge .now-challenging .challenge-color {
     width: 80%;
     height: 80%;
     border-radius: 50%;
 }
-.chalcell .chaltooltip {
+.challenge-cell .challenge-tooltip {
     visibility: hidden;
     background-color: black;
     color: #fff;
@@ -81,23 +80,23 @@ td .unchallengeable {
     position: absolute;
     z-index: 2;
 }
-.chalcell:hover .chaltooltip {
+.challenge-cell:hover .challenge-tooltip {
     visibility: visible;
 }
-.chalcolorbar {
+.challenge-colorbar {
     position: relative;
     height: 20px;
-    width: min(100%, var(--chal-width));
+    width: min(100%, var(--challenge-width));
     background: linear-gradient(90deg, #00ff00, #11ff52, #23ff9b, #34ffda, #46eeff, #57c2ff, #699fff, #7a86ff, #a18cff, #ca9dff, #e9afff, #ffc0ff);
 }
-.hidechallengecolor .chalcolor, .hidechallengecolor .chalcolorbar {
+.hide-challenge-color .challenge-color, .hide-challenge-color .challenge-colorbar {
     visibility: hidden;
 }
-#gabought .btn-sm {
+#gaBought .btn-sm {
     padding: 0.25rem;
 }
 @media screen and (max-width: 700px) {
-    td .chalcell, th .chalcell {
+    td .challenge-cell, th .challenge-cell {
         font-size: small;
     }
     #controlButtons .btn {
@@ -105,10 +104,10 @@ td .unchallengeable {
         font-size: .725rem;
     }
 }
-.tooltipcell {
+.tooltip-cell {
     position: relative;
 }
-.tooltipcell .uptooltip {
+.tooltip-cell .up-tooltip {
     visibility: hidden;
     background-color: black;
     color: #fff;
@@ -124,6 +123,6 @@ td .unchallengeable {
     position: absolute;
     z-index: 1;
 }
-.tooltipcell:hover .uptooltip {
+.tooltip-cell:hover .up-tooltip {
     visibility: visible;
 }
