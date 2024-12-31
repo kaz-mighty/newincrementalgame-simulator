@@ -769,14 +769,19 @@ class Nig {
 
         let camp = this.player.accelLevelUsed;
         let d = new Date();
-        if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
+        if (d.getMonth() == 0 && d.getDate() <= 7) {
+            camp += 1;
+            if (this.isChallengeActive(3) && this.isChallengeActive(4)) {
+                camp += 10;
+            }
+        }
         // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
         // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
         // if (d.getMonth() == 4 && 3 <= d.getDate() && d.getDate() <= 7) camp = camp + 1;
         if ((d.getMonth() == 6 && 29 <= d.getDate()) || (d.getMonth() == 7 && d.getDate() <= 31)) camp = camp + 2;
         // if (d.getMonth() == 8 && 15 <= d.getDate() && d.getDate() <= 21) camp = camp + 1;
 
-        if (camp > 7) camp = 7;
+        if (camp > 20) camp = 20;
         mult = mult.mul(1 + 4 * camp);
 
         if (this.player.rings.outsideAuto.autoDoChallenge) {
