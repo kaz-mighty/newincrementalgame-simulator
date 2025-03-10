@@ -500,6 +500,7 @@ class Nig {
             disabledChip: new Array(SET_CHIP_NUM).fill(false),
 
             statue: new Array(SET_CHIP_KIND).fill(0),
+            polishedStatue: new Array(SET_CHIP_KIND).fill(0),
 
             worldPipe: new Array(10).fill(0),
             rings: {
@@ -651,6 +652,7 @@ class Nig {
             disabledChip: playerData.disabledchip,
 
             statue: playerData.statue,
+            polishedStatue: playerData.polishedstatue,
 
             worldPipe: playerData.worldpipe,
             rings: this.loadRingFromOriginal(playerData.rings),
@@ -766,6 +768,10 @@ class Nig {
         }
 
         mult = mult.mul(1 + this.player.setChip[0] * 0.1);
+
+        for (let i = 0; i < SET_CHIP_KIND; i++) {
+            mult = mult.mul(1 + this.player.polishedStatue[i] * 0.01);
+        }
 
         let camp = this.player.accelLevelUsed;
         let d = new Date();
@@ -1464,6 +1470,21 @@ class Nig {
         if (this.player.chip[i] < cost) return;
         this.player.chip[i] -= cost;
         this.player.statue[i] += 1;
+    };
+
+    isStatuePolishable(i) {
+        let cost = this.calcPolishCost(i);
+        if (this.player.polishedStatue[i] >= this.player.statue[i] || this.player.shine < cost) {return false;}
+        return true;
+    };
+    calcPolishCost(i) {
+        return (this.player.polishedStatue[i] + 1) * 1000000;
+    };
+    polishStatue(i) {
+        if (!this.isStatuePolishable(i)) {return;}
+        let cost = this.calcPolishCost(i);
+        this.player.shine -= cost;
+        this.player.polishedStatue[i] += 1;
     };
 
     checkTrophies() {
@@ -2446,6 +2467,10 @@ const app = Vue.createApp({
         },
         buildStatue(i) {
             this.nig.buildStatue(i);
+        },
+        polishStatue(i) {
+            this.nig.polishStatue(i);
+            this.clearCheckpointsCache();
         },
         changeMode(i) {
             this.nig.changeMode(i);
