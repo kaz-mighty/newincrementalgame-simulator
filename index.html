@@ -468,7 +468,7 @@
     <div class="collapse" id="statueInfo">
       <div class="card card-body">
         <div v-for="i in SET_CHIP_KIND" :key="i">
-          <div v-show="nig.player.chip[i-1] > 0 || nig.chipUsed[i-1] > 0">
+          <div v-show="nig.player.chip[i-1] > 0 || nig.chipUsed[i-1] > 0 || nig.player.statue[i-1] > 0">
             <span>{{itemData.chipName[i - 1] + "像 "}}</span>
             <span> 所持数: {{ nig.player.statue[i-1] }} &thinsp;</span>
             <span> 輝像: {{ nig.player.polishedStatue[i-1] }} &thinsp;</span>

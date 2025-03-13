@@ -1672,6 +1672,9 @@ class Nig {
                 let cnt = this.smallMemories[i];
                 cnt -= 75;
                 cnt *= this.players[i].worldPipe[this.world];
+                if (this.players[i].remember >= 10) {
+                    cnt = Math.floor(cnt * (0.1 + this.players[i].remember / 10));
+                }
                 this.eachPipedSmallMemory[i] = cnt;
                 sum += cnt;
             } else {
