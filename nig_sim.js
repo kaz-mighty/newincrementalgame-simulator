@@ -1234,7 +1234,7 @@ class Nig {
         if (this.isPerfectChallengeActive(4)) gainLevel = D(gainLevel.log2()).max(1);
         gainLevel = gainLevel.round().max(1);
 
-        gainLevel = gainLevel.mul(1 + this.eachPipedSmallMemory[2] * 0.2);
+        gainLevel = gainLevel.mul(D(this.eachPipedSmallMemory[2] / 5.0).pow_base(2));
         if (this.isChallengeBonusActive(12)) gainLevel = gainLevel.mul(2);
         return gainLevel;
     };
