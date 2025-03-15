@@ -770,7 +770,7 @@ class Nig {
         mult = mult.mul(1 + this.player.setChip[0] * 0.1);
 
         for (let i = 0; i < SET_CHIP_KIND; i++) {
-            mult = mult.mul(1 + this.player.polishedStatue[i] * 0.01);
+            mult = mult.mul(1 + this.player.statue[i] * 0.01);
         }
 
         let camp = this.player.accelLevelUsed;
