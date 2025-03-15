@@ -846,7 +846,7 @@ class Nig {
         let a = Array.from(new Array(8), (_, i) => new Array(Math.max(0, highest + 1 - i)).fill(D(0)));
         for (let i = 0; i <= highest; i++) a[i][0] = this.player.accelerators[i];
         for (let i = highest + 1; i-- > 1;) {
-            let mult = mu;
+            let mult = D(1);
             if (i == 1 ? this.isChallengeBonusActive(10) : this.isRankChallengeBonusActive(6))
                 if (this.isRankChallengeBonusActive(10))
                     mult = mult.add(this.player.acceleratorsBought[i].pow_base(2));
@@ -854,7 +854,7 @@ class Nig {
                     mult = mult.add(this.player.acceleratorsBought[i]);
             mult = mult.mul(D(1.5).pow(this.player.setChip[i + 10]));
             mult = mult.mul(1 + this.eachPipedSmallMemory[1] * 0.2);
-            a[i].forEach((aa, j) => a[i - 1][j + 1] = a[i - 1][j + 1].add(aa.mul(mult)));
+            a[i].forEach((aa, j) => a[i - 1][j + 1] = a[i - 1][j + 1].add(aa.mul(mult).mul(mu)));
             while (a[i - 1].length > 0 && a[i - 1][a[i - 1].length - 1].eq(0)) a[i - 1].pop();
         }
         return a;
