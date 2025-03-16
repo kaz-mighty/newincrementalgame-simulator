@@ -501,6 +501,7 @@ class Nig {
 
             statue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatue: new Array(SET_CHIP_KIND).fill(0),
+            polishedStatueBright: new Array(SET_CHIP_KIND).fill(0),
 
             worldPipe: new Array(10).fill(0),
             rings: {
@@ -653,6 +654,7 @@ class Nig {
 
             statue: playerData.statue,
             polishedStatue: playerData.polishedstatue,
+            polishedStatueBright: playerData.polishedstatuebr,
 
             worldPipe: playerData.worldpipe,
             rings: this.loadRingFromOriginal(playerData.rings),
@@ -1485,6 +1487,20 @@ class Nig {
         let cost = this.calcPolishCost(i);
         this.player.shine -= cost;
         this.player.polishedStatue[i] += 1;
+    };
+
+    isStatuePolishableBright(i) {
+        if (this.player.polishedStatueBright[i] >= this.player.polishedStatue[i] * 10) {return false;}
+        if (this.player.brightness < this.calcPolishCostBright(i)) {return false;}
+        return true;
+    };
+    calcPolishCostBright(i) {
+        return (this.player.polishedStatueBright[i] + 10) * 100;
+    };
+    polishStatueBright(i) {
+        if (!this.isStatuePolishableBright(i)) {return;}
+        this.player.brightness -= this.calcPolishCostBright(i);
+        this.player.polishedStatueBright[i] += 1;
     };
 
     checkTrophies() {
@@ -2470,10 +2486,13 @@ const app = Vue.createApp({
         },
         buildStatue(i) {
             this.nig.buildStatue(i);
+            this.clearCheckpointsCache();
         },
         polishStatue(i) {
             this.nig.polishStatue(i);
-            this.clearCheckpointsCache();
+        },
+        polishStatueBright(i) {
+            this.nig.polishStatueBright(i);
         },
         changeMode(i) {
             this.nig.changeMode(i);
