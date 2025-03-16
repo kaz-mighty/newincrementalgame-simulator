@@ -472,14 +472,19 @@
             <span>{{itemData.chipName[i - 1] + "像 "}}</span>
             <span> 所持数: {{ nig.player.statue[i-1] }} &thinsp;</span>
             <span> 輝像: {{ nig.player.polishedStatue[i-1] }} &thinsp;</span>
+            <span> 煌像: {{ (nig.player.polishedStatueBright[i-1]/10).toFixed(1) }} &thinsp;</span>
             <span class="tooltip-cell">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
                 :disabled="!nig.isStatueBuildable(i-1)">
                 設像コスト: {{ nig.calcStatueCost(i-1) }}
               </button>
-              <button :disabled="!nig.isStatuePolishable(i-1)" @click="polishStatue(i-1)" class="btn btn-outline-dark btn-sm"
-                type="button">
-                磨像コスト: {{ nig.calcPolishCost(i-1) }}
+              <button type="button" class="btn btn-outline-dark btn-sm" @click="polishStatue(i-1)"
+                :disabled="!nig.isStatuePolishable(i-1)">
+                磨像: 輝き{{ nig.calcPolishCost(i-1) }} 
+              </button>
+              <button type="button" class="btn btn-outline-dark btn-sm" @click="polishStatueBright(i-1)"
+                :disabled="!nig.isStatuePolishableBright(i-1)">
+                磨像: 煌き{{ nig.calcPolishCostBright(i-1) }}
               </button>
             </span>
           </div>
