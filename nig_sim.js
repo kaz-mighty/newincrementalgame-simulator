@@ -157,9 +157,9 @@ class ItemData {
             '100以上の輝きを所持する',
             '1000以上の輝きを所持する',
             '10000以上の輝きを所持する',
-            '100000以上の輝きを所持する',
-            '1000000以上の輝きを所持する',
-            '10000000以上の輝きを所持する',
+            '100,000以上の輝きを所持する',
+            '1,000,000以上の輝きを所持する',
+            '10,000,000以上の輝きを所持する',
             '設定タブ内で、データ吐き出しを行う',
             '設定タブ内で、ツイート設定機能を2つ以上設定する',
             '裏発生器1を1つ以上購入する',
@@ -257,6 +257,10 @@ class ItemData {
             '紫鋼像を64個以上にする',
             '朱鋼像を64個以上にする',
             '蒼鋼像を64個以上にする',
+            '100,000,000以上の輝きを所持する',
+            '1,000,000,000以上の輝きを所持する',
+            '100,000以上の煌きを所有する',
+            '1,000,000以上の煌きを所有する',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -1672,6 +1676,10 @@ class Nig {
             if (this.player.statue[4] >= 64) this.player.smallTrophies2nd[52] = true
             if (this.player.statue[5] >= 64) this.player.smallTrophies2nd[53] = true
             if (this.player.statue[6] >= 64) this.player.smallTrophies2nd[54] = true
+            if (this.player.shine >= 100_000_000) this.player.smallTrophies2nd[55] = true;
+            if (this.player.shine >= 1_000_000_000) this.player.smallTrophies2nd[56] = true;
+            if (this.player.brightness >= 100_000) this.player.smallTrophies2nd[57] = true;
+            if (this.player.brightness >= 1_000_000) this.player.smallTrophies2nd[58] = true;
         }
     };
     checkMemories() {
