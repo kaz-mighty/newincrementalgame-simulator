@@ -355,7 +355,10 @@
             <span class="up-tooltip" v-html="startPerfectChallengeMessage"></span>
           </div>
         </div>
-        <div>完全挑戦段階: {{ nig.pChallengeStage }}</div>
+        <div>
+          完全挑戦段階: {{ nig.pChallengeStage }}
+          (余り: {{ nig.pChallengeStageRaw % 510 }}/510)
+        </div>
       </div>
     </div>
 
