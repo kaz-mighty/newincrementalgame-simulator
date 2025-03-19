@@ -401,6 +401,7 @@ class Nig {
         this.worldOpened = new Array(10).fill(false);
         this.chipUsed = new Array(SET_CHIP_KIND).fill(0);
         this.pChallengeStage = 0;
+        this.pChallengeStageRaw = 0;
         this.world = 0;
     };
 
@@ -1136,6 +1137,7 @@ class Nig {
         cnt += this.player.pChallengeCleared[i]
         cnt += this.player.pRChallengeCleared[i]
       }
+      this.pChallengeStageRaw = cnt;
 
       cnt /= 510;
       this.pChallengeStage = Math.floor(cnt);
@@ -2263,7 +2265,8 @@ const app = Vue.createApp({
         },
         startPerfectChallengeMessage() {
             let id = this.nig.calcPerfectChallengeId();
-            let contents = '進行度 通常: ' + (this.nig.player.pChallengeCleared[id]);
+            let contents = '挑戦番号: ' + id + '<br>';
+            contents += '  進行度 通常: ' + (this.nig.player.pChallengeCleared[id]);
             contents += '  上位: ' + (this.nig.player.pRChallengeCleared[id]);
             return contents;
         },
