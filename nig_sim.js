@@ -1104,19 +1104,30 @@ class Nig {
         return true;
     };
 
+    getMaxToken() {
+        let maxToken = this.player.challengeCleared.length;
+        if (this.player.onPChallenge) {
+            const challengeId = this.calcPerfectChallengeId();
+            maxToken = Math.max(maxToken, this.player.pChallengeCleared[challengeId]);
+        }
+        return maxToken;
+    };
+    getMaxRankToken() {
+        let maxRankToken = this.player.rankChallengeCleared.length;
+        if (this.player.onPChallenge) {
+            const challengeId = this.calcPerfectChallengeId();
+            maxRankToken = Math.max(maxRankToken, this.player.pRChallengeCleared[challengeId]);
+        }
+        return maxRankToken;
+    };
     calcToken() {
-        const challengeId = this.calcPerfectChallengeId();
         let spent = 0;
         this.player.challengeBonuses.forEach((value, index) => {
             if (value) {
                 spent += itemData.rewardCost[index];
             }
         });
-        let t = this.player.challengeCleared.length;
-        if (this.player.onPChallenge) {
-            t = Math.max(t, this.player.pChallengeCleared[challengeId]);
-        }
-        this.player.token = t - spent;
+        this.player.token = this.getMaxToken() - spent;
 
         spent = 0;
         this.player.rankChallengeBonuses.forEach((value, index) => {
@@ -1124,12 +1135,7 @@ class Nig {
                 spent += itemData.rewardCost[index];
             }
         });
-        t = this.player.rankChallengeCleared.length;
-        if (this.player.onPChallenge) {
-            t = Math.max(t, this.player.pRChallengeCleared[challengeId]);
-        }
-        this.player.rankToken = t - spent;
-
+        this.player.rankToken = this.getMaxRankToken() - spent;
     };
     checkPChallengeCleared(){
       let cnt = 0;
@@ -2113,14 +2119,15 @@ class Nig {
             },
             config,
         };
+        let usableRankToken = this.player.rankChallengeCleared.length >= 1 ? this.getMaxRankToken() : 0;
         let accelLevelCandidates = config.searchAccelLevel
             ? Array.from(new Array(this.player.accelLevel + 1).keys())
             : [this.player.accelLevelUsed];
         let challengeBonusesCandidates = config.searchChallengeBonuses
-            ? mbCache.get(this.player.challengeCleared.length, false, true)
+            ? mbCache.get(this.getMaxToken(), false, true)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
         let rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
-            ? mbCache.get(this.player.rankChallengeCleared.length, true, true)
+            ? mbCache.get(usableRankToken, true, true)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
         accelLevelCandidates.forEach(accelLevel => {
             challengeBonusesCandidates.forEach(challengeBonuses => {
@@ -2210,50 +2217,74 @@ const colorbarPower = f => {
     return col;
 };
 
+const initialConfig = () => {
+    return {
+        isPerfectChallengeReset: true,
+        hideClearedChallenge: false,
+        hideChallengeColor: false,
+        showTickMinimum: false,
+        challenge: {
+            searchChallengeBonuses: true,
+            searchRankChallengeBonuses: true,
+            searchAccelLevel: true,
+            toggleBonuses: true,
+        },
+        searchClearChallenge: true,
+        autoSimulateCheckpoints: false,
+        autoSimulateDarkCheckpoints: false,
+        procMsPerTick: 0,
+        verbose: false,
+        spoiler: false,
+        simulateTableWidth: 80,
+    };
+};
+
 const app = Vue.createApp({
     data() {
         return {
+            /* const */
             TROPHY_NUM: TROPHY_NUM,
             SET_CHIP_KIND: SET_CHIP_KIND,
             SET_CHIP_NUM: SET_CHIP_NUM,
-            nig: new Nig(),
             itemData: itemData,
             shineChallengeLength: [64, 96, 128, 160, 192, 224],
             brightnessRankChallengeLength: [32, 64, 128, 255],
             flickerPChallengeStage: [1],
-            simulatedCheckpoints: Array.from(new Array(10), () => new Map()),
-            challengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            rankChallengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            checkpoints: [D('1e18'), D('1e72')],
-            simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
-            darkCheckpoints: [D('1e18')],
-            cpSimulatedTime: Date.now(),
+
             sampleTick: [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
             sampleTickLabel: ['1', '1e1', '1e2', '1e3', '1e4', '1e5', '1e6', '1e7', '1e8', '1e9'],
             sampleTime: [1, 60, 3600, 86400, 2592000, 31536000, 3153600000],
             sampleTimeLabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
-            isPerfectChallengeReset: true,
-            hideClearedChallenge: false,
-            hideChallengeColor: false,
-            showTickMinimum: false,
-            challengeConfig: {
-                searchChallengeBonuses: true,
-                searchRankChallengeBonuses: true,
-                searchAccelLevel: true,
-                toggleBonuses: true,
-            },
-            searchClearChallenge: true,
-            autoSimulateCheckpoints: false,
-            autoSimulateDarkCheckpoints: false,
+
+            /* game data */
+            nig: new Nig(),
+
+            /* saveable config */
+            config: initialConfig(),
+
+            /* simulation data */
+            challengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
+            rankChallengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
+            simulatedCheckpoints: Array.from(new Array(10), () => new Map()),
+            checkpoints: [D('1e18'), D('1e72')],
+            simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
+            darkCheckpoints: [D('1e18')],
+            cpSimulatedTime: Date.now(),
+
             checkpointTarget: 'point',
             checkpointValue: '',
             darkCheckpointTarget: 'point',
             darkCheckpointValue: '',
-            procMsPerTick: 0,
-            verbose: false,
-            spoiler: false,
-            simulateTableWidth: 80,
         }
+    },
+    watch: {
+        config: {
+            handler: "saveConfig",
+            deep: true,
+        },
+        'config.simulateTableWidth'(newValue) {
+            document.querySelector(':root').style.setProperty('--challenge-width', `${newValue}vh`);
+        },
     },
     computed: {
         startChallengeMessage() {
@@ -2302,7 +2333,7 @@ const app = Vue.createApp({
                 let color = 'transparent';
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 if (res !== null) {
-                    if (this.showTickMinimum) {
+                    if (this.config.showTickMinimum) {
                         const tick = res.tickMinimum.tick;
                         if (tick.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
@@ -2311,7 +2342,7 @@ const app = Vue.createApp({
                             color = colorbarPower(f);
                         }
                     } else {
-                        const sec = res.secMinimum.sec.add(res.secMinimum.tick.mul(this.procMsPerTick * 0.001));
+                        const sec = res.secMinimum.sec.add(res.secMinimum.tick.mul(this.config.procMsPerTick * 0.001));
                         if (sec.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
@@ -2329,13 +2360,13 @@ const app = Vue.createApp({
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 let message = 'Uncalculated';
                 if (res !== null) {
-                    let minResult = this.showTickMinimum ? res.tickMinimum : res.secMinimum;
-                    const sec = minResult.sec.add(minResult.tick.mul(this.procMsPerTick * 0.001));
+                    let minResult = this.config.showTickMinimum ? res.tickMinimum : res.secMinimum;
+                    const sec = minResult.sec.add(minResult.tick.mul(this.config.procMsPerTick * 0.001));
                     message = minResult.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
-                    if ((this.verbose || this.challengeConfig.searchChallengeBonuses) && minResult.challengeBonuses.length > 0) message += '<br/>効力' + minResult.challengeBonuses.map(x => x + 1);
-                    if ((this.verbose || this.challengeConfig.searchRankChallengeBonuses) && minResult.rankChallengeBonuses.length > 0) message += '<br/>上位効力' + minResult.rankChallengeBonuses.map(x => x + 1);
-                    if ((this.verbose || this.challengeConfig.searchAccelLevel) && this.nig.player.accelLevel > 0) message += '<br/>起動時間回帰力' + minResult.accelLevelUsed;
+                    if ((this.config.verbose || this.config.challenge.searchChallengeBonuses) && minResult.challengeBonuses.length > 0) message += '<br/>効力' + minResult.challengeBonuses.map(x => x + 1);
+                    if ((this.config.verbose || this.config.challenge.searchRankChallengeBonuses) && minResult.rankChallengeBonuses.length > 0) message += '<br/>上位効力' + minResult.rankChallengeBonuses.map(x => x + 1);
+                    if ((this.config.verbose || this.config.challenge.searchAccelLevel) && this.nig.player.accelLevel > 0) message += '<br/>起動時間回帰力' + minResult.accelLevelUsed;
                     // message += '<br/>id: ' + id;
                 }
                 return message;
@@ -2345,7 +2376,7 @@ const app = Vue.createApp({
             return this.checkpoints.map(checkpoint => {
                 const res = this.simulatedCheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
-                const sec = res.sec.add(res.tick.mul(this.procMsPerTick * 0.001));
+                const sec = res.sec.add(res.tick.mul(this.config.procMsPerTick * 0.001));
                 let content = checkpoint.toExponential(3) + ' ポイントまで ' + res.tick.toExponential(3) + ' ticks';
                 content += ' (' + sec.toExponential(3) + ' sec)';
                 content += ' ' + (new Date(this.cpSimulatedTime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
@@ -2400,6 +2431,20 @@ const app = Vue.createApp({
         },
     },
     methods: {
+        loadConfig() {
+            console.log("load config.");
+            let config = localStorage.getItem("config");
+            if (config == null) {return;}
+            this.config = deepMergeWithoutUndefined(initialConfig(), JSON.parse(atob(config)), {
+                arrayMerge: combineMerge,
+                isMergeableObject: (target) => Array.isArray(target) || isPlainObject(target),
+                customMerge: (_) => deepMergeWithoutUndefined,
+            });
+        },
+        saveConfig() {
+            console.log("save config.");
+            localStorage.setItem("config", btoa(JSON.stringify(this.config)));
+        },
         formatDecimal(d, places) {
             if (d.lt(D(10).pow(places))) {
                 return d.toFixed(0);
@@ -2453,7 +2498,7 @@ const app = Vue.createApp({
         selectWorld(i) {
             this.nig.save();
             this.nig.moveWorld(i);
-            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
         },
         spendShine(num) {
             this.nig.spendShine(num);
@@ -2525,7 +2570,7 @@ const app = Vue.createApp({
             if (this.nig.player.onPChallenge) {
                 this.nig.exitPerfectChallenge();
             } else {
-                this.nig.startPerfectChallenge(this.isPerfectChallengeReset);
+                this.nig.startPerfectChallenge(this.config.isPerfectChallengeReset);
             }
             this.clearAllCache();
         },
@@ -2544,8 +2589,8 @@ const app = Vue.createApp({
         clearCheckpointsCache() {
             this.simulatedCheckpoints[this.nig.world].clear();
             this.simulatedDarkCheckpoints[this.nig.world].clear();
-            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
@@ -2554,8 +2599,8 @@ const app = Vue.createApp({
                 this.challengeSimulated[i] = new Array(256).fill(null);
                 this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
-            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
         },
         addCheckpoint() {
             this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));
@@ -2575,11 +2620,11 @@ const app = Vue.createApp({
             if (challengeId <= 0 || 256 <= challengeId) return;
             let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
-            if (!update) update ||= sim[this.nig.world][challengeId].config !== this.challengeConfig;
-            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
-            if (!this.searchClearChallenge && rec) {
+            if (!update) update ||= sim[this.nig.world][challengeId].config !== this.config.challenge;
+            if (!update) update ||= !this.config.challenge.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
+            if (!update) update ||= !this.config.challenge.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
+            if (!update) update ||= !this.config.challenge.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
+            if (!this.config.searchClearChallenge && rec) {
                 let cleared = rank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
             }
@@ -2587,7 +2632,7 @@ const app = Vue.createApp({
             // simulateする場合のみsetTimeoutを挟む
             if (update) {
                 setTimeout(() => {
-                    sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, rank, JSON.parse(JSON.stringify(this.challengeConfig)));
+                    sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, rank, JSON.parse(JSON.stringify(this.config.challenge)));
                     if (rec) this.simulateChallenges(challengeId + 1, rank, rec);
                 }, 0);
             } else {
@@ -2651,12 +2696,15 @@ const app = Vue.createApp({
             }
         },
         scaleChallengeTable(c) {
-            this.simulateTableWidth = Math.max(20, Math.min(100, this.simulateTableWidth * c));
-            document.querySelector(':root').style.setProperty('--challenge-width', `${this.simulateTableWidth}vh`);
+            this.config.simulateTableWidth = Math.max(20, Math.min(100, this.config.simulateTableWidth * c));
+        },
+        resetChallengeTableScale() {
+            this.config.simulateTableWidth = 80;
         },
     },
     mounted() {
         setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
+        this.loadConfig();
     },
     updated() {
         setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
