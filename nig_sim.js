@@ -1104,19 +1104,30 @@ class Nig {
         return true;
     };
 
+    getMaxToken() {
+        let maxToken = this.player.challengeCleared.length;
+        if (this.player.onPChallenge) {
+            const challengeId = this.calcPerfectChallengeId();
+            maxToken = Math.max(maxToken, this.player.pChallengeCleared[challengeId]);
+        }
+        return maxToken;
+    };
+    getMaxRankToken() {
+        let maxRankToken = this.player.rankChallengeCleared.length;
+        if (this.player.onPChallenge) {
+            const challengeId = this.calcPerfectChallengeId();
+            maxRankToken = Math.max(maxRankToken, this.player.pRChallengeCleared[challengeId]);
+        }
+        return maxRankToken;
+    };
     calcToken() {
-        const challengeId = this.calcPerfectChallengeId();
         let spent = 0;
         this.player.challengeBonuses.forEach((value, index) => {
             if (value) {
                 spent += itemData.rewardCost[index];
             }
         });
-        let t = this.player.challengeCleared.length;
-        if (this.player.onPChallenge) {
-            t = Math.max(t, this.player.pChallengeCleared[challengeId]);
-        }
-        this.player.token = t - spent;
+        this.player.token = this.getMaxToken() - spent;
 
         spent = 0;
         this.player.rankChallengeBonuses.forEach((value, index) => {
@@ -1124,12 +1135,7 @@ class Nig {
                 spent += itemData.rewardCost[index];
             }
         });
-        t = this.player.rankChallengeCleared.length;
-        if (this.player.onPChallenge) {
-            t = Math.max(t, this.player.pRChallengeCleared[challengeId]);
-        }
-        this.player.rankToken = t - spent;
-
+        this.player.rankToken = this.getMaxRankToken() - spent;
     };
     checkPChallengeCleared(){
       let cnt = 0;
@@ -2113,14 +2119,15 @@ class Nig {
             },
             config,
         };
+        let usableRankToken = this.player.rankChallengeCleared.length >= 1 ? this.getMaxRankToken() : 0;
         let accelLevelCandidates = config.searchAccelLevel
             ? Array.from(new Array(this.player.accelLevel + 1).keys())
             : [this.player.accelLevelUsed];
         let challengeBonusesCandidates = config.searchChallengeBonuses
-            ? mbCache.get(this.player.challengeCleared.length, false, true)
+            ? mbCache.get(this.getMaxToken(), false, true)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
         let rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
-            ? mbCache.get(this.player.rankChallengeCleared.length, true, true)
+            ? mbCache.get(usableRankToken, true, true)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
         accelLevelCandidates.forEach(accelLevel => {
             challengeBonusesCandidates.forEach(challengeBonuses => {

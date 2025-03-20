@@ -552,7 +552,7 @@
         </div>
       </div>
       <div>
-        <div class="form-check form-check-inline" v-if="nig.player.challengeCleared.length>0">
+        <div class="form-check form-check-inline">
           <input type="checkbox" class="form-check-input" id="searchChallengeBonuses"
             v-model="challengeConfig.searchChallengeBonuses">
           <label class="form-check-label" for="searchChallengeBonuses">効力探索</label>
@@ -562,7 +562,7 @@
             v-model="challengeConfig.searchRankChallengeBonuses">
           <label class="form-check-label" for="searchRankChallengeBonuses">上位効力探索</label>
         </div>
-        <div class="form-check form-check-inline" v-if="nig.player.challengeCleared.length>0">
+        <div class="form-check form-check-inline">
           <input type="checkbox" class="form-check-input" id="toggleBonuses" v-model="challengeConfig.toggleBonuses">
           <label class="form-check-label" for="toggleBonuses">リセット時効力切り替え</label>
         </div>
