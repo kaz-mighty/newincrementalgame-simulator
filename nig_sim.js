@@ -2661,6 +2661,10 @@ const app = Vue.createApp({
             this.simulateTableWidth = Math.max(20, Math.min(100, this.simulateTableWidth * c));
             document.querySelector(':root').style.setProperty('--challenge-width', `${this.simulateTableWidth}vh`);
         },
+        resetChallengeTableScale() {
+            this.simulateTableWidth = 80;
+            document.querySelector(':root').style.setProperty('--challenge-width', `${this.simulateTableWidth}vh`);
+        },
     },
     mounted() {
         setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
