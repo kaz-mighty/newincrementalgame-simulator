@@ -667,6 +667,7 @@ class Nig {
     };
     loadRingFromOriginal(rings) {
         // noinspection JSUnresolvedReference
+        if (rings == null) {return {};}
         return {
             setRings: rings.setrings,
             ringsExp: rings.ringsexp,
