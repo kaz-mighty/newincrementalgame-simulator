@@ -417,10 +417,13 @@
         </thead>
         <tbody>
           <tr v-for="i in 10" :key="i">
-            <td class="d-grid">
+            <td class="d-grid tooltip-cell">
               <button :class="buttonSelectedClass(nig.world == i-1)" :disabled="!nig.worldOpened[i-1]" class="btn btn-sm"
-                type="button" v-if="nig.worldOpened[i-1]"
+                type="button"
                 @click="selectWorld(i - 1)">世界{{ i }}</button>
+              <span class="right-tooltip" v-if="config.spoiler">
+                {{ itemData.worldText[i-1] }}
+              </span>
             </td>
             <td class="align-middle">{{ nig.players[i-1].trophies.reduce((x, y) => x + (y ? 1 : 0), 0) }}</td>
             <td class="align-middle">{{ nig.players[i-1].remember }}</td>
@@ -503,8 +506,11 @@
           <table class="table-bordered table-sm">
             <tbody>
               <tr>
-                <td v-for="i in TROPHY_NUM" :key="i">
+                <td v-for="i in TROPHY_NUM" :key="i" class="tooltip-cell">
                   <span>{{ nig.player.trophies[i - 1] ? itemData.trophyText[i - 1] : '???' }}</span>
+                  <span class="up-tooltip" v-if="config.spoiler" style="white-space: pre-line;">
+                    {{ itemData.trophyConditionHtmlText[i - 1] }}
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -782,11 +788,11 @@
       <div class="card-body">
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="verbose" v-model="config.verbose">
-          <label class="form-check-label" for="verbose">表示増加</label>
+          <label class="form-check-label" for="verbose">挑戦タブで、探索しない場合でも効力を表示する</label>
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="spoiler" v-model="config.spoiler">
-          <label class="form-check-label" for="spoiler">ネタバレ</label>
+          <label class="form-check-label" for="spoiler">ネタバレ(世界、実績、里程の条件が表示されます)</label>
         </div>
         <div>
           <button @click="scaleChallengeTable(0.9)" class="btn btn-outline-dark btn-sm" type="button">-</button>

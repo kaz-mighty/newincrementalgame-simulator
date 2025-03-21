@@ -106,23 +106,32 @@ td .unchallengeable {
 }
 .tooltip-cell {
     position: relative;
-}
-.tooltip-cell .up-tooltip {
-    visibility: hidden;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    padding: 5px 5px;
-    border-radius: 6px;
 
-    width: 28ch;
-    bottom: 115%;
-    left: 50%;
-    margin-left: -14ch;
+    &:hover {
+        .up-tooltip, .right-tooltip {
+            visibility: visible;
+        }
+    }
+    .up-tooltip, .right-tooltip {
+        visibility: hidden;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        padding: 5px 5px;
+        border-radius: 6px;
+        width: 28ch;
 
-    position: absolute;
-    z-index: 1;
-}
-.tooltip-cell:hover .up-tooltip {
-    visibility: visible;
+        position: absolute;
+        z-index: 1;
+    }
+    .up-tooltip {
+        bottom: 115%;
+        left: 50%;
+        margin-left: -14ch;
+    }
+    .right-tooltip {
+        top: 50%;
+        left: 105%;
+        transform: translate(0, -50%);
+    }
 }
