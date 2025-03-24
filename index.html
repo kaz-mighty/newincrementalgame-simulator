@@ -19,24 +19,24 @@
   <div id="app" class="container">
 
     <div id="controlButtons" class="btn-group flex-wrap" role="group" aria-label="control buttons">
-      <button @click="importSave()" class="btn btn-outline-dark" type="button">データ取り込み</button>
+      <button type="button" class="btn btn-outline-dark" @click="importSave()">データ取り込み</button>
 
       <input type="checkbox" class="btn-check" id="basicInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="basicInfoB" data-bs-toggle="collapse" data-bs-target="#basicInfo"
         aria-expanded="false" aria-controls="basicInfo">基本</label>
 
-      <input autocomplete="off" class="btn-check" id="gaBoughtB" type="checkbox">
-      <label aria-controls="gaBought" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#gaBought"
-             data-bs-toggle="collapse" for="gaBoughtB">器</label>
+      <input type="checkbox" class="btn-check" id="gaBoughtB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="gaBoughtB" data-bs-toggle="collapse" data-bs-target="#gaBought"
+        aria-expanded="false" aria-controls="gaBought">器</label>
 
-      <input autocomplete="off"class="btn-check" id="darkBoughtB" type="checkbox" >
-      <label aria-controls="darkBought" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#darkBought"
-        data-bs-toggle="collapse" for="darkBoughtB"
+      <input type="checkbox" class="btn-check" id="darkBoughtB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="darkBoughtB" data-bs-toggle="collapse" data-bs-target="#darkBought"
+        aria-expanded="false" aria-controls="darkBought"
         v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏</label>
 
       <input type="checkbox" class="btn-check" id="timeInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="timeInfoB" data-bs-toggle="collapse" data-bs-target="#timeInfo"
-        aria-controls="timeInfo" aria-expanded="false" v-if="nig.player.accelLevel>0">時</label>
+        aria-expanded="false" aria-controls="timeInfo" v-if="nig.player.accelLevel>0">時</label>
 
       <input type="checkbox" class="btn-check" id="levelInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="levelInfoB" data-bs-toggle="collapse" data-bs-target="#levelInfo"
@@ -55,15 +55,15 @@
 
       <input type="checkbox" class="btn-check" id="shineInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="shineInfoB" data-bs-toggle="collapse" data-bs-target="#shineInfo"
-        aria-controls="shineInfo" aria-expanded="false" v-if="nig.player.challengeCleared.length >= 64">輝き</label>
+        aria-expanded="false" aria-controls="shineInfo" v-if="nig.player.challengeCleared.length >= 64">輝き</label>
 
       <input type="checkbox" class="btn-check" id="worldInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="worldInfoB" data-bs-toggle="collapse" data-bs-target="#worldInfo"
-        aria-controls="worldInfo" aria-expanded="false" v-if="nig.worldOpened.slice(1).some(b => b)">世界</label>
+        aria-expanded="false" aria-controls="worldInfo" v-if="nig.worldOpened.slice(1).some(b => b)">世界</label>
 
       <input type="checkbox" class="btn-check" id="chipInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="chipInfoB" data-bs-toggle="collapse" data-bs-target="#chipInfo"
-        aria-controls="chipInfo" aria-expanded="false" v-if="nig.player.smallTrophies[5]">鋳片</label>
+        aria-expanded="false" aria-controls="chipInfo" v-if="nig.player.smallTrophies[5]">鋳片</label>
 
       <input type="checkbox" class="btn-check" id="statueInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="statueInfoB" data-bs-toggle="collapse" data-bs-target="#statueInfo"
@@ -77,18 +77,18 @@
       <label class="btn btn-outline-dark" for="challengeViewB" data-bs-toggle="collapse" data-bs-target="#challengeView"
         aria-expanded="false" aria-controls="challengeView">挑戦</label>
 
-      <input autocomplete="off" class="btn-check" id="simulatedCheckpointsB" type="checkbox">
-      <label aria-controls="simulatedCheckpoints" aria-expanded="false" class="btn btn-outline-dark"
-        data-bs-target="#simulatedCheckpoints" data-bs-toggle="collapse" for="simulatedCheckpointsB">到達</label>
+      <input type="checkbox" class="btn-check" id="simulatedCheckpointsB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="simulatedCheckpointsB" data-bs-toggle="collapse"
+        data-bs-target="#simulatedCheckpoints" aria-expanded="false" aria-controls="simulatedCheckpoints">到達</label>
 
       <input type="checkbox" class="btn-check" id="simulatedDarkB" autocomplete="off">
-      <label aria-controls="simulatedDark" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#simulatedDark"
-        data-bs-toggle="collapse" for="simulatedDarkB"
+      <label class="btn btn-outline-dark" for="simulatedDarkB" data-bs-toggle="collapse"
+        data-bs-target="#simulatedDark" aria-expanded="false" aria-controls="simulatedDark"
         v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏到達</label>
 
-      <input autocomplete="off" class="btn-check" id="gaExpressionB" type="checkbox">
-      <label aria-controls="gaExpression" aria-expanded="false" class="btn btn-outline-dark" data-bs-target="#gaExpression"
-        data-bs-toggle="collapse" for="gaExpressionB">式</label>
+      <input type="checkbox" class="btn-check" id="gaExpressionB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="gaExpressionB" data-bs-toggle="collapse" data-bs-target="#gaExpression"
+        aria-expanded="false" aria-controls="gaExpression">式</label>
 
       <input type="checkbox" class="btn-check" id="helpMessageB" autocomplete="off">
       <label class="btn btn-outline-dark" for="helpMessageB" data-bs-toggle="collapse" data-bs-target="#helpMessage"
@@ -249,15 +249,15 @@
         <div>時間回帰力: {{ nig.player.accelLevel }}</div>
         <div>
           起動時間回帰力: {{ nig.player.accelLevelUsed }}
-          <button :disabled="nig.player.accelLevelUsed<=0" @click="workTime(nig.player.accelLevelUsed-1)" class="btn btn-outline-dark btn-sm"
-            type="button">-</button>
-          <button :disabled="nig.player.accelLevelUsed>=nig.player.accelLevel" @click="workTime(nig.player.accelLevelUsed+1)" class="btn btn-outline-dark btn-sm"
-            type="button">+</button>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed-1)"
+            :disabled="nig.player.accelLevelUsed<=0">-</button>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed+1)"
+            :disabled="nig.player.accelLevelUsed>=nig.player.accelLevel">+</button>
         </div>
         <div>
           時の結晶
-          <span :key="i" v-for="i in 8">
-             結晶{{ i }}: {{ nig.player.timeCrystal[i-1] }} &thinsp;
+          <span v-for="i in 8" :key="i">
+            結晶{{ i }}: {{ nig.player.timeCrystal[i-1] }} &thinsp;
           </span>
         </div>
 
@@ -268,7 +268,7 @@
       <div class="card card-body">
         <div class="d-flex align-items-center flex-wrap">
           <div>挑戦</div>
-          <div :key="i" class="tooltip-cell" v-for="i in 8">
+          <div v-for="i in 8" :key="i" class="tooltip-cell">
             <button type="button" class="btn" @click="nig.configChallenge(i-1)"
               :class="buttonSelectedClass(nig.player.challenges[i-1])" :disabled="nig.player.onChallenge">
               {{ i }}
@@ -280,15 +280,15 @@
               :disabled="nig.calcChallengeId()==0">
               {{ nig.player.onChallenge ? '挑戦放棄' : '挑戦開始' }}
             </button>
-            <span class="up-tooltip" v-html="startChallengeMessage" v-if="nig.calcChallengeId()!=0"></span>
+            <span v-if="nig.calcChallengeId()!=0" class="up-tooltip" v-html="startChallengeMessage"></span>
           </div>
         </div>
         <div>勲章: {{ nig.player.token }}</div>
         <div class="d-flex align-items-center flex-wrap">
           <div>効力</div>
-          <div :key="i" class="tooltip-cell" v-for="i in 15">
+          <div v-for="i in 15" :key="i" class="tooltip-cell">
             <button type="button" class="btn" @click="toggleReward(i-1)"
-                    :class="buttonSelectedClass(nig.player.challengeBonuses[i-1])" :disabled="!nig.isRewardToggleable(i-1)">
+              :class="buttonSelectedClass(nig.player.challengeBonuses[i-1])" :disabled="!nig.isRewardToggleable(i-1)">
               {{ i }}
             </button>
             <span class="up-tooltip">
@@ -297,9 +297,9 @@
           </div>
         </div>
         <div v-if="nig.player.rankChallengeCleared.length>0">大勲章: {{ nig.player.rankToken }}</div>
-        <div class="d-flex align-items-center flex-wrap" v-if="nig.player.rankChallengeCleared.length>0">
+        <div v-if="nig.player.rankChallengeCleared.length>0" class="d-flex align-items-center flex-wrap">
           <div>上位効力</div>
-          <div :key="i" class="tooltip-cell" v-for="i in 15">
+          <div v-for="i in 15" :key="i" class="tooltip-cell">
             <button type="button" class="btn" @click="toggleRankReward(i-1)"
               :class="buttonSelectedClass(nig.player.rankChallengeBonuses[i-1])"
               :disabled="!nig.isRankRewardToggleable(i-1)">
@@ -318,7 +318,7 @@
         <div v-for="i in 5" :key="i">
           <span>段位効力{{ i }}{{ ' ' }}</span>
           <span class="tooltip-cell">
-            <button @click="buyLevelItems(i-1)" class="btn btn-outline-dark btn-sm" type="button"
+            <button type="button" class="btn btn-outline-dark btn-sm" @click="buyLevelItems(i-1)"
               :disabled="!nig.isLevelItemBuyable(i-1)">
               購入コスト: {{ nig.calcLevelItemCost(i - 1).toExponential(1) }}
             </button>
@@ -340,9 +340,9 @@
         </div>
         <div class="d-flex align-items-center flex-wrap">
           <div>完全挑戦</div>
-          <div :key="i" class="tooltip-cell" v-for="i in 10">
+          <div v-for="i in 10" :key="i" class="tooltip-cell">
             <button type="button" class="btn" @click="nig.configPerfectChallenge(i-1)"
-                    :class="buttonSelectedClass(nig.player.pChallenges[i-1])" :disabled="nig.player.onPChallenge">
+              :class="buttonSelectedClass(nig.player.pChallenges[i-1])" :disabled="nig.player.onPChallenge">
               {{ i }}
             </button>
             <span class="up-tooltip">{{ itemData.perfectChallengetext[i - 1] }}</span>
@@ -367,14 +367,14 @@
         <div>
           輝き所持数: {{ nig.player.shine }}
           <span v-for="(length, i) in shineChallengeLength">
-            <button class="btn btn-outline-dark" type="button" v-if="nig.player.challengeCleared.length >= length"
+            <button type="button" class="btn btn-outline-dark" v-if="nig.player.challengeCleared.length >= length"
               @click="spendShine(Math.pow(10, i))" :disabled="nig.player.shine<Math.pow(10, i)">
               輝き消費: {{ Math.pow(10, i) }}
             </button>
           </span>
           <span>
-            <button :disabled="nig.player.shine<1000000" @click="spendShine(1000000)" class="btn btn-outline-dark"
-              type="button" v-if="nig.pChallengeStage >= 10">
+            <button type="button" class="btn btn-outline-dark" v-if="nig.pChallengeStage >= 10"
+              @click="spendShine(1000000)" :disabled="nig.player.shine<1000000">
               輝き消費: 1000000
             </button>
           </span>
@@ -382,7 +382,7 @@
         <div v-if="nig.player.rankChallengeCleared.length>=32">
           煌き所持数: {{ nig.player.brightness }}
           <span v-for="(length, i) in brightnessRankChallengeLength">
-            <button class="btn btn-outline-dark" type="button" v-if="nig.player.rankChallengeCleared.length >= length"
+            <button type="button" class="btn btn-outline-dark" v-if="nig.player.rankChallengeCleared.length >= length"
               @click="spendBrightness(Math.pow(10, i))" :disabled="nig.player.brightness<Math.pow(10, i)">
               煌き消費: {{ Math.pow(10, i) }}
             </button>
@@ -391,8 +391,8 @@
         <div v-if="nig.pChallengeStage>=1">
           瞬き所持数: {{ nig.player.flicker }}
           <span v-for="(length, i) in flickerPChallengeStage">
-            <button :disabled="nig.player.flicker<Math.pow(10, i)" @click="spendFlicker(Math.pow(10, i))" class="btn btn-outline-dark"
-              type="button" v-if="nig.pChallengeStage >= length">
+            <button type="button" class="btn btn-outline-dark" v-if="nig.pChallengeStage >= length"
+              @click="spendFlicker(Math.pow(10, i))" :disabled="nig.player.flicker<Math.pow(10, i)">
               瞬き消費: {{ Math.pow(10, i) }}
             </button>
           </span>
@@ -412,14 +412,14 @@
             <td class="align-middle">思い出</td>
             <td class="align-middle">里程</td>
             <td class="align-middle">世界管</td>
-            <td :key="j" class="align-middle" v-for="j in 10" v-show="nig.worldOpened[j-1]">{{ j }}</td>
+            <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldOpened[j-1]">{{ j }}</td>
           </tr>
         </thead>
         <tbody>
           <tr v-for="i in 10" :key="i">
             <td class="d-grid tooltip-cell">
-              <button :class="buttonSelectedClass(nig.world == i-1)" :disabled="!nig.worldOpened[i-1]" class="btn btn-sm"
-                type="button"
+              <button type="button" class="btn btn-sm"
+                :class="buttonSelectedClass(nig.world == i-1)" :disabled="!nig.worldOpened[i-1]"
                 @click="selectWorld(i - 1)">世界{{ i }}</button>
               <span class="right-tooltip" v-if="config.spoiler">
                 {{ itemData.worldText[i-1] }}
@@ -429,7 +429,7 @@
             <td class="align-middle">{{ nig.players[i-1].remember }}</td>
             <td class="align-middle">{{ nig.smallMemories[i - 1] }}</td>
             <td class="align-middle">{{ Math.max(0, Math.floor((nig.smallMemories[i - 1] - 72) / 3)) }}</td>
-            <td :key="j" class="align-middle" v-for="j in 10" v-show="nig.worldOpened[j-1]"
+            <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldOpened[j-1]"
               :style="{ 'background-color': i==j ? 'lightgray' : 'transparent' }">
               {{ nig.players[i - 1].worldPipe[j - 1] ? nig.players[i - 1].worldPipe[j - 1] : '' }}
             </td>
@@ -458,12 +458,12 @@
         </div>
         <div class="d-flex align-items-center flex-wrap">
           鋳片効力
-          <div :key="i" class="tooltip-cell" v-for="i in 52">
+          <div v-for="i in 52" :key="i" class="tooltip-cell">
             <span v-if="i<=32||nig.countRemembers()>=16">
-              <button :disabled="nig.player.disabledChip[i-1]" :style="chipColoredButtonClass(nig.player.setChip[i-1])" @click="toggleChip(i-1)"
-                class="btn btn-outline-dark"
-                type="button">{{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' :
-                itemData.chipName[nig.player.setChip[i - 1] - 1] }}</button>
+              <button type="button" class="btn btn-outline-dark" :style="chipColoredButtonClass(nig.player.setChip[i-1])"
+                @click="toggleChip(i-1)" :disabled="nig.player.disabledChip[i-1]">
+                {{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' : itemData.chipName[nig.player.setChip[i - 1] - 1] }}
+              </button>
               <span class="up-tooltip">{{ itemData.chipBonusName[i - 1] }}</span>
             </span>
           </div>
@@ -486,7 +486,7 @@
               </button>
               <button type="button" class="btn btn-outline-dark btn-sm" @click="polishStatue(i-1)"
                 :disabled="!nig.isStatuePolishable(i-1)">
-                磨像: 輝き{{ nig.calcPolishCost(i-1) }} 
+                磨像: 輝き{{ nig.calcPolishCost(i-1) }}
               </button>
               <button type="button" class="btn btn-outline-dark btn-sm" @click="polishStatueBright(i-1)"
                 :disabled="!nig.isStatuePolishableBright(i-1)">
@@ -508,7 +508,7 @@
               <tr>
                 <td v-for="i in TROPHY_NUM" :key="i" class="tooltip-cell">
                   <span>{{ nig.player.trophies[i - 1] ? itemData.trophyText[i - 1] : '???' }}</span>
-                  <span class="up-tooltip" v-if="config.spoiler" style="white-space: pre-line;">
+                  <span v-if="config.spoiler" class="up-tooltip" style="white-space: pre-line;">
                     {{ itemData.trophyConditionHtmlText[i - 1] }}
                   </span>
                 </td>
@@ -521,15 +521,15 @@
           <table class="table-bordered table-sm">
             <tbody>
               <tr v-for="i in 10" :key="i">
-                <td :key="j" class="tooltip-cell" v-for="j in 10">
+                <td v-for="j in 10" :key="j" class="tooltip-cell">
                   <span>{{ nig.player.smallTrophies[i * 10 + j - 11] ? (i - 1) * 10 + j : '　' }}</span>
                   <span class="up-tooltip" v-if="config.spoiler">
                     {{ itemData.smallTrophyText[i * 10 + j - 11] }}
                   </span>
                 </td>
               </tr>
-              <tr :key="i" v-for="i in 6" v-if="nig.player.crownResetTime.gt(0)">
-                <td :key="j" class="tooltip-cell" v-for="j in 10">
+              <tr v-for="i in 6" :key="i" v-if="nig.player.crownResetTime.gt(0)">
+                <td v-for="j in 10" :key="j" class="tooltip-cell">
                   <span>{{ nig.player.smallTrophies2nd[i * 10 + j - 11] ? 100 + (i - 1) * 10 + j : '　' }}</span>
                   <span class="up-tooltip" v-if="config.spoiler">
                     {{ itemData.smallTrophyText[100 + i * 10 + j - 11] }}
@@ -545,15 +545,15 @@
     <div class="collapse card card-body" id="challengeView">
       <div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" id="hideClearedChallenge" type="checkbox" v-model="config.hideClearedChallenge">
+          <input type="checkbox" class="form-check-input" id="hideClearedChallenge" v-model="config.hideClearedChallenge">
           <label class="form-check-label" for="hideClearedChallenge">クリア済を非表示</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" id="hideChallengeColor" type="checkbox" v-model="config.hideChallengeColor">
+          <input type="checkbox" class="form-check-input" id="hideChallengeColor" v-model="config.hideChallengeColor">
           <label class="form-check-label" for="hideChallengeColor">クリア時間を非表示</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" id="showTickMinimum" type="checkbox" v-model="config.showTickMinimum">
+          <input type="checkbox" class="form-check-input" id="showTickMinimum" v-model="config.showTickMinimum">
           <label class="form-check-label" for="showTickMinimum">最小tickを表示（デフォルト：最小時間）</label>
         </div>
       </div>
@@ -586,8 +586,8 @@
         <div class="nav nav-tabs" id="challengeTab" role="tablist">
           <a class="nav-link active" id="challengePanelTab" data-bs-toggle="tab" href="#challengePanel" role="tab"
             aria-controls="challengePanel" aria-selected="true">挑戦</a>
-          <a aria-controls="rankChallengePanel" aria-selected="true" class="nav-link" data-bs-toggle="tab" href="#rankChallengePanel"
-            id="rankChallengePanelTab" role="tab"
+          <a class="nav-link" id="rankChallengePanelTab" data-bs-toggle="tab" href="#rankChallengePanel" role="tab"
+            aria-controls="rankChallengePanel" aria-selected="true"
             v-if="nig.player.challengeCleared.length>=128">階位挑戦</a>
         </div>
       </nav>
@@ -595,7 +595,7 @@
         :class="{ 'show-cleared-challenge': !config.hideClearedChallenge, 'hide-challenge-color': config.hideChallengeColor }">
         <div class="tab-pane fade show active" id="challengePanel" role="tabpanel" aria-labelledby="challengePanelTab">
           <div>
-            <button @click="simulateChallengesAll(false)" class="btn btn-outline-dark" type="button">シミュレート</button>
+            <button type="button" class="btn btn-outline-dark" @click="simulateChallengesAll(false)">シミュレート</button>
             ⚠重いので注意　クリックで1マスずつシミュレート
           </div>
           <table class="challenge-table">
@@ -617,24 +617,24 @@
                     {{ (i - 1) % (1 << j)>= (1 << j - 1) ? j + 4 : '' }}</div>
                 </th>
                 <td v-for="j in 16" :key="j">
-                  <div :class="challengeCell(i-1,j-1)" @click="simulateChallengeOne(i-1,j-1,false)" class="challenge-cell">
-                    <div :style="challengesColor(i-1,j-1)" class="challenge-color"></div>
-                    <span class="challenge-tooltip" v-html="challengeMessage(i-1,j-1)" v-if="i>1||j>1"></span>
+                  <div class="challenge-cell" :class="challengeCell(i-1,j-1)" @click="simulateChallengeOne(i-1,j-1,false)">
+                    <div class="challenge-color" :style="challengesColor(i-1,j-1)"></div>
+                    <span class="challenge-tooltip" v-if="i>1||j>1" v-html="challengeMessage(i-1,j-1)"></span>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
           <div class="challenge-colorbar" v-if="config.showTickMinimum">
-            <span :key="i" :style="scaleSampleTime(sampleTick[i-1])" v-for="i in 10">{{ sampleTickLabel[i-1] }}</span>
+            <span v-for="i in 10" :key="i" :style="scaleSampleTime(sampleTick[i-1])">{{ sampleTickLabel[i-1] }}</span>
           </div>
           <div class="challenge-colorbar" v-if="!config.showTickMinimum">
-            <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
+            <span v-for="i in 7" :key="i" :style="scaleSampleTime(sampleTime[i-1])">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>
-        <div aria-labelledby="rankChallengePanelTab" class="tab-pane fade" id="rankChallengePanel" role="tabpanel">
+        <div class="tab-pane fade" id="rankChallengePanel" role="tabpanel" aria-labelledby="rankChallengePanelTab">
           <div>
-            <button @click="simulateChallengesAll(true)" class="btn btn-outline-dark" type="button">シミュレート</button>
+            <button type="button" class="btn btn-outline-dark" @click="simulateChallengesAll(true)">シミュレート</button>
             ⚠重いので注意　クリックで1マスずつシミュレート
           </div>
           <table class="challenge-table">
@@ -656,20 +656,20 @@
                     {{ (i - 1) % (1 << j)>= (1 << j - 1) ? j + 4 : '' }}</div>
                 </th>
                 <td v-for="j in 16" :key="j">
-                  <div :class="challengeCell(i-1,j-1,true)" @click="simulateChallengeOne(i-1,j-1,true)"
-                    class="challenge-cell">
-                    <div :style="challengesColor(i-1,j-1,true)" class="challenge-color"></div>
-                    <span class="challenge-tooltip" v-html="challengeMessage(i-1,j-1,true)" v-if="i>1||j>1"></span>
+                  <div class="challenge-cell" :class="challengeCell(i-1,j-1,true)"
+                    @click="simulateChallengeOne(i-1,j-1,true)">
+                    <div class="challenge-color" :style="challengesColor(i-1,j-1,true)"></div>
+                    <span class="challenge-tooltip" v-if="i>1||j>1" v-html="challengeMessage(i-1,j-1,true)"></span>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
           <div class="challenge-colorbar" v-if="config.showTickMinimum">
-            <span :key="i" :style="scaleSampleTime(sampleTick[i-1])" v-for="i in 10">{{ sampleTickLabel[i-1] }}</span>
+            <span v-for="i in 10" :key="i" :style="scaleSampleTime(sampleTick[i-1])">{{ sampleTickLabel[i-1] }}</span>
           </div>
           <div class="challenge-colorbar" v-if="!config.showTickMinimum">
-            <span :key="i" :style="scaleSampleTime(sampleTime[i-1])" v-for="i in 7">{{ sampleTimeLabel[i-1] }}</span>
+            <span v-for="i in 7" :key="i" :style="scaleSampleTime(sampleTime[i-1])">{{ sampleTimeLabel[i-1] }}</span>
           </div>
         </div>
       </div>
@@ -678,12 +678,12 @@
     <div class="collapse card" id="simulatedCheckpoints">
       <div class="card-body">
         <div>
-          <button @click="simulateCheckpoints" class="btn btn-outline-dark" type="button">シミュレート</button>
-          <button :class="buttonSelectedClass(config.autoSimulateCheckpoints)" @click="config.autoSimulateCheckpoints = !config.autoSimulateCheckpoints;" class="btn"
-            type="button">自動</button>
+          <button type="button" class="btn btn-outline-dark" @click="simulateCheckpoints">シミュレート</button>
+          <button type="button" class="btn" @click="config.autoSimulateCheckpoints = !config.autoSimulateCheckpoints;"
+            :class="buttonSelectedClass(config.autoSimulateCheckpoints)">自動</button>
         </div>
         <div class="input-group">
-          <select aria-label="checkpoint target" class="form-select" v-model="checkpointTarget">
+          <select class="form-select" v-model="checkpointTarget" aria-label="checkpoint target">
             <option value="point" selected>ポイント</option>
             <option value="levelReset">段位リセット</option>
             <option value="rankReset">階位リセット</option>
@@ -691,20 +691,20 @@
           </select>
           <span class="input-group-text"
             v-if="checkpointTarget=='levelReset' || checkpointTarget=='rankReset' || checkpointTarget=='crownReset'">で</span>
-          <input @keydown="(event)=>{if(event.key==='Enter')addCheckpoint()}" aria-label="Text input" class="form-control" placeholder="start[:stop[:[*]step]]"
-            type="text" v-model="checkpointValue">
+          <input type="text" class="form-control" v-model="checkpointValue" placeholder="start[:stop[:[*]step]]"
+            aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addCheckpoint()}">
           <span class="input-group-text"
             v-if="checkpointTarget=='levelReset' || checkpointTarget=='rankReset' || checkpointTarget=='crownReset'">
             {{ {levelReset: '段位', rankReset: '階位', crownReset: '冠位'}[checkpointTarget] }}獲得する
           </span>
           <span class="input-group-text">{{ targetMoneysDesc }} </span>
-          <button @click="addCheckpoint" class="btn btn-outline-dark" type="button">追加</button>
+          <button type="button" class="btn btn-outline-dark" @click="addCheckpoint">追加</button>
         </div>
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item" v-for="(_, i) in checkpoints">
           <span>{{ checkpointMessages[i] }}</span>
-          <button @click="removeCheckpoint(i)" class="btn-close float-end" type="button"></button>
+          <button type="button" class="btn-close float-end" @click="removeCheckpoint(i)"></button>
         </li>
       </ul>
     </div>
@@ -713,17 +713,17 @@
       <div class="card-body">
         <div>
           <button type="button" class="btn btn-outline-dark" @click="simulateDarkCheckpoints">シミュレート</button>
-          <button :class="buttonSelectedClass(config.autoSimulateDarkCheckpoints)" @click="config.autoSimulateDarkCheckpoints = !config.autoSimulateDarkCheckpoints;" class="btn"
-            type="button">自動</button>
+          <button type="button" class="btn" @click="config.autoSimulateDarkCheckpoints = !config.autoSimulateDarkCheckpoints;"
+            :class="buttonSelectedClass(config.autoSimulateDarkCheckpoints)">自動</button>
         </div>
         <div class="input-group">
-          <select aria-label="checkpoint target" class="form-select" v-model="darkCheckpointTarget">
+          <select class="form-select" v-model="darkCheckpointTarget" aria-label="checkpoint target">
             <option value="point" selected>ポイント</option>
             <option value="darkLevelReset">裏段位リセット</option>
           </select>
           <span class="input-group-text"
             v-if="darkCheckpointTarget==='darkLevelReset'">で</span>
-          <input class="form-control" placeholder="start[:stop[:[*]step]]" type="text" v-model="darkCheckpointValue"
+          <input type="text" class="form-control" v-model="darkCheckpointValue" placeholder="start[:stop[:[*]step]]"
             aria-label="Text input" @keydown="(event)=>{if(event.key==='Enter')addDarkCheckpoint()}">
           <span class="input-group-text"
             v-if="darkCheckpointTarget==='darkLevelReset'">
@@ -780,8 +780,8 @@
         </p>
         <div class="input-group">
           <span class="input-group-text">1tickあたりの遅延時間</span>
-          <input aria-label="config.procMsPerTick" class="form-control" placeholder="0" type="text"
-            v-model.number="config.procMsPerTick">
+          <input type="text" class="form-control" v-model.number="config.procMsPerTick" placeholder="0"
+            aria-label="config.procMsPerTick">
           <span class="input-group-text">ms</span>
         </div>
       </div>
@@ -795,9 +795,9 @@
           <label class="form-check-label" for="spoiler">ネタバレ(世界、実績、里程の条件が表示されます)</label>
         </div>
         <div>
-          <button @click="scaleChallengeTable(0.9)" class="btn btn-outline-dark btn-sm" type="button">-</button>
-          <button @click="scaleChallengeTable(1.1)" class="btn btn-outline-dark btn-sm" type="button">+</button>
-          <button @click="resetChallengeTableScale()" class="btn btn-outline-dark btn-sm" type="button">リセット</button>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="scaleChallengeTable(0.9)">-</button>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="scaleChallengeTable(1.1)">+</button>
+          <button type="button" class="btn btn-outline-dark btn-sm" @click="resetChallengeTableScale()">リセット</button>
           &thinsp;
           <span>挑戦表サイズ</span>
         </div>
