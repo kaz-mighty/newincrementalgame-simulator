@@ -344,6 +344,38 @@ class ItemData {
             '煌き使用効率',
             '煌き使用効率裏',
         ];
+        this.chipTable = [
+            ["0", [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e80", [0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e90", [0.65, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e100", [0.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e110", [0.30, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e120", [0.20, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e130", [0.05, 0.80, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e140", [0.00, 0.65, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e150", [0.00, 0.55, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e160", [0.00, 0.45, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e170", [0.00, 0.25, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e180", [0.00, 0.15, 0.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e190", [0.00, 0.10, 0.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e200", [0.00, 0.00, 0.20, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e210", [0.00, 0.00, 0.15, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e220", [0.00, 0.00, 0.10, 0.70, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e230", [0.00, 0.00, 0.05, 0.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e240", [0.00, 0.00, 0.00, 0.50, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e250", [0.00, 0.00, 0.00, 0.40, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e275", [0.00, 0.00, 0.00, 0.30, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e300", [0.00, 0.00, 0.00, 0.20, 0.95, 0.99, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e325", [0.00, 0.00, 0.00, 0.20, 0.93, 0.98, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e350", [0.00, 0.00, 0.00, 0.20, 0.90, 0.97, 0.995, 1.00, 1.00, 1.00, 1.00]],
+        ];
         this.perfectChallengetext = [
             '発生器の倍率が1/100になります。',
             '間隙のベースは10000毛秒になります。',
@@ -356,6 +388,11 @@ class ItemData {
             '裏発生器と裏ポイントは発生器を強化しません。',
             '鋳片効力は、新規挑戦達成でない段位リセットを行うごとにランダムで1つが無効になります。',
         ];
+    }
+
+    calcChipProbability(chipLv, lotteryTime) {
+        let probTable = this.chipTable[chipLv][1].map(x => Math.pow(x, lotteryTime));
+        return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
     }
 }
 
@@ -530,6 +567,7 @@ class Nig {
             chip: new Array(SET_CHIP_KIND).fill(0),
             setChip: new Array(SET_CHIP_NUM).fill(0),
             disabledChip: new Array(SET_CHIP_NUM).fill(false),
+            spendChip: new Array(SET_CHIP_KIND).fill(0),
 
             statue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatue: new Array(SET_CHIP_KIND).fill(0),
@@ -683,6 +721,7 @@ class Nig {
             chip: playerData.chip,
             setChip: playerData.setchip,
             disabledChip: playerData.disabledchip,
+            spendChip: playerData.spendchip,
 
             statue: playerData.statue,
             polishedStatue: playerData.polishedstatue,
@@ -1773,6 +1812,7 @@ class Nig {
         if (this.players[0].challengeCleared.length >= 200) this.worldOpened[8] = true;
         if (this.players[0].rankChallengeCleared.length >= 200) this.worldOpened[9] = true;
     };
+
     toggleChip(i) {
         let oldChip = this.player.setChip[i];
         for (let j = oldChip + 1; j <= SET_CHIP_KIND; j++) if (this.configChip(i, j)) return true;
@@ -1796,6 +1836,23 @@ class Nig {
             if (v != 0) this.chipUsed[v - 1] = this.chipUsed[v - 1] + 1;
         }
     };
+    getMaxSpendChip(i) {
+        return this.player.statue[i] * this.player.statue[i];
+    };
+    calcChipRetryTime() { // return float value
+        let retry = 0;
+        for (let i = 0; i < 9; i++) {
+            if (this.player.spendChip[i] > 0) {
+                retry += 1 + Math.log(this.player.spendChip[i]) / Math.log(10 - i);
+            }
+        }
+        return retry;
+    };
+    getGainChipMoney(chipLv) {
+        let bonus = D(10).pow(this.eachPipedSmallMemory[7] * 0.4);
+        return D(itemData.chipTable[chipLv][0]).div(bonus);
+    };
+    
     workTime(val) {
         if (0 <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
@@ -2260,6 +2317,12 @@ const initialConfig = () => {
         searchClearChallenge: true,
         autoSimulateCheckpoints: false,
         autoSimulateDarkCheckpoints: false,
+        simulateChips: {
+            auto: false,
+            showMode: 'prob',
+            showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
+            doubleUp: false,
+        },
         procMsPerTick: 0,
         verbose: false,
         spoiler: false,
@@ -2456,6 +2519,16 @@ const app = Vue.createApp({
             if (this.nig.player.money.gte('1e200') && this.nig.player.crownResetTime.gt(0)) return true;
             if (this.nig.player.lightMoney.gt(0)) return true;
             return this.nig.player.lightGenerators.some(d => d.gt(0));
+        },
+        showChipsNum() {
+            return this.config.simulateChips.showChips.slice(0, this.SET_CHIP_KIND).reduce((a, b) => a + b, 0);
+        },
+        calcAllChipProbability() {
+            let lotteryTime = 1 + this.nig.calcChipRetryTime();
+            let probTable = new Array(itemData.chipTable.length).fill(null).map(
+                (_, i) => this.itemData.calcChipProbability(i, lotteryTime).map(x => (x == 0 ? "0 %" : (x * 100).toFixed(2) + " %"))
+            );
+            return probTable;
         },
     },
     methods: {

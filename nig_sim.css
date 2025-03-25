@@ -135,3 +135,13 @@ td .unchallengeable {
         transform: translate(0, -50%);
     }
 }
+
+.form-inline {
+    display: inline;
+    width: auto;
+}
+.chip-input {
+    display: inline;
+    max-width: 6em;
+    padding: 0.25rem;
+}
