@@ -747,17 +747,15 @@
 
     <div class="collapse" id="simulatedChips">
       <div class="card card-body">
-        <div v-if="false">
-          <!-- todo -->
-          <button type="button" class="btn btn-outline-dark" @click="">シミュレート</button>
+        <div>
+          <button type="button" class="btn btn-outline-dark" @click="simulateChipCheckpoints()">シミュレート</button>
           <button type="button" class="btn" @click="config.simulateChips.auto = !config.simulateChips.auto;"
             :class="buttonSelectedClass(config.simulateChips.auto)">自動</button>
         </div>
-        <div v-if="false">
+        <div>
           <label class="align-middle">
             シミュレーション最大ポイント
-            <!-- todo -->
-            <input type="text" class="form-control form-inline" v-model="" placeholder="1e100">
+            <input type="text" class="form-control form-inline" v-model="config.simulateChips.maxPoint" placeholder="1e100">
           </label>
         </div>
         <div class="d-flex align-items-center flex-wrap">
@@ -765,10 +763,10 @@
             表示
             <select class="form-select form-inline" v-model="config.simulateChips.showMode">
               <option value="prob" selected>確率/期待値</option>
-              <!-- <option value="perHour">効率[個/時間]</option> -->
+              <option value="perHour">効率[個/時間]</option>
             </select>
           </label>
-          <div v-for="i in SET_CHIP_KIND" :key="i" class="tooltip-cell">
+          <div v-for="i in SET_CHIP_KIND" :key="i">
             <button type="button" class="btn btn-outline-dark"
               :class="buttonSelectedClass(config.simulateChips.showChips[i - 1])"
               :style="chipColoredButtonClass(config.simulateChips.showChips[i - 1] ? i : 0)"
@@ -777,15 +775,15 @@
             </button>
           </div>
         </div>
-        <div v-if="false">
+        <div>
           <div class="form-check form-check-inline">
             <input type="checkbox" class="form-check-input" id="doubleUp" v-model="config.simulateChips.doubleUp">
             <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮(未実装)</label>
           </div>
         </div>
       </div>
-      <table class="table table-bordered table-sm text-center">
-        <thead>
+      <table class="table table-bordered table-sm">
+        <thead class="text-center">
           <tr>
             <td>洗練</td>
             <td :colspan="showChipsNum" v-show="showChipsNum != 0">消費数</td>
@@ -799,31 +797,30 @@
             </td>
           </tr>
           <tr>
-            <!-- todo: 最大値の表示を考えてなかった -->
             <td class="align-middle">{{ Math.floor(nig.calcChipRetryTime() * 1000) / 1000 }}</td>
-            <td v-for="i in SET_CHIP_KIND" :key="i"
+            <td v-for="i in SET_CHIP_KIND" :key="i" class="tooltip-cell"
               v-show="config.simulateChips.showChips[i - 1]">
               <input type="number" class="form-control chip-input" v-if="i - 1 < 9"
                 min="0" :max="nig.getMaxSpendChip(i - 1)"
                 v-model.number="nig.player.spendChip[i - 1]"
                 :area-label="itemData.chipName[i - 1] + ' 精錬度'">
+              <div class="down-tooltip" style="width: 12ch">最大 {{ nig.getMaxSpendChip(i - 1) }}</div>
             </td>
           </tr>
           <tr>
             <td>ポイント</td>
-            <!-- todo -->
-            <td :colspan="showChipsNum" v-show="showChipsNum != 0">確率</td>
+            <td :colspan="showChipsNum" v-show="showChipsNum != 0">{{ chipTableTitle }}</td>
             <td>所要時間[s]</td>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="text-end">
           <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv">
             <td>{{ nig.getGainChipMoney(chipLv).toExponential(3) }}</td>
             <td v-for="j in SET_CHIP_KIND" :key="j"
               v-show="config.simulateChips.showChips[j - 1]">
-              {{ calcAllChipProbability[chipLv][j - 1] }}
+              {{ chipCheckpointCells[chipLv][j - 1] }}
             </td>
-            <td>{{  }}</td>
+            <td>{{ chipCheckpointTimeMessages(chipLv) }}</td>
           </tr>
         </tbody>
       </table>
