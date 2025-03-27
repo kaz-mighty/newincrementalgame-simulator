@@ -2504,7 +2504,7 @@ const app = Vue.createApp({
             };
         },
         chipCheckpointCellProbs() {
-            const lotteryTime = 1 + this.nig.calcChipRetryTime();
+            const lotteryTime = 1 + Math.floor(this.nig.calcChipRetryTime());
             const probTable = new Array(itemData.chipTable.length).fill(null).map(
                 (_, i) => this.itemData.calcChipProbability(i, lotteryTime)
             );
