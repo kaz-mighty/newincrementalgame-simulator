@@ -86,6 +86,10 @@
         data-bs-target="#simulatedDark" aria-expanded="false" aria-controls="simulatedDark"
         v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏到達</label>
 
+      <input type="checkbox" class="btn-check" id="simulatedChipsB" autocomplete="off">
+      <label class="btn btn-outline-dark" for="simulatedChipsB" data-bs-toggle="collapse"
+        data-bs-target="#simulatedChips" aria-expanded="false" aria-controls="simulatedChips">鋳片入手</label>
+
       <input type="checkbox" class="btn-check" id="gaExpressionB" autocomplete="off">
       <label class="btn btn-outline-dark" for="gaExpressionB" data-bs-toggle="collapse" data-bs-target="#gaExpression"
         aria-expanded="false" aria-controls="gaExpression">式</label>
@@ -739,6 +743,87 @@
           <button type="button" class="btn-close float-end" @click="removeDarkCheckpoint(i)"></button>
         </li>
       </ul>
+    </div>
+
+    <div class="collapse" id="simulatedChips">
+      <div class="card card-body">
+        <div>
+          <button type="button" class="btn btn-outline-dark" @click="simulateChipCheckpoints()">シミュレート</button>
+          <button type="button" class="btn" @click="config.simulateChips.auto = !config.simulateChips.auto;"
+            :class="buttonSelectedClass(config.simulateChips.auto)">自動</button>
+        </div>
+        <div>
+          <label class="align-middle">
+            シミュレーション最大ポイント
+            <input type="text" class="form-control form-inline" v-model="config.simulateChips.maxPoint" placeholder="1e100">
+          </label>
+        </div>
+        <div class="d-flex align-items-center flex-wrap">
+          <label>
+            表示
+            <select class="form-select form-inline" v-model="config.simulateChips.showMode">
+              <option value="prob" selected>確率/期待値</option>
+              <option value="perHour">効率[個/時間]</option>
+            </select>
+          </label>
+          <div v-for="i in SET_CHIP_KIND" :key="i">
+            <button type="button" class="btn btn-outline-dark"
+              :class="buttonSelectedClass(config.simulateChips.showChips[i - 1])"
+              :style="chipColoredButtonClass(config.simulateChips.showChips[i - 1] ? i : 0)"
+              @click="config.simulateChips.showChips[i - 1] = !config.simulateChips.showChips[i - 1]">
+              {{ itemData.chipName[i - 1] }}
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="form-check form-check-inline">
+            <input type="checkbox" class="form-check-input" id="doubleUp" v-model="config.simulateChips.doubleUp">
+            <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮(未実装)</label>
+          </div>
+        </div>
+      </div>
+      <table class="table table-bordered table-sm">
+        <thead class="text-center">
+          <tr>
+            <td>洗練</td>
+            <td :colspan="showChipsNum" v-show="showChipsNum != 0">消費数</td>
+            <td rowspan="3"></td>
+          </tr>
+          <tr>
+            <td>洗練度</td>
+            <td v-for="i in SET_CHIP_KIND" :key="i"
+              v-show="config.simulateChips.showChips[i - 1]">
+              {{ itemData.chipName[i - 1] }}
+            </td>
+          </tr>
+          <tr>
+            <td class="align-middle">{{ Math.floor(nig.calcChipRetryTime() * 1000) / 1000 }}</td>
+            <td v-for="i in SET_CHIP_KIND" :key="i" class="tooltip-cell"
+              v-show="config.simulateChips.showChips[i - 1]">
+              <input type="number" class="form-control chip-input" v-if="i - 1 < 9"
+                min="0" :max="nig.getMaxSpendChip(i - 1)"
+                v-model.number="nig.player.spendChip[i - 1]"
+                :area-label="itemData.chipName[i - 1] + ' 精錬度'">
+              <div class="down-tooltip" style="width: 12ch">最大 {{ nig.getMaxSpendChip(i - 1) }}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>ポイント</td>
+            <td :colspan="showChipsNum" v-show="showChipsNum != 0">{{ chipTableTitle }}</td>
+            <td>所要時間[s]</td>
+          </tr>
+        </thead>
+        <tbody class="text-end">
+          <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv">
+            <td>{{ nig.getGainChipMoney(chipLv).toExponential(3) }}</td>
+            <td v-for="j in SET_CHIP_KIND" :key="j"
+              v-show="config.simulateChips.showChips[j - 1]">
+              {{ chipCheckpointCells[chipLv][j - 1] }}
+            </td>
+            <td>{{ chipCheckpointTimeMessages(chipLv) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="collapse card" id="gaExpression">

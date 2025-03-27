@@ -344,6 +344,38 @@ class ItemData {
             '煌き使用効率',
             '煌き使用効率裏',
         ];
+        this.chipTable = [
+            ["0", [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e80", [0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e90", [0.65, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e100", [0.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e110", [0.30, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e120", [0.20, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e130", [0.05, 0.80, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e140", [0.00, 0.65, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e150", [0.00, 0.55, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e160", [0.00, 0.45, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e170", [0.00, 0.25, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e180", [0.00, 0.15, 0.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e190", [0.00, 0.10, 0.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e200", [0.00, 0.00, 0.20, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e210", [0.00, 0.00, 0.15, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e220", [0.00, 0.00, 0.10, 0.70, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e230", [0.00, 0.00, 0.05, 0.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e240", [0.00, 0.00, 0.00, 0.50, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e250", [0.00, 0.00, 0.00, 0.40, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e275", [0.00, 0.00, 0.00, 0.30, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e300", [0.00, 0.00, 0.00, 0.20, 0.95, 0.99, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e325", [0.00, 0.00, 0.00, 0.20, 0.93, 0.98, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e350", [0.00, 0.00, 0.00, 0.20, 0.90, 0.97, 0.995, 1.00, 1.00, 1.00, 1.00]],
+        ];
         this.perfectChallengetext = [
             '発生器の倍率が1/100になります。',
             '間隙のベースは10000毛秒になります。',
@@ -356,6 +388,11 @@ class ItemData {
             '裏発生器と裏ポイントは発生器を強化しません。',
             '鋳片効力は、新規挑戦達成でない段位リセットを行うごとにランダムで1つが無効になります。',
         ];
+    }
+
+    calcChipProbability(chipLv, lotteryTime) {
+        let probTable = this.chipTable[chipLv][1].map(x => Math.pow(x, lotteryTime));
+        return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
     }
 }
 
@@ -530,6 +567,7 @@ class Nig {
             chip: new Array(SET_CHIP_KIND).fill(0),
             setChip: new Array(SET_CHIP_NUM).fill(0),
             disabledChip: new Array(SET_CHIP_NUM).fill(false),
+            spendChip: new Array(SET_CHIP_KIND).fill(0),
 
             statue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatue: new Array(SET_CHIP_KIND).fill(0),
@@ -683,6 +721,7 @@ class Nig {
             chip: playerData.chip,
             setChip: playerData.setchip,
             disabledChip: playerData.disabledchip,
+            spendChip: playerData.spendchip,
 
             statue: playerData.statue,
             polishedStatue: playerData.polishedstatue,
@@ -995,6 +1034,14 @@ class Nig {
         this.player.lightMoney = Nig.calcAfterNTick(lExpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.lightGenerators[i] = Nig.calcAfterNTick(lExpr[i + 1], tick);
     }
+    updateAutoBuys() {
+        for (let i = 7; i >= 0; i--) {
+            this.buyGenerator(i);
+        }
+        for (let i = 7; i >= 0; i--) {
+            this.buyAccelerator(i);
+        }
+    };
 
     spendShine(num) {
         if (this.player.shine < num) return;
@@ -1317,7 +1364,8 @@ class Nig {
         return D('1e216');
     };
 
-    resetLevel(_force, exit, challenge) {
+    resetLevel(_force, exit) {
+        // todo: Refactor if exit
         const gainLevel = this.calcGainLevel();
         let rankResetTime = this.player.rankResetTime.add(1);
         if (this.isPerfectChallengeActive(4)) rankResetTime = rankResetTime.pow(0.1).round();
@@ -1325,16 +1373,11 @@ class Nig {
 
         let isChallengeClear = false;
         if (this.player.onChallenge) {
-            this.player.onChallenge = false;
             const id = this.calcChallengeId();
             if (!this.player.challengeCleared.includes(id)) {
                 this.player.challengeCleared.push(id);
                 isChallengeClear = true;
             }
-        } else if (challenge) {
-            this.player.onChallenge = true;
-            if (this.player.challenges[3])
-                this.player.generatorsMode = new Array(8).fill(0);
         }
         if (this.isPerfectChallengeActive(9) && (!exit) && (!isChallengeClear)) {
             const randomInt = Math.floor(Math.random() * 100);
@@ -1360,7 +1403,6 @@ class Nig {
         let gainRank = this.calcGainRank();
         if (!force && !confirm('昇階リセットして、階位' + gainRank + 'を得ますか？')) return;
         if (this.player.onChallenge) {
-            this.player.onChallenge = false;
             let id = this.calcChallengeId();
             if (this.player.challengeCleared.length >= 128 && !this.player.rankChallengeCleared.includes(id)) {
                 this.player.rankChallengeCleared.push(this.calcChallengeId());
@@ -1383,6 +1425,8 @@ class Nig {
     };
 
     resetLevelData() {
+        this.player.onChallenge = false;
+
         this.player.money = D(1);
 
         this.player.generators = new Array(8).fill(D(0));
@@ -1428,7 +1472,11 @@ class Nig {
     };
 
     startChallenge() {
-        this.resetLevel(true, true, true);
+        this.resetLevel(true, true);
+        this.player.onChallenge = true;
+        if (this.player.challenges[3]) {
+            this.player.generatorsMode = new Array(8).fill(0);
+        };
     };
     exitChallenge() {
         this.player.onChallenge = false;
@@ -1773,6 +1821,7 @@ class Nig {
         if (this.players[0].challengeCleared.length >= 200) this.worldOpened[8] = true;
         if (this.players[0].rankChallengeCleared.length >= 200) this.worldOpened[9] = true;
     };
+
     toggleChip(i) {
         let oldChip = this.player.setChip[i];
         for (let j = oldChip + 1; j <= SET_CHIP_KIND; j++) if (this.configChip(i, j)) return true;
@@ -1796,6 +1845,23 @@ class Nig {
             if (v != 0) this.chipUsed[v - 1] = this.chipUsed[v - 1] + 1;
         }
     };
+    getMaxSpendChip(i) {
+        return this.player.statue[i] * this.player.statue[i];
+    };
+    calcChipRetryTime() { // return float value
+        let retry = 0;
+        for (let i = 0; i < 9; i++) {
+            if (this.player.spendChip[i] > 0) {
+                retry += 1 + Math.log(this.player.spendChip[i]) / Math.log(10 - i);
+            }
+        }
+        return retry;
+    };
+    getGainChipMoney(chipLv) {
+        let bonus = D(10).pow(this.eachPipedSmallMemory[7] * 0.4);
+        return D(itemData.chipTable[chipLv][0]).div(bonus);
+    };
+    
     workTime(val) {
         if (0 <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
@@ -2118,12 +2184,7 @@ class Nig {
                 };
             }
 
-            for (let i = 7; i >= 0; i--) {
-                this.buyGenerator(i);
-            }
-            for (let i = 7; i >= 0; i--) {
-                this.buyAccelerator(i);
-            }
+            this.updateAutoBuys();
         }
         res = res.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
         return res;
@@ -2260,6 +2321,13 @@ const initialConfig = () => {
         searchClearChallenge: true,
         autoSimulateCheckpoints: false,
         autoSimulateDarkCheckpoints: false,
+        simulateChips: {
+            auto: false,
+            showMode: 'prob',
+            showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
+            doubleUp: false,
+            maxPoint: '1e100'
+        },
         procMsPerTick: 0,
         verbose: false,
         spoiler: false,
@@ -2297,6 +2365,7 @@ const app = Vue.createApp({
             checkpoints: [D('1e18'), D('1e72')],
             simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
             darkCheckpoints: [D('1e18')],
+            simulatedChipCheckpoints: Array.from(new Array(10), () => new Map()),
             cpSimulatedTime: Date.now(),
 
             checkpointTarget: 'point',
@@ -2417,6 +2486,78 @@ const app = Vue.createApp({
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
             });
+        },
+        chipCheckpointTime: function() {
+            return function (chipLv) {
+                const result = this.simulatedChipCheckpoints[this.nig.world].get(chipLv);
+                return result?.sec.add(result.tick.mul(this.config.procMsPerTick * 0.001));
+            }
+        },
+        chipCheckpointTimeMessages: function() {
+            return function (chipLv) {
+                const sec = this.chipCheckpointTime(chipLv);
+                if (sec === undefined) {return "???";}
+                if (sec.lessThan(1000)) {
+                    return sec.toFixed(3);
+                }
+                return sec.toExponential(3);
+            };
+        },
+        chipCheckpointCellProbs() {
+            const lotteryTime = 1 + this.nig.calcChipRetryTime();
+            const probTable = new Array(itemData.chipTable.length).fill(null).map(
+                (_, i) => this.itemData.calcChipProbability(i, lotteryTime)
+            );
+            return probTable;
+        },
+        chipCheckpointPerHour: function () {
+            return function (prob, chipLv) {
+                const sec = this.chipCheckpointTime(chipLv);
+                if (prob === 0) {return "0";}
+                if (sec === undefined) {return "???";}
+                const perHour = prob * 3600 / sec;
+                // 1時間に1000回以上
+                if (sec * 1000 <= 3600) {return perHour.toFixed(0);}
+                return perHour.toFixed(2);
+            };
+        },
+        chipCheckpointCells() {
+            const config = this.config.simulateChips;
+            let probTable = this.chipCheckpointCellProbs;
+            if (config.doubleUp) {
+                // todo
+            }
+            if (config.showMode == "prob") {
+                if (config.doubleUp) {
+                    probTable = probTable.map(
+                        array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
+                    );
+                } else {
+                    probTable = probTable.map(
+                        array => array.map(x => (x == 0 ? "0 %" : (x * 100).toFixed(2) + " %"))
+                    );
+                }
+            } else if (config.showMode == "perHour") {
+                probTable = probTable.map(
+                    (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
+                );
+            }
+            return probTable;
+        },
+        showChipsNum() {
+            return this.config.simulateChips.showChips.slice(0, this.SET_CHIP_KIND).reduce((a, b) => a + b, 0);
+        },
+        chipTableTitle() {
+            const config = this.config.simulateChips;
+            if (config.showMode == "prob") {
+                if (config.doubleUp) {
+                    return "期待値";
+                } else {
+                    return "確率";
+                }
+            } else if (config.showMode == "perHour") {
+                return "効率[個/時間]";
+            }
         },
         targetMoneys() {
             return this.commonTargetMoneys(this.checkpointValue, this.checkpointTarget);
@@ -2617,18 +2758,22 @@ const app = Vue.createApp({
         clearCheckpointsCache() {
             this.simulatedCheckpoints[this.nig.world].clear();
             this.simulatedDarkCheckpoints[this.nig.world].clear();
+            this.simulatedChipCheckpoints[this.nig.world].clear();
             if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
             if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.config.simulateChips.auto) {this.simulateChipCheckpoints();}
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
                 this.simulatedCheckpoints[i].clear();
                 this.simulatedDarkCheckpoints[i].clear();
+                this.simulatedChipCheckpoints[i].clear();
                 this.challengeSimulated[i] = new Array(256).fill(null);
                 this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
             if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
             if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.config.simulateChips.auto) {this.simulateChipCheckpoints();}
         },
         addCheckpoint() {
             this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));
@@ -2684,6 +2829,33 @@ const app = Vue.createApp({
                 if (this.darkCheckpoints.length === 0) return;
                 const res = this.nig.clone().simulateDark(this.darkCheckpoints);
                 res.forEach((r, i) => this.simulatedDarkCheckpoints[this.nig.world].set(this.darkCheckpoints[i], r));
+            }, 0);
+        },
+        simulateChipCheckpoints() {
+            let maxPoint;
+            try {
+                maxPoint = D(this.config.simulateChips.maxPoint.trim());
+            } catch (error) {
+                return;
+            }
+
+            let checkpoints = new Array();
+            let chipLvs = new Array();
+            for (let i = 1; i < this.itemData.chipTable.length; i++) {
+                let money = this.nig.getGainChipMoney(i);
+                if (money.greaterThan(maxPoint)) {break;}
+                checkpoints.push(money);
+                chipLvs.push(i);
+            }
+
+            setTimeout(() => {
+                if (checkpoints.length === 0) {return;}
+                const nig = this.nig.clone();
+                nig.resetLevelData();
+                nig.updateAutoBuys();
+                nig.updateTickSpeed();
+                const result = nig.simulate(checkpoints);
+                result.forEach((r, i) => this.simulatedChipCheckpoints[this.nig.world].set(chipLvs[i], r));
             }, 0);
         },
         scaleSampleTime(t) {

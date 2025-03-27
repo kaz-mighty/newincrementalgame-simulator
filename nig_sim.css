@@ -108,11 +108,11 @@ td .unchallengeable {
     position: relative;
 
     &:hover {
-        .up-tooltip, .right-tooltip {
+        .up-tooltip, .right-tooltip, .down-tooltip {
             visibility: visible;
         }
     }
-    .up-tooltip, .right-tooltip {
+    .up-tooltip, .right-tooltip, .down-tooltip {
         visibility: hidden;
         background-color: black;
         color: #fff;
@@ -127,11 +127,27 @@ td .unchallengeable {
     .up-tooltip {
         bottom: 115%;
         left: 50%;
-        margin-left: -14ch;
+        transform: translate(-50%, 0);
     }
     .right-tooltip {
         top: 50%;
         left: 105%;
         transform: translate(0, -50%);
     }
+    .down-tooltip {
+        top: 115%;
+        left: 50%;
+        transform: translate(-50%, 0);
+    }
+}
+
+.form-inline {
+    display: inline;
+    width: auto;
+}
+.chip-input {
+    display: inline;
+    width: 100%;
+    max-width: 6em;
+    padding: 0.25rem;
 }
