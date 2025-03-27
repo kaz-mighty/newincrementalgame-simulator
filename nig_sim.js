@@ -472,7 +472,7 @@ class Nig {
     static decimalProperties = [
         'money',
         'level',
-        'leveResetTime',
+        'levelResetTime',
         'maxLevelGained',
         'rank',
         'rankResetTime',
@@ -501,7 +501,7 @@ class Nig {
 
             money: D(1),
             level: D(0),
-            leveResetTime: D(0),
+            levelResetTime: D(0),
             maxLevelGained: D(1),
             token: 0,
             shine: 0,
@@ -655,7 +655,7 @@ class Nig {
 
             money: playerData.money,
             level: playerData.level,
-            leveResetTime: playerData.levelresettime,
+            levelResetTime: playerData.levelresettime,
             maxLevelGained: playerData.maxlevelgained,
             token: playerData.token,
             shine: playerData.shine,
@@ -806,7 +806,7 @@ class Nig {
         let mult = D(1);
         if (!this.isChallengeActive(7)) {
             const cap = D(100).mul(this.player.levelItems[2] * (1 + this.player.setChip[28] * 0.3) + 1);
-            mult = mult.mul(this.softCap(this.player.leveResetTime.add(1), cap));
+            mult = mult.mul(this.softCap(this.player.levelResetTime.add(1), cap));
         }
 
         if (this.isChallengeBonusActive(3)) mult = mult.mul(D(2));
@@ -1110,7 +1110,7 @@ class Nig {
     };
 
     isAcceleratorOpened(index) {
-        if (index >= 1 && this.player.leveResetTime.lte(0)) return false;
+        if (index >= 1 && this.player.levelResetTime.lte(0)) return false;
         if (index >= 2 && index < 7 && this.player.levelItems[3] + 1 < index) return false;
         if (index == 7 && (this.player.levelItems[3] != 5 || this.player.accelLevel <= 0)) return false;
         return true;
@@ -1386,7 +1386,7 @@ class Nig {
         }
 
         this.player.level = this.player.level.add(exit ? D(0) : gainLevel);
-        this.player.leveResetTime = this.player.leveResetTime.add(gainLevelReset);
+        this.player.levelResetTime = this.player.levelResetTime.add(gainLevelReset);
         this.player.maxLevelGained = this.player.maxLevelGained.max(exit ? D(0) : gainLevel);
         if (this.player.accelLevel > 0) {
             for (let i = 0; i < 8; i++) {
@@ -1447,7 +1447,7 @@ class Nig {
     };
     resetRankData() {
         this.player.level = D(0);
-        this.player.leveResetTime = D(0);
+        this.player.levelResetTime = D(0);
         this.player.levelItems = new Array(5).fill(0);
         this.resetLevelData();
     };
@@ -1592,7 +1592,7 @@ class Nig {
     };
 
     checkTrophies() {
-        if (this.player.leveResetTime.gt(0)) this.player.trophies[0] = true;
+        if (this.player.levelResetTime.gt(0)) this.player.trophies[0] = true;
         if (this.player.rankResetTime.gt(0)) this.player.trophies[1] = true;
         if (this.player.shine > 0) this.player.trophies[2] = true;
         if (this.player.challengeCleared.includes(238) || this.player.challengeCleared.length >= 100) this.player.trophies[3] = true;
@@ -1627,8 +1627,8 @@ class Nig {
         if (this.player.acceleratorsBought[5].gt(0)) this.player.smallTrophies[21] = true;
         if (this.player.acceleratorsBought[6].gt(0)) this.player.smallTrophies[22] = true;
         if (this.player.acceleratorsBought[7].gt(0)) this.player.smallTrophies[23] = true;
-        if (this.player.leveResetTime.gt(200)) this.player.smallTrophies[24] = true;
-        if (this.player.leveResetTime.gt(999)) this.player.smallTrophies[25] = true;
+        if (this.player.levelResetTime.gt(200)) this.player.smallTrophies[24] = true;
+        if (this.player.levelResetTime.gt(999)) this.player.smallTrophies[25] = true;
         if (this.player.challengeCleared.includes(128)) this.player.smallTrophies[26] = true;
         if (this.player.challengeCleared.includes(64)) this.player.smallTrophies[27] = true;
         if (this.player.challengeCleared.includes(32)) this.player.smallTrophies[28] = true;
