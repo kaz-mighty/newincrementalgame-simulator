@@ -88,7 +88,8 @@
 
       <input type="checkbox" class="btn-check" id="simulatedChipsB" autocomplete="off">
       <label class="btn btn-outline-dark" for="simulatedChipsB" data-bs-toggle="collapse"
-        data-bs-target="#simulatedChips" aria-expanded="false" aria-controls="simulatedChips">鋳片入手</label>
+        data-bs-target="#simulatedChips" aria-expanded="false" aria-controls="simulatedChips"
+        v-if="nig.player.smallTrophies[5]">鋳片入手</label>
 
       <input type="checkbox" class="btn-check" id="gaExpressionB" autocomplete="off">
       <label class="btn btn-outline-dark" for="gaExpressionB" data-bs-toggle="collapse" data-bs-target="#gaExpression"
@@ -785,9 +786,9 @@
       <table class="table table-bordered table-sm">
         <thead class="text-center">
           <tr>
+            <td rowspan="3"></td>
             <td>洗練</td>
             <td :colspan="showChipsNum" v-show="showChipsNum != 0">消費数</td>
-            <td rowspan="3"></td>
           </tr>
           <tr>
             <td>洗練度</td>
@@ -809,18 +810,18 @@
           </tr>
           <tr>
             <td>ポイント</td>
-            <td :colspan="showChipsNum" v-show="showChipsNum != 0">{{ chipTableTitle }}</td>
             <td>所要時間[s]</td>
+            <td :colspan="showChipsNum" v-show="showChipsNum != 0">{{ chipTableTitle }}</td>
           </tr>
         </thead>
         <tbody class="text-end">
           <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv">
             <td>{{ nig.getGainChipMoney(chipLv).toExponential(3) }}</td>
+            <td>{{ chipCheckpointTimeMessages(chipLv) }}</td>
             <td v-for="j in SET_CHIP_KIND" :key="j"
               v-show="config.simulateChips.showChips[j - 1]">
               {{ chipCheckpointCells[chipLv][j - 1] }}
             </td>
-            <td>{{ chipCheckpointTimeMessages(chipLv) }}</td>
           </tr>
         </tbody>
       </table>
