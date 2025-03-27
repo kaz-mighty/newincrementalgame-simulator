@@ -41,7 +41,7 @@
       <input type="checkbox" class="btn-check" id="levelInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="levelInfoB" data-bs-toggle="collapse" data-bs-target="#levelInfo"
         aria-expanded="false" aria-controls="levelInfo"
-        v-if="nig.player.leveResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">段位</label>
+        v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">段位</label>
 
       <input type="checkbox" class="btn-check" id="rankInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="rankInfoB" data-bs-toggle="collapse" data-bs-target="#rankInfo"
@@ -105,8 +105,8 @@
         <div v-if="nig.worldOpened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
         <div
-          v-if="nig.player.leveResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
-          段位: {{ formatDecimal(nig.player.level, 6) }} 段位リセット: {{ formatDecimal(nig.player.leveResetTime, 6) }}
+          v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
+          段位: {{ formatDecimal(nig.player.level, 6) }} 段位リセット: {{ formatDecimal(nig.player.levelResetTime, 6) }}
         </div>
         <div v-if="nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
           階位: {{ formatDecimal(nig.player.rank, 6) }} 階位リセット: {{ formatDecimal(nig.player.rankResetTime, 6) }}
@@ -115,7 +115,7 @@
           冠位: {{ formatDecimal(nig.player.crown, 6) }} 冠位リセット: {{ formatDecimal(nig.player.crownResetTime, 6) }}
         </div>
         <div
-          v-if="nig.player.leveResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
+          v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
           最大取得段位: {{ formatDecimal(nig.player.maxLevelGained, 6) }}
         </div>
         <div v-if="nig.player.challengeCleared.length>0">挑戦達成: {{ nig.player.challengeCleared.length }}</div>
@@ -523,7 +523,7 @@
         </div>
         <div>
           里程: {{ nig.smallMemory }}
-          <table class="table-bordered table-sm">
+          <table class="table-bordered table-sm text-end">
             <tbody>
               <tr v-for="i in 10" :key="i">
                 <td v-for="j in 10" :key="j" class="tooltip-cell">
