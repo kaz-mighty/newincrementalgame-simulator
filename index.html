@@ -779,7 +779,7 @@
         <div>
           <div class="form-check form-check-inline">
             <input type="checkbox" class="form-check-input" id="doubleUp" v-model="config.simulateChips.doubleUp">
-            <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮(未実装)</label>
+            <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮</label>
           </div>
         </div>
       </div>
@@ -792,9 +792,10 @@
           </tr>
           <tr>
             <td>洗練度</td>
-            <td v-for="i in SET_CHIP_KIND" :key="i"
+            <td v-for="i in SET_CHIP_KIND" :key="i" class="tooltip-cell"
               v-show="config.simulateChips.showChips[i - 1]">
               {{ itemData.chipName[i - 1] }}
+              <div class="up-tooltip">入手数期待値: {{ chipDoubleUpExpected[i - 1].toFixed(3) }}倍</div>
             </td>
           </tr>
           <tr>

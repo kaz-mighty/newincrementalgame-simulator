@@ -2521,11 +2521,19 @@ const app = Vue.createApp({
                 return perHour.toFixed(2);
             };
         },
+        chipDoubleUpExpected() {
+            return new Array(this.SET_CHIP_KIND).fill(null).map(
+                (_, i) => Math.pow(1 + 0.01, this.nig.chipUsed[i])
+            );
+        },
         chipCheckpointCells() {
             const config = this.config.simulateChips;
             let probTable = this.chipCheckpointCellProbs;
             if (config.doubleUp) {
-                // todo
+                const expect = this.chipDoubleUpExpected;
+                probTable = probTable.map(
+                    array => array.map((x, i) => x * expect[i])
+                );
             }
             if (config.showMode == "prob") {
                 if (config.doubleUp) {
