@@ -765,6 +765,7 @@
             <select class="form-select form-inline" v-model="config.simulateChips.showMode">
               <option value="prob" selected>確率/期待値</option>
               <option value="perHour">効率[個/時間]</option>
+              <option value="perHourWithSpend">効率(消費含む)</option>
             </select>
           </label>
           <div v-for="i in SET_CHIP_KIND" :key="i">

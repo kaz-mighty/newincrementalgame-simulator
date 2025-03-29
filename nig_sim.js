@@ -2549,6 +2549,10 @@ const app = Vue.createApp({
                 probTable = probTable.map(
                     (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
                 );
+            } else if (config.showMode == "perHourWithSpend") {
+                probTable = probTable.map(
+                    (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
+                );
             }
             return probTable;
         },
@@ -2565,6 +2569,8 @@ const app = Vue.createApp({
                 }
             } else if (config.showMode == "perHour") {
                 return "効率[個/時間]";
+            } else if (config.showMode == "perHourWithSpend") {
+                return "効率(消費含む)[個/時間]"
             }
         },
         targetMoneys() {
