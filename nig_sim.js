@@ -2488,7 +2488,7 @@ const app = Vue.createApp({
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
             });
         },
-        chipCheckpointMoney: function() {
+        chipCheckpointMoney() {
             return new Array(itemData.chipTable.length).fill(null).map((_, i) => this.nig.getGainChipMoney(i));
         },
         chipCheckpointRange() {
@@ -2502,21 +2502,20 @@ const app = Vue.createApp({
             } catch {}
             return {min, max};
         },
-        chipCheckpointTime: function() {
-            return function (chipLv) {
+        chipCheckpointTimes() {
+            return new Array(itemData.chipTable.length).fill(null).map((_, chipLv) => {
                 const result = this.simulatedChipCheckpoints[this.nig.world].get(chipLv);
                 return result?.sec.add(result.tick.mul(this.config.procMsPerTick * 0.001));
-            }
+            });
         },
-        chipCheckpointTimeMessages: function() {
-            return function (chipLv) {
-                const sec = this.chipCheckpointTime(chipLv);
+        chipCheckpointTimeMessages() {
+            return this.chipCheckpointTimes.map(sec => {
                 if (sec === undefined) {return "???";}
                 if (sec.lessThan(1000)) {
                     return sec.toFixed(3);
                 }
                 return sec.toExponential(3);
-            };
+            });
         },
         chipCheckpointCellProbs() {
             const lotteryTime = 1 + Math.floor(this.nig.calcChipRetryTime());
@@ -2527,7 +2526,7 @@ const app = Vue.createApp({
         },
         chipCheckpointPerHour: function () {
             return function (prob, chipLv) {
-                const sec = this.chipCheckpointTime(chipLv);
+                const sec = this.chipCheckpointTimes[chipLv];
                 if (prob === 0) {return "0";}
                 if (sec === undefined) {return "???";}
                 const perHour = prob * 3600 / sec;
