@@ -752,11 +752,20 @@
           <button type="button" class="btn btn-outline-dark" @click="simulateChipCheckpoints()">シミュレート</button>
           <button type="button" class="btn" @click="config.simulateChips.auto = !config.simulateChips.auto;"
             :class="buttonSelectedClass(config.simulateChips.auto)">自動</button>
-        </div>
-        <div>
-          <label class="align-middle">
-            シミュレーション最大ポイント
-            <input type="text" class="form-control form-inline" v-model="config.simulateChips.maxPoint" placeholder="1e100">
+          &thinsp;
+
+          シミュレーション&表示範囲
+          <label>
+            最低
+            <input type="text" class="form-control form-inline" style="width: 6em"
+              v-model="config.simulateChips.minPoint" placeholder="1e80">
+          </label>
+          &thinsp;
+          <label>
+            最大
+            <input type="text" class="form-control form-inline" style="width: 6em"
+              v-model="config.simulateChips.maxPoint" placeholder="1e100">
+            ポイント
           </label>
         </div>
         <div class="d-flex align-items-center flex-wrap">
@@ -765,6 +774,7 @@
             <select class="form-select form-inline" v-model="config.simulateChips.showMode">
               <option value="prob" selected>確率/期待値</option>
               <option value="perHour">効率[個/時間]</option>
+              <option value="perHourWithSpend">効率(消費含む)</option>
             </select>
           </label>
           <div v-for="i in SET_CHIP_KIND" :key="i">
@@ -779,7 +789,7 @@
         <div>
           <div class="form-check form-check-inline">
             <input type="checkbox" class="form-check-input" id="doubleUp" v-model="config.simulateChips.doubleUp">
-            <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮(未実装)</label>
+            <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮</label>
           </div>
         </div>
       </div>
@@ -792,9 +802,10 @@
           </tr>
           <tr>
             <td>洗練度</td>
-            <td v-for="i in SET_CHIP_KIND" :key="i"
+            <td v-for="i in SET_CHIP_KIND" :key="i" class="tooltip-cell"
               v-show="config.simulateChips.showChips[i - 1]">
               {{ itemData.chipName[i - 1] }}
+              <div class="up-tooltip">入手数期待値: {{ chipDoubleUpExpected[i - 1].toFixed(3) }}倍</div>
             </td>
           </tr>
           <tr>
@@ -815,9 +826,10 @@
           </tr>
         </thead>
         <tbody class="text-end">
-          <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv">
-            <td>{{ nig.getGainChipMoney(chipLv).toExponential(3) }}</td>
-            <td>{{ chipCheckpointTimeMessages(chipLv) }}</td>
+          <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv"
+            v-show="chipCheckpointMoney[chipLv].gte(chipCheckpointRange.min) && chipCheckpointMoney[chipLv].lte(chipCheckpointRange.max)">
+            <td>{{ chipCheckpointMoney[chipLv].toExponential(3) }}</td>
+            <td>{{ chipCheckpointTimeMessages[chipLv] }}</td>
             <td v-for="j in SET_CHIP_KIND" :key="j"
               v-show="config.simulateChips.showChips[j - 1]">
               {{ chipCheckpointCells[chipLv][j - 1] }}

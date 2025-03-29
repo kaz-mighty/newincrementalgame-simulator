@@ -2326,7 +2326,8 @@ const initialConfig = () => {
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
             doubleUp: false,
-            maxPoint: '1e100'
+            minPoint: '0',
+            maxPoint: '1e100',
         },
         procMsPerTick: 0,
         verbose: false,
@@ -2487,21 +2488,34 @@ const app = Vue.createApp({
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
             });
         },
-        chipCheckpointTime: function() {
-            return function (chipLv) {
+        chipCheckpointMoney() {
+            return new Array(itemData.chipTable.length).fill(null).map((_, i) => this.nig.getGainChipMoney(i));
+        },
+        chipCheckpointRange() {
+            let min = D(0);
+            let max = D("1e100");
+            try {
+                min = D(this.config.simulateChips.minPoint.trim());
+            } catch {}
+            try {
+                max = D(this.config.simulateChips.maxPoint.trim());
+            } catch {}
+            return {min, max};
+        },
+        chipCheckpointTimes() {
+            return new Array(itemData.chipTable.length).fill(null).map((_, chipLv) => {
                 const result = this.simulatedChipCheckpoints[this.nig.world].get(chipLv);
                 return result?.sec.add(result.tick.mul(this.config.procMsPerTick * 0.001));
-            }
+            });
         },
-        chipCheckpointTimeMessages: function() {
-            return function (chipLv) {
-                const sec = this.chipCheckpointTime(chipLv);
+        chipCheckpointTimeMessages() {
+            return this.chipCheckpointTimes.map(sec => {
                 if (sec === undefined) {return "???";}
                 if (sec.lessThan(1000)) {
                     return sec.toFixed(3);
                 }
                 return sec.toExponential(3);
-            };
+            });
         },
         chipCheckpointCellProbs() {
             const lotteryTime = 1 + Math.floor(this.nig.calcChipRetryTime());
@@ -2512,7 +2526,7 @@ const app = Vue.createApp({
         },
         chipCheckpointPerHour: function () {
             return function (prob, chipLv) {
-                const sec = this.chipCheckpointTime(chipLv);
+                const sec = this.chipCheckpointTimes[chipLv];
                 if (prob === 0) {return "0";}
                 if (sec === undefined) {return "???";}
                 const perHour = prob * 3600 / sec;
@@ -2521,11 +2535,19 @@ const app = Vue.createApp({
                 return perHour.toFixed(2);
             };
         },
+        chipDoubleUpExpected() {
+            return new Array(this.SET_CHIP_KIND).fill(null).map(
+                (_, i) => Math.pow(1 + 0.01, this.nig.chipUsed[i])
+            );
+        },
         chipCheckpointCells() {
             const config = this.config.simulateChips;
             let probTable = this.chipCheckpointCellProbs;
             if (config.doubleUp) {
-                // todo
+                const expect = this.chipDoubleUpExpected;
+                probTable = probTable.map(
+                    array => array.map((x, i) => x * expect[i])
+                );
             }
             if (config.showMode == "prob") {
                 if (config.doubleUp) {
@@ -2540,6 +2562,10 @@ const app = Vue.createApp({
             } else if (config.showMode == "perHour") {
                 probTable = probTable.map(
                     (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
+                );
+            } else if (config.showMode == "perHourWithSpend") {
+                probTable = probTable.map(
+                    (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
                 );
             }
             return probTable;
@@ -2557,6 +2583,8 @@ const app = Vue.createApp({
                 }
             } else if (config.showMode == "perHour") {
                 return "効率[個/時間]";
+            } else if (config.showMode == "perHourWithSpend") {
+                return "効率(消費含む)[個/時間]"
             }
         },
         targetMoneys() {
@@ -2832,12 +2860,7 @@ const app = Vue.createApp({
             }, 0);
         },
         simulateChipCheckpoints() {
-            let maxPoint;
-            try {
-                maxPoint = D(this.config.simulateChips.maxPoint.trim());
-            } catch (error) {
-                return;
-            }
+            const maxPoint = this.chipCheckpointRange.max;
 
             let checkpoints = new Array();
             let chipLvs = new Array();
