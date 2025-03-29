@@ -752,11 +752,20 @@
           <button type="button" class="btn btn-outline-dark" @click="simulateChipCheckpoints()">シミュレート</button>
           <button type="button" class="btn" @click="config.simulateChips.auto = !config.simulateChips.auto;"
             :class="buttonSelectedClass(config.simulateChips.auto)">自動</button>
-        </div>
-        <div>
-          <label class="align-middle">
-            シミュレーション最大ポイント
-            <input type="text" class="form-control form-inline" v-model="config.simulateChips.maxPoint" placeholder="1e100">
+          &thinsp;
+
+          シミュレーション&表示範囲
+          <label>
+            最低
+            <input type="text" class="form-control form-inline" style="width: 6em"
+              v-model="config.simulateChips.minPoint" placeholder="1e80">
+          </label>
+          &thinsp;
+          <label>
+            最大
+            <input type="text" class="form-control form-inline" style="width: 6em"
+              v-model="config.simulateChips.maxPoint" placeholder="1e100">
+            ポイント
           </label>
         </div>
         <div class="d-flex align-items-center flex-wrap">
@@ -817,8 +826,9 @@
           </tr>
         </thead>
         <tbody class="text-end">
-          <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv">
-            <td>{{ nig.getGainChipMoney(chipLv).toExponential(3) }}</td>
+          <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv"
+            v-show="chipCheckpointMoney[chipLv].gte(chipCheckpointRange.min) && chipCheckpointMoney[chipLv].lte(chipCheckpointRange.max)">
+            <td>{{ chipCheckpointMoney[chipLv].toExponential(3) }}</td>
             <td>{{ chipCheckpointTimeMessages(chipLv) }}</td>
             <td v-for="j in SET_CHIP_KIND" :key="j"
               v-show="config.simulateChips.showChips[j - 1]">

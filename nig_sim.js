@@ -2326,7 +2326,8 @@ const initialConfig = () => {
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
             doubleUp: false,
-            maxPoint: '1e100'
+            minPoint: '0',
+            maxPoint: '1e100',
         },
         procMsPerTick: 0,
         verbose: false,
@@ -2486,6 +2487,20 @@ const app = Vue.createApp({
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
             });
+        },
+        chipCheckpointMoney: function() {
+            return new Array(itemData.chipTable.length).fill(null).map((_, i) => this.nig.getGainChipMoney(i));
+        },
+        chipCheckpointRange() {
+            let min = D(0);
+            let max = D("1e100");
+            try {
+                min = D(this.config.simulateChips.minPoint.trim());
+            } catch {}
+            try {
+                max = D(this.config.simulateChips.maxPoint.trim());
+            } catch {}
+            return {min, max};
         },
         chipCheckpointTime: function() {
             return function (chipLv) {
@@ -2846,12 +2861,7 @@ const app = Vue.createApp({
             }, 0);
         },
         simulateChipCheckpoints() {
-            let maxPoint;
-            try {
-                maxPoint = D(this.config.simulateChips.maxPoint.trim());
-            } catch (error) {
-                return;
-            }
+            const maxPoint = this.chipCheckpointRange.max;
 
             let checkpoints = new Array();
             let chipLvs = new Array();
