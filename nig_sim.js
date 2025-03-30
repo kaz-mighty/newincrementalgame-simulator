@@ -2897,26 +2897,24 @@ const app = Vue.createApp({
                 'btn-outline-dark': !cond,
             };
         },
-        chipColoredButtonClass(j) {
+        chipColoredButtonStyle(j) {
             if (j === 0) {
                 return {};
-            } else if (j >= 9) {
-                let color = ['silver', 'gold'][j - 9];
-                return {
-                    'background-color': color,
-                    'background-image': 'linear-gradient(135deg,transparent 20%,40%,rgba(255,255,255,1) 50%,60%,transparent 80%)'
-                }
-
-            } else {
-                let color = [
-                    '#cd7f32', 'silver', 'gold',
-                    '#E5E4E2', '#EE82EE', '#FF3333',
-                    '#42FFDD', '#38B48B'
-                ][j - 1];
-                return {
-                    'background-color': color,
-                };
             }
+            let color = [
+                '#cd7f32', 'silver', 'gold',
+                '#E5E4E2', '#EE82EE', '#FF3333',
+                '#42FFDD', '#38B48B',
+                'silver', 'gold',
+            ][j - 1];
+            let image = 'none';
+            if (j >= 9) {
+                image = 'linear-gradient(135deg,transparent 20%,40%,rgba(255,255,255,1) 50%,60%,transparent 80%)';
+            }
+            return {
+                'background-color': color,
+                'background-image': image,
+            };
         },
         scaleChallengeTable(c) {
             this.config.simulateTableWidth = Math.max(20, Math.min(100, this.config.simulateTableWidth * c));

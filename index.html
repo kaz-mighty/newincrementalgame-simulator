@@ -465,7 +465,7 @@
           鋳片効力
           <div v-for="i in 52" :key="i" class="tooltip-cell">
             <span v-if="i<=32||nig.countRemembers()>=16">
-              <button type="button" class="btn btn-outline-dark" :style="chipColoredButtonClass(nig.player.setChip[i-1])"
+              <button type="button" class="btn btn-outline-dark" :style="chipColoredButtonStyle(nig.player.setChip[i-1])"
                 @click="toggleChip(i-1)" :disabled="nig.player.disabledChip[i-1]">
                 {{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' : itemData.chipName[nig.player.setChip[i - 1] - 1] }}
               </button>
@@ -779,8 +779,7 @@
           </label>
           <div v-for="i in SET_CHIP_KIND" :key="i">
             <button type="button" class="btn btn-outline-dark"
-              :class="buttonSelectedClass(config.simulateChips.showChips[i - 1])"
-              :style="chipColoredButtonClass(config.simulateChips.showChips[i - 1] ? i : 0)"
+              :style="chipColoredButtonStyle(config.simulateChips.showChips[i - 1] ? i : 0)"
               @click="config.simulateChips.showChips[i - 1] = !config.simulateChips.showChips[i - 1]">
               {{ itemData.chipName[i - 1] }}
             </button>
@@ -803,6 +802,7 @@
           <tr>
             <td>洗練度</td>
             <td v-for="i in SET_CHIP_KIND" :key="i" class="tooltip-cell"
+              :style="chipColoredButtonStyle(i)"
               v-show="config.simulateChips.showChips[i - 1]">
               {{ itemData.chipName[i - 1] }}
               <div class="up-tooltip">入手数期待値: {{ chipDoubleUpExpected[i - 1].toFixed(3) }}倍</div>
@@ -836,6 +836,17 @@
             </td>
           </tr>
         </tbody>
+        <tfoot class="text-center">
+          <tr>
+            <td>ポイント</td>
+            <td>所要時間[s]</td>
+            <td v-for="i in SET_CHIP_KIND" :key="i"
+              :style="chipColoredButtonStyle(i)"
+              v-show="config.simulateChips.showChips[i - 1]">
+              {{ itemData.chipName[i - 1] }}
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </div>
 
