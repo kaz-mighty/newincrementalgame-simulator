@@ -790,12 +790,16 @@
             <input type="checkbox" class="form-check-input" id="doubleUp" v-model="config.simulateChips.doubleUp">
             <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮</label>
           </div>
+          <div class="form-check form-check-inline">
+            <input type="checkbox" class="form-check-input" id="showGainLevel" v-model="config.simulateChips.showGainLevel">
+            <label class="form-check-label" for="showGainLevel">獲得段位を表示</label>
+          </div>
         </div>
       </div>
       <table class="table table-bordered table-sm">
         <thead class="text-center">
           <tr>
-            <td rowspan="3"></td>
+            <td rowspan="3" :colspan="config.simulateChips.showGainLevel ? 2 : 1"></td>
             <td>洗練</td>
             <td :colspan="showChipsNum" v-show="showChipsNum != 0">消費数</td>
           </tr>
@@ -821,6 +825,7 @@
           </tr>
           <tr>
             <td>ポイント</td>
+            <td v-show="config.simulateChips.showGainLevel">獲得段位</td>
             <td>所要時間[s]</td>
             <td :colspan="showChipsNum" v-show="showChipsNum != 0">{{ chipTableTitle }}</td>
           </tr>
@@ -829,6 +834,7 @@
           <tr v-for="chipLv in itemData.chipTable.length - 1" :key="chipLv"
             v-show="chipCheckpointMoney[chipLv].gte(chipCheckpointRange.min) && chipCheckpointMoney[chipLv].lte(chipCheckpointRange.max)">
             <td>{{ chipCheckpointMoney[chipLv].toExponential(3) }}</td>
+            <td v-show="config.simulateChips.showGainLevel">{{ chipCheckpointLevel[chipLv] }}</td>
             <td>{{ chipCheckpointTimeMessages[chipLv] }}</td>
             <td v-for="j in SET_CHIP_KIND" :key="j"
               v-show="config.simulateChips.showChips[j - 1]">
@@ -839,6 +845,7 @@
         <tfoot class="text-center">
           <tr>
             <td>ポイント</td>
+            <td v-show="config.simulateChips.showGainLevel">獲得段位</td>
             <td>所要時間[s]</td>
             <td v-for="i in SET_CHIP_KIND" :key="i"
               :style="chipColoredButtonStyle(i)"

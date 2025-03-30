@@ -2328,6 +2328,7 @@ const initialConfig = () => {
             doubleUp: false,
             minPoint: '0',
             maxPoint: '1e100',
+            showGainLevel: false,
         },
         procMsPerTick: 0,
         verbose: false,
@@ -2490,6 +2491,9 @@ const app = Vue.createApp({
         },
         chipCheckpointMoney() {
             return new Array(itemData.chipTable.length).fill(null).map((_, i) => this.nig.getGainChipMoney(i));
+        },
+        chipCheckpointLevel() {
+            return this.chipCheckpointMoney.map(x => this.nig.calcGainLevel(x).toExponential(3));
         },
         chipCheckpointRange() {
             let min = D(0);
