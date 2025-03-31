@@ -433,7 +433,15 @@
             <td class="align-middle">{{ nig.players[i-1].trophies.reduce((x, y) => x + (y ? 1 : 0), 0) }}</td>
             <td class="align-middle">{{ nig.players[i-1].remember }}</td>
             <td class="align-middle">{{ nig.smallMemories[i - 1] }}</td>
-            <td class="align-middle">{{ Math.max(0, Math.floor((nig.smallMemories[i - 1] - 72) / 3)) }}</td>
+            <td class="align-middle tooltip-cell">
+              {{ Math.max(0, Math.floor((nig.smallMemories[i - 1] - 72) / 3)) }}
+              <div class="left-tooltip" v-if="config.spoiler">
+                世界{{ i }}固有: {{ itemData.worldPipeText[i-1].effect }}
+                <div v-for="pipe in 3" :key="pipe">
+                  {{pipe}}本: {{ itemData.worldPipeText[i-1].value(nig.getPipedSmallMemory(i-1, pipe)) }}
+                </div>
+              </div>
+            </td>
             <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldOpened[j-1]"
               :style="{ 'background-color': i==j ? 'lightgray' : 'transparent' }">
               {{ nig.players[i - 1].worldPipe[j - 1] ? nig.players[i - 1].worldPipe[j - 1] : '' }}
@@ -908,7 +916,7 @@
         </div>
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="spoiler" v-model="config.spoiler">
-          <label class="form-check-label" for="spoiler">ネタバレ(世界、実績、里程の条件が表示されます)</label>
+          <label class="form-check-label" for="spoiler">ネタバレ(世界、実績、里程の条件と世界管の効果が表示されます)</label>
         </div>
         <div>
           <button type="button" class="btn btn-outline-dark btn-sm" @click="scaleChallengeTable(0.9)">-</button>
