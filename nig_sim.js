@@ -102,7 +102,16 @@ class ItemData {
             '階位挑戦を200種類以上達成する',
         ];
         this.worldPipeText = [
-
+            {effect: "発生器コスト", value: (x) => D(-(x * 0.2)).pow_base(10).toExponential(3) + " 倍"},
+            {effect: "時間加速器生産量", value: (x) => (1 + x * 0.2).toFixed(1) + " 倍"},
+            {effect: "段位取得量", value: (x) => D(x / 5.0).pow_base(2).toFixed(1) + " 倍"},
+            {effect: "時間加速器iコスト", value: (x) => "10 ^ (" + (-x * 0.2).toFixed(1) + " * i) 倍"},
+            {effect: "階位取得量", value: (x) => (1 + x * 0.2).toFixed(1) + " 倍"},
+            {effect: "裏発生器生産量", value: (x) => (1 + x * 0.2).toFixed(1) + " 倍"},
+            {effect: "輝き入手確率", value: (x) => "+ " + x + " %"},
+            {effect: "鋳片判定ライン", value: (x) => D(10).pow(-(x * 0.4)).toExponential(3) + " 倍"},
+            {effect: "裏発生器iコスト", value: (x) => "10 ^ (" + (-x * 0.02).toFixed(2) + " * i * i) 倍"},
+            {effect: "煌き入手確率", value: (x) => "+ " + (0.1 * x * 0.5).toFixed(2) + " %"},
         ];
         this.trophyText = [
             '有段者',
@@ -1773,18 +1782,21 @@ class Nig {
             this.memory += this.players[i].trophies.reduce((x, y) => x + (y ? 1 : 0), 0);
         }
     };
+    getPipedSmallMemory(fromWorld, pipeNum) {
+        let count = (this.smallMemories[fromWorld] - 75) * pipeNum;
+        const remember = this.players[fromWorld].remember;
+        if (remember >= 10) {
+            count = Math.floor(count * (0.1 + remember / 10));
+        }
+        return count;
+    };
     checkPipedSmallMemories() {
         let sum = 0;
         for (let i = 0; i < 10; i++) {
             if (this.players[i].worldPipe[this.world] >= 1) {
-                let cnt = this.smallMemories[i];
-                cnt -= 75;
-                cnt *= this.players[i].worldPipe[this.world];
-                if (this.players[i].remember >= 10) {
-                    cnt = Math.floor(cnt * (0.1 + this.players[i].remember / 10));
-                }
-                this.eachPipedSmallMemory[i] = cnt;
-                sum += cnt;
+                const count = this.getPipedSmallMemory(i, this.players[i].worldPipe[this.world]);
+                this.eachPipedSmallMemory[i] = count;
+                sum += count;
             } else {
                 this.eachPipedSmallMemory[i] = 0;
             }
@@ -2319,10 +2331,10 @@ const initialConfig = () => {
             toggleBonuses: true,
         },
         searchClearChallenge: true,
-        autoSimulateCheckpoints: false,
-        autoSimulateDarkCheckpoints: false,
+        // autoSimulateCheckpoints: false,
+        // autoSimulateDarkCheckpoints: false,
         simulateChips: {
-            auto: false,
+            // auto: false,
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
             doubleUp: false,
@@ -2374,6 +2386,10 @@ const app = Vue.createApp({
             checkpointValue: '',
             darkCheckpointTarget: 'point',
             darkCheckpointValue: '',
+
+            autoSimulateCheckpoints: false,
+            autoSimulateDarkCheckpoints: false,
+            autoSimulateChips: false,
         }
     },
     watch: {
@@ -2699,7 +2715,7 @@ const app = Vue.createApp({
         selectWorld(i) {
             this.nig.save();
             this.nig.moveWorld(i);
-            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
         },
         spendShine(num) {
             this.nig.spendShine(num);
@@ -2791,9 +2807,9 @@ const app = Vue.createApp({
             this.simulatedCheckpoints[this.nig.world].clear();
             this.simulatedDarkCheckpoints[this.nig.world].clear();
             this.simulatedChipCheckpoints[this.nig.world].clear();
-            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
-            if (this.config.simulateChips.auto) {this.simulateChipCheckpoints();}
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
@@ -2803,9 +2819,9 @@ const app = Vue.createApp({
                 this.challengeSimulated[i] = new Array(256).fill(null);
                 this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
-            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
-            if (this.config.simulateChips.auto) {this.simulateChipCheckpoints();}
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         addCheckpoint() {
             this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));
