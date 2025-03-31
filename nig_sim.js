@@ -2331,10 +2331,10 @@ const initialConfig = () => {
             toggleBonuses: true,
         },
         searchClearChallenge: true,
-        autoSimulateCheckpoints: false,
-        autoSimulateDarkCheckpoints: false,
+        // autoSimulateCheckpoints: false,
+        // autoSimulateDarkCheckpoints: false,
         simulateChips: {
-            auto: false,
+            // auto: false,
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
             doubleUp: false,
@@ -2386,6 +2386,10 @@ const app = Vue.createApp({
             checkpointValue: '',
             darkCheckpointTarget: 'point',
             darkCheckpointValue: '',
+
+            autoSimulateCheckpoints: false,
+            autoSimulateDarkCheckpoints: false,
+            autoSimulateChips: false,
         }
     },
     watch: {
@@ -2711,7 +2715,7 @@ const app = Vue.createApp({
         selectWorld(i) {
             this.nig.save();
             this.nig.moveWorld(i);
-            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
         },
         spendShine(num) {
             this.nig.spendShine(num);
@@ -2803,9 +2807,9 @@ const app = Vue.createApp({
             this.simulatedCheckpoints[this.nig.world].clear();
             this.simulatedDarkCheckpoints[this.nig.world].clear();
             this.simulatedChipCheckpoints[this.nig.world].clear();
-            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
-            if (this.config.simulateChips.auto) {this.simulateChipCheckpoints();}
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
@@ -2815,9 +2819,9 @@ const app = Vue.createApp({
                 this.challengeSimulated[i] = new Array(256).fill(null);
                 this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
-            if (this.config.autoSimulateCheckpoints) this.simulateCheckpoints();
-            if (this.config.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
-            if (this.config.simulateChips.auto) {this.simulateChipCheckpoints();}
+            if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
+            if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         addCheckpoint() {
             this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));

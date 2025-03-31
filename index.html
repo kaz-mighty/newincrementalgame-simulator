@@ -692,8 +692,8 @@
       <div class="card-body">
         <div>
           <button type="button" class="btn btn-outline-dark" @click="simulateCheckpoints">シミュレート</button>
-          <button type="button" class="btn" @click="config.autoSimulateCheckpoints = !config.autoSimulateCheckpoints;"
-            :class="buttonSelectedClass(config.autoSimulateCheckpoints)">自動</button>
+          <button type="button" class="btn" @click="autoSimulateCheckpoints = !autoSimulateCheckpoints;"
+            :class="buttonSelectedClass(autoSimulateCheckpoints)">自動</button>
         </div>
         <div class="input-group">
           <select class="form-select" v-model="checkpointTarget" aria-label="checkpoint target">
@@ -726,8 +726,8 @@
       <div class="card-body">
         <div>
           <button type="button" class="btn btn-outline-dark" @click="simulateDarkCheckpoints">シミュレート</button>
-          <button type="button" class="btn" @click="config.autoSimulateDarkCheckpoints = !config.autoSimulateDarkCheckpoints;"
-            :class="buttonSelectedClass(config.autoSimulateDarkCheckpoints)">自動</button>
+          <button type="button" class="btn" @click="autoSimulateDarkCheckpoints = !autoSimulateDarkCheckpoints;"
+            :class="buttonSelectedClass(autoSimulateDarkCheckpoints)">自動</button>
         </div>
         <div class="input-group">
           <select class="form-select" v-model="darkCheckpointTarget" aria-label="checkpoint target">
@@ -758,8 +758,8 @@
       <div class="card card-body">
         <div>
           <button type="button" class="btn btn-outline-dark" @click="simulateChipCheckpoints()">シミュレート</button>
-          <button type="button" class="btn" @click="config.simulateChips.auto = !config.simulateChips.auto;"
-            :class="buttonSelectedClass(config.simulateChips.auto)">自動</button>
+          <button type="button" class="btn" @click="autoSimulateChips = !autoSimulateChips;"
+            :class="buttonSelectedClass(autoSimulateChips)">自動</button>
           &thinsp;
 
           シミュレーション&表示範囲
