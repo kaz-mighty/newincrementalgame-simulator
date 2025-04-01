@@ -2161,7 +2161,7 @@ class Nig {
         let res = Array.from(checkpoints).fill(null);
         let totalTicks = D(0);
         let totalSec = D(0);
-        while (events.length) {
+        while (events.length && checkpointsQue.length) {
             let [cost, type, index, number] = events.pop();
             //達成済みならcontinue
             if (type === 0) {
