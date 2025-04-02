@@ -2101,6 +2101,7 @@ class Nig {
         if (this.player.darkMoney.gte(targetDarkMoney)) return D(0);
         if (this.player.darkGenerators.every(g => g.eq(0))) return D(Infinity);
         const dExpr = this.calcDarkGeneratorExpr(mu);
+        /* 指数探索のバリエーション */
         let ok = D(2);
         let ng = D(0);
         while (Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
@@ -2158,14 +2159,14 @@ class Nig {
             }
         }
 
-        let res = Array.from(checkpoints).fill(null);
+        let result = Array.from(checkpoints).fill(null);
         let totalTicks = D(0);
         let totalSec = D(0);
         while (events.length && checkpointsQue.length) {
             let [cost, type, index, number] = events.pop();
             //達成済みならcontinue
             if (type === 0) {
-                if (res[index] !== null) continue;
+                if (result[index] !== null) continue;
             } else if (type === 1) {
                 if (this.player.generatorsBought[index].gt(number)) continue;
             } else if (type === 2) {
@@ -2190,7 +2191,7 @@ class Nig {
             //checkpoint確認
             while (checkpointsQue.length && this.player.money.gte(checkpointsQue.peek()[0])) {
                 let [_, k] = checkpointsQue.pop();
-                res[k] = {
+                result[k] = {
                     tick: totalTicks,
                     sec: totalSec,
                 };
@@ -2198,12 +2199,12 @@ class Nig {
 
             this.updateAutoBuys();
         }
-        res = res.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
-        return res;
+        result = result.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
+        return result;
     };
 
     simulateChallenges(challengeId, rank, config) {
-        let minRes = {
+        let minResult = {
             tickMinimum: {
                 tick: D(Infinity),
                 sec: D(Infinity),
@@ -2258,20 +2259,20 @@ class Nig {
                     this.player.accelLevelUsed = accelLevel;
 
                     let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
-                    let res = this.simulate(checkpoints)[0];
-                    if (res.tick.lt(minRes.tickMinimum.tick)) {
-                        minRes.tickMinimum = {
-                            tick: res.tick,
-                            sec: res.sec,
+                    let result = this.simulate(checkpoints)[0];
+                    if (result.tick.lt(minResult.tickMinimum.tick)) {
+                        minResult.tickMinimum = {
+                            tick: result.tick,
+                            sec: result.sec,
                             challengeBonuses: challengeBonuses.slice(),
                             rankChallengeBonuses: rankChallengeBonuses.slice(),
                             accelLevelUsed: this.player.accelLevelUsed,
                         };
                     }
-                    if (res.sec.lt(minRes.secMinimum.sec)) {
-                        minRes.secMinimum = {
-                            tick: res.tick,
-                            sec: res.sec,
+                    if (result.sec.lt(minResult.secMinimum.sec)) {
+                        minResult.secMinimum = {
+                            tick: result.tick,
+                            sec: result.sec,
                             challengeBonuses: challengeBonuses.slice(),
                             rankChallengeBonuses: rankChallengeBonuses.slice(),
                             accelLevelUsed: this.player.accelLevelUsed,
@@ -2280,21 +2281,21 @@ class Nig {
                 });
             })
         });
-        return minRes;
+        return minResult;
     };
 
     simulateDark(checkpoints) {
         if (checkpoints.length === 0) return [];
-        let index = Array.from(checkpoints, (_, i) => i);
-        index.sort((i, j) => checkpoints[i].cmp(checkpoints[j]));
-        let events = [];
+
+        let events = []; //[cost, index]
         for (let i = 0; i < checkpoints.length; i++) {
             events.push([checkpoints[i], i]);
         }
         events.sort((a, b) => a[0].cmp(b[0]));
+
         let result = Array.from(checkpoints).fill(null);
-        events.forEach(([c, i]) => {
-            result[i] = this.calcDarkGoalTick(c);
+        events.forEach(([cost, index]) => {
+            result[index] = this.calcDarkGoalTick(cost);
         });
         return result;
     };
