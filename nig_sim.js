@@ -624,11 +624,12 @@ class Nig {
     };
 
     static calcAfterNTick(expr, n) {
+        if (n instanceof Decimal) {n = n.toNumber();}
         let p = D(1);
         let res = D(0);
         for (let i = 0; i < expr.length; i++) {
             res = res.add(expr[i].mul(p));
-            p = p.mul(n.sub(i)).div(i + 1);
+            p = p.mul(n - i).div(i + 1);
         }
         return res;
     };
@@ -1945,19 +1946,19 @@ class Nig {
     };
 
     calcGoalTicks(targetMoney, update) {
-        if (this.player.money.gte(targetMoney)) return D(0);
-        if (this.player.generators.every(g => g.eq(0))) return D(Infinity);
+        if (this.player.money.gte(targetMoney)) return 0;
+        if (this.player.generators.every(g => g.eq(0))) return Infinity;
         const gExpr = this.calcGeneratorExpr();
         /* 指数を指数探索 -> 相乗平均で二分探索(指数の二分探索になる) -> 相加平均で探索 */
-        let ok = D(2);
-        let ng = D(0);
+        let ok = 2;
+        let ng = 0;
         while (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
             ng = ok;
-            ok = ok.mul(ok);
+            ok = ok * ok;
         }
         let cnt = 0;
-        while (ng.add(1).lt(ok) && cnt < 60) {
-            const m = ok.sub(ng).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
+        while (ng + 1 < ok && cnt < 60) {
+            const m = (ok - ng < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
             if (Nig.calcAfterNTick(gExpr[0], m).lt(targetMoney)) {
                 ng = m;
             } else {
@@ -1965,28 +1966,28 @@ class Nig {
             }
             cnt += 1;
         }
-        if (update) this.updateGenerators(D(1), ok, gExpr);
+        if (update) this.updateGenerators(D(1), D(ok), gExpr);
         return ok;
     };
 
     tick2sec(tick, update) {
-        if (tick.lte(0)) return D(0);
-        if (tick.eq(D(Infinity))) return D(Infinity);
+        if (tick <= 0) return 0;
+        if (tick === Infinity) return Infinity;
         const aExpr = this.calcAcceleratorExpr();
         const delta = 1e-3;
         const baseTick = this.getBaseTick() / 1000;
         const aMult = this.getAMult();
-        let curTick = D(0);
+        let curTick = 0;
         let prevDt = baseTick / this.getAcceleratorsSpeed(aMult);
-        let sec = D(0);
-        while (curTick.lt(tick)) {
+        let sec = 0;
+        while (curTick < tick) {
             const prevTick = curTick;
             /* tickspeedの変化が一定以下になる経過tickを二分探索 (相加平均 or 相乗平均) */
-            let ok = curTick.add(1);
-            let ng = tick.add(1);
+            let ok = curTick + 1;
+            let ng = tick + 1;
             let cnt = 0;
-            while (ok.add(1).lt(ng) && cnt < 60) {
-                const m = ng.sub(ok).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
+            while (ok + 1 < ng && cnt < 60) {
+                const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
                 if ((baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult)) + delta > prevDt) {
                     ok = m;
                 } else {
@@ -1995,12 +1996,12 @@ class Nig {
                 cnt += 1;
             }
             curTick = ok;
-            if (prevTick.eq(curTick)) break;
-            const dt = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, curTick, aMult);
-            sec = sec.add(D((prevDt + dt) / 2).mul(curTick.sub(prevTick)));
+            if (prevTick === curTick) break;
+            const dt = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, D(curTick), aMult);
+            sec += (prevDt + dt) / 2 * (curTick - prevTick);
             prevDt = dt;
         }
-        if (update) this.updateAccelerators(D(1), tick, aExpr);
+        if (update) this.updateAccelerators(D(1), D(tick), aExpr);
         return sec;
     };
 
@@ -2017,30 +2018,31 @@ class Nig {
             const aExpr = this.calcAcceleratorExpr();
             const baseTick = this.getBaseTick();
             const aMult = this.getAMult();
-            let curTick = D(0);
-            const baseMult9 = D(50).div(baseTick);
-            let prevMult9 = baseMult9.mul(this.getAcceleratorsSpeed(aMult));
-            let prevMult9Mult = prevMult9.mul(prevMult9.max(1));
+            const getSquareBy9 = (x) => (x * Math.max(x, 1));
+            let curTick = 0;
+            const baseMult9 = 50 / baseTick;
+            let prevMult9 = baseMult9 * this.getAcceleratorsSpeed(aMult);
+            let prevMult9Mult = getSquareBy9(prevMult9);
             let highestA = 0;
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
             while (this.player.money.lt(targetMoney)) {
                 /* 上位効力10の倍率の変化が一定以内になる経過tickを指数の指数探索 */
-                const delta = prevMult9.lt('0.2') ? D('1e-2') : prevMult9.lt('2') ? D('1e-1') : prevMult9.lt('20') ? D('1') : D('10');
+                const delta = prevMult9 < 0.2 ? 0.01 : prevMult9 < 2 ? 0.1 : prevMult9 < 20 ? 1 : 10;
 
-                let ok = curTick.add(1);
-                let ng = curTick.add(2);
+                let ok = curTick + 1;
+                let ng = curTick + 2;
                 let cnt = 0;
                 if (highestA > 0) {
-                    let curMult9 = baseMult9.mul(this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult));
-                    while (curMult9.mul(curMult9.max(1)).lt(prevMult9Mult.add(delta))) {
-                        ng = ng.mul(ng);
-                        curMult9 = baseMult9.mul(this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult));
+                    let curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(ng), aMult);
+                    while (getSquareBy9(curMult9) < prevMult9Mult + delta) {
+                        ng = ng * ng;
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(ng), aMult);
                     }
-                    while (ok.add(1).lt(ng) && cnt < 60) {
-                        const m = ng.sub(ok).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
-                        curMult9 = baseMult9.mul(this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult));
-                        if (curMult9.mul(curMult9.max(1)).lt(prevMult9Mult.add(delta))) {
+                    while (ok + 1 < ng && cnt < 60) {
+                        const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(m), aMult);
+                        if (getSquareBy9(curMult9) < prevMult9Mult + delta) {
                             ok = m;
                         } else {
                             ng = m;
@@ -2052,19 +2054,19 @@ class Nig {
                 /* 倍率が変化しないなら、targetMoneyに到達するtickの指数を指数探索 */
                 const gExpr = this.calcGeneratorExpr();
                 if (highestA === 0) {
-                    ok = curTick.add(2);
-                    while (Nig.calcAfterNTick(gExpr[0], ok.sub(curTick)).lt(targetMoney)) {
-                        ok = ok.mul(ok);
+                    ok = curTick + 2;
+                    while (Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
+                        ok = ok * ok;
                     }
                 }
 
                 /* 求めたtick後にtargetMoney到達済みなら到達tickを二分探索 */
-                if (Nig.calcAfterNTick(gExpr[0], ok.sub(curTick)).gte(targetMoney)) {
+                if (Nig.calcAfterNTick(gExpr[0], ok - curTick).gte(targetMoney)) {
                     ng = curTick;
                     cnt = 0;
-                    while (ng.add(1).lt(ok) && cnt < 60) {
-                        const m = ok.sub(ng).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng.add(1)).sqrt().floor();
-                        if (Nig.calcAfterNTick(gExpr[0], m.sub(curTick)).lt(targetMoney)) {
+                    while (ng + 1 < ok && cnt < 60) {
+                        const m = (ok - ng) < 4 ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * (ng + 1)));
+                        if (Nig.calcAfterNTick(gExpr[0], m - curTick).lt(targetMoney)) {
                             ng = m;
                         } else {
                             ok = m;
@@ -2072,30 +2074,30 @@ class Nig {
                         cnt += 1;
                     }
                 }
-                const tick = ok.sub(curTick);
+                const tick = ok - curTick;
                 this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
                 for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, ok, aMult);
+                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, D(ok), aMult);
                 this.player.tickSpeed = baseTick / tsNum;
                 this.multByAc = D(50).div(this.player.tickSpeed);
-                prevMult9 = baseMult9.mul(tsNum);
-                prevMult9Mult = prevMult9.mul(prevMult9.max(1));
+                prevMult9 = baseMult9 * tsNum;
+                prevMult9Mult = getSquareBy9(prevMult9);
                 curTick = ok;
             }
             if (update) {
-                this.updateAccelerators(D(1), curTick, aExpr);
+                this.updateAccelerators(D(1), D(curTick), aExpr);
             } else {
                 this.player.money = prevInfo.money;
                 this.player.generators = prevInfo.generators;
                 this.player.tickSpeed = prevInfo.tickSpeed;
                 this.multByAc = prevInfo.multByAc;
             }
-            const sec = curTick.mul(0.05);
-            return { tick: curTick, sec: sec };
+            const sec = curTick * 0.05;
+            return { tick: D(curTick), sec: D(sec) };
         } else {
             const tick = this.calcGoalTicks(targetMoney, update);
             const sec = this.tick2sec(tick, update);
-            return { tick: tick, sec: sec };
+            return { tick: D(tick), sec: D(sec) };
         }
     };
 
@@ -2181,7 +2183,7 @@ class Nig {
             if (this.player.money.gte(cost)) {
                 this.updateGenerators(D(1), tick);
                 this.updateAccelerators(D(1), tick)
-                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick, true);
+                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick.toNumber(), true);
             } else {
                 const tickAndSec = this.calcTickAndSec(cost, true);
                 tick = tickAndSec.tick;
