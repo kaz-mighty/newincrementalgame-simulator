@@ -2298,7 +2298,7 @@ class Nig {
 
         let result = Array.from(checkpoints).fill(null);
         events.forEach(([cost, index]) => {
-            result[index] = D(this.calcDarkGoalTick(cost));
+            result[index] = this.calcDarkGoalTick(cost);
         });
         return result;
     };
