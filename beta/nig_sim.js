@@ -1954,6 +1954,7 @@ class Nig {
         while (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
             ng = ok;
             ok = ok * ok;
+            if (!Number.isFinite(ok)) {return Infinity;}
         }
         let cnt = 0;
         while (ng + 1 < ok && cnt < 60) {
@@ -2025,7 +2026,7 @@ class Nig {
             let highestA = 0;
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
-            while (this.player.money.lt(targetMoney)) {
+            outerloop: while (this.player.money.lt(targetMoney)) {
                 /* 上位効力10の倍率の変化が一定以内になる経過tickを指数の指数探索 */
                 const delta = prevMult9 < 0.2 ? 0.01 : prevMult9 < 2 ? 0.1 : prevMult9 < 20 ? 1 : 10;
 
@@ -2037,6 +2038,10 @@ class Nig {
                     while (getSquareBy9(curMult9) < prevMult9Mult + delta) {
                         ng = ng * ng;
                         curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
+                        if (!Number.isFinite(ng)) {
+                            curTick = Infinity;
+                            break outerloop;
+                        }
                     }
                     while (ok + 1 < ng && cnt < 60) {
                         const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
@@ -2056,6 +2061,10 @@ class Nig {
                     ok = curTick + 2;
                     while (Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
                         ok = ok * ok;
+                        if (!Number.isFinite(ok)) {
+                            curTick = Infinity;
+                            break outerloop;
+                        }
                     }
                 }
 
@@ -2110,6 +2119,7 @@ class Nig {
         while (Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
             ng = ok;
             ok = ok * ok;
+            if (!Number.isFinite(ok)) {return Infinity;}
         }
         let cnt = 0;
         while (ng + 1 < ok && cnt < 60) {
