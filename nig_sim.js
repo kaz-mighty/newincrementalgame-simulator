@@ -624,7 +624,6 @@ class Nig {
     };
 
     static calcAfterNTick(expr, n) {
-        if (n instanceof Decimal) {n = n.toNumber();}
         let p = D(1);
         let res = D(0);
         for (let i = 0; i < expr.length; i++) {
@@ -1041,19 +1040,19 @@ class Nig {
         this.multByAc = D(50).div(this.player.tickSpeed);
     };
 
-    updateGenerators(mu = D(1), tick = D(1), gExpr = this.calcGeneratorExpr(mu)) {
+    updateGenerators(mu = D(1), tick = 1, gExpr = this.calcGeneratorExpr(mu)) {
         this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
     };
-    updateAccelerators(mu = D(1), tick = D(1), aExpr = this.calcAcceleratorExpr(mu)) {
+    updateAccelerators(mu = D(1), tick = 1, aExpr = this.calcAcceleratorExpr(mu)) {
         for (let i = 0; i < 8; i++) this.player.accelerators[i] = Nig.calcAfterNTick(aExpr[i], tick);
         this.updateTickSpeed();
     };
-    updateDarkGenerators(mu = D(1), tick = D(1), dExpr = this.calcDarkGeneratorExpr(mu)) {
+    updateDarkGenerators(mu = D(1), tick = 1, dExpr = this.calcDarkGeneratorExpr(mu)) {
         this.player.darkMoney = Nig.calcAfterNTick(dExpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.darkGenerators[i] = Nig.calcAfterNTick(dExpr[i + 1], tick);
     };
-    updateLightGenerators(mu = D(1), tick = D(1), lExpr = this.calcLightGeneratorExpr(mu)){
+    updateLightGenerators(mu = D(1), tick = 1, lExpr = this.calcLightGeneratorExpr(mu)){
         this.player.lightMoney = Nig.calcAfterNTick(lExpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.lightGenerators[i] = Nig.calcAfterNTick(lExpr[i + 1], tick);
     }
@@ -1966,7 +1965,7 @@ class Nig {
             }
             cnt += 1;
         }
-        if (update) this.updateGenerators(D(1), D(ok), gExpr);
+        if (update) this.updateGenerators(D(1), ok, gExpr);
         return ok;
     };
 
@@ -1997,17 +1996,17 @@ class Nig {
             }
             curTick = ok;
             if (prevTick === curTick) break;
-            const dt = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, D(curTick), aMult);
+            const dt = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, curTick, aMult);
             sec += (prevDt + dt) / 2 * (curTick - prevTick);
             prevDt = dt;
         }
-        if (update) this.updateAccelerators(D(1), D(tick), aExpr);
+        if (update) this.updateAccelerators(D(1), tick, aExpr);
         return sec;
     };
 
     calcTickAndSec(targetMoney, update) {
-        if (this.player.money.gte(targetMoney)) return { ticks: D(0), sec: D(0) };
-        if (targetMoney.eq(D(Infinity))) return { ticks: D(Infinity), sec: D(Infinity) };
+        if (this.player.money.gte(targetMoney)) return { ticks: 0, sec: 0 };
+        if (targetMoney.eq(D(Infinity))) return { ticks: Infinity, sec: Infinity };
         if (this.isRankChallengeBonusActive(9)) {
             const prevInfo = {
                 money: this.player.money,
@@ -2034,14 +2033,14 @@ class Nig {
                 let ng = curTick + 2;
                 let cnt = 0;
                 if (highestA > 0) {
-                    let curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(ng), aMult);
+                    let curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
                     while (getSquareBy9(curMult9) < prevMult9Mult + delta) {
                         ng = ng * ng;
-                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(ng), aMult);
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
                     }
                     while (ok + 1 < ng && cnt < 60) {
                         const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
-                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(m), aMult);
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult);
                         if (getSquareBy9(curMult9) < prevMult9Mult + delta) {
                             ok = m;
                         } else {
@@ -2077,7 +2076,7 @@ class Nig {
                 const tick = ok - curTick;
                 this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
                 for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, D(ok), aMult);
+                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, ok, aMult);
                 this.player.tickSpeed = baseTick / tsNum;
                 this.multByAc = D(50).div(this.player.tickSpeed);
                 prevMult9 = baseMult9 * tsNum;
@@ -2085,7 +2084,7 @@ class Nig {
                 curTick = ok;
             }
             if (update) {
-                this.updateAccelerators(D(1), D(curTick), aExpr);
+                this.updateAccelerators(D(1), curTick, aExpr);
             } else {
                 this.player.money = prevInfo.money;
                 this.player.generators = prevInfo.generators;
@@ -2093,28 +2092,28 @@ class Nig {
                 this.multByAc = prevInfo.multByAc;
             }
             const sec = curTick * 0.05;
-            return { tick: D(curTick), sec: D(sec) };
+            return { tick: curTick, sec: sec };
         } else {
             const tick = this.calcGoalTicks(targetMoney, update);
             const sec = this.tick2sec(tick, update);
-            return { tick: D(tick), sec: D(sec) };
+            return { tick: tick, sec: sec };
         }
     };
 
     calcDarkGoalTick(targetDarkMoney, mu = D(1)) {
-        if (this.player.darkMoney.gte(targetDarkMoney)) return D(0);
-        if (this.player.darkGenerators.every(g => g.eq(0))) return D(Infinity);
+        if (this.player.darkMoney.gte(targetDarkMoney)) return 0;
+        if (this.player.darkGenerators.every(g => g.eq(0))) return Infinity;
         const dExpr = this.calcDarkGeneratorExpr(mu);
         /* 指数を指数探索 -> 相乗平均で二分探索(指数の二分探索になる) -> 相加平均で探索 */
-        let ok = D(2);
-        let ng = D(0);
+        let ok = 2;
+        let ng = 0;
         while (Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
             ng = ok;
-            ok = ok.mul(ok);
+            ok = ok * ok;
         }
         let cnt = 0;
-        while (ng.add(1).lt(ok) && cnt < 60) {
-            const m = ok.sub(ng).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
+        while (ng + 1 < ok && cnt < 60) {
+            const m = (ok - ng < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
             if (Nig.calcAfterNTick(dExpr[0], m).lt(targetDarkMoney)) {
                 ng = m;
             } else {
@@ -2164,8 +2163,8 @@ class Nig {
         }
 
         let result = Array.from(checkpoints).fill(null);
-        let totalTicks = D(0);
-        let totalSec = D(0);
+        let totalTicks = 0;
+        let totalSec = 0;
         while (events.length && checkpointsQue.length) {
             let [cost, type, index, number] = events.pop();
             //達成済みならcontinue
@@ -2179,25 +2178,25 @@ class Nig {
             //console.log(totalTicks.toExponential(3), this.player.money.toExponential(3), cost.toExponential(3), type, index, number.toFixed(0))
 
             //次の目標まで(最低1tick)更新
-            let tick = D(1), sec = D(0);
+            let tick = 1, sec = 0;
             if (this.player.money.gte(cost)) {
                 this.updateGenerators(D(1), tick);
                 this.updateAccelerators(D(1), tick)
-                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick.toNumber(), true);
+                sec = this.isRankChallengeBonusActive(9) ? tick * 0.05 : this.tick2sec(tick, true);
             } else {
                 const tickAndSec = this.calcTickAndSec(cost, true);
                 tick = tickAndSec.tick;
                 sec = tickAndSec.sec;
             }
-            totalTicks = totalTicks.add(tick);
-            totalSec = totalSec.add(sec);
+            totalTicks += tick;
+            totalSec += sec;
 
             //checkpoint確認
             while (checkpointsQue.length && this.player.money.gte(checkpointsQue.peek()[0])) {
                 let [_, k] = checkpointsQue.pop();
                 result[k] = {
-                    tick: totalTicks,
-                    sec: totalSec,
+                    tick: D(totalTicks),
+                    sec: D(totalSec),
                 };
             }
 
@@ -2299,7 +2298,7 @@ class Nig {
 
         let result = Array.from(checkpoints).fill(null);
         events.forEach(([cost, index]) => {
-            result[index] = this.calcDarkGoalTick(cost);
+            result[index] = D(this.calcDarkGoalTick(cost));
         });
         return result;
     };
