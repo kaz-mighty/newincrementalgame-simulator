@@ -89,6 +89,30 @@ class ItemData {
             '階位の入手量が少しだけ増加します',
         ];
         this.levelItemCost = [D('1e1'), D('1e2'), D('1e3'), D('1e4'), D('1e5')];
+        this.worldText = [
+            '最初から開放',
+            '挑戦1+2+3+5+6+7を達成する',
+            '挑戦を100種類以上達成する',
+            '階位挑戦を16種類以上達成する',
+            '段位効力の累計購入回数を12500以上にする',
+            '裏ポイントを1e18以上にする',
+            '階位を262142以上にする',
+            '階位挑戦1+2+3+5+6+7を達成する',
+            '挑戦を200種類以上達成する',
+            '階位挑戦を200種類以上達成する',
+        ];
+        this.worldPipeText = [
+            {effect: "発生器コスト", value: (x) => D(-(x * 0.2)).pow_base(10).toExponential(3) + " 倍"},
+            {effect: "時間加速器生産量", value: (x) => (1 + x * 0.2).toFixed(1) + " 倍"},
+            {effect: "段位取得量", value: (x) => D(x / 5.0).pow_base(2).toFixed(1) + " 倍"},
+            {effect: "時間加速器iコスト", value: (x) => "10 ^ (" + (-x * 0.2).toFixed(1) + " * i) 倍"},
+            {effect: "階位取得量", value: (x) => (1 + x * 0.2).toFixed(1) + " 倍"},
+            {effect: "裏発生器生産量", value: (x) => (1 + x * 0.2).toFixed(1) + " 倍"},
+            {effect: "輝き入手確率", value: (x) => "+ " + x + " %"},
+            {effect: "鋳片判定ライン", value: (x) => D(10).pow(-(x * 0.4)).toExponential(3) + " 倍"},
+            {effect: "裏発生器iコスト", value: (x) => "10 ^ (" + (-x * 0.02).toFixed(2) + " * i * i) 倍"},
+            {effect: "煌き入手確率", value: (x) => "+ " + (0.1 * x * 0.5).toFixed(2) + " %"},
+        ];
         this.trophyText = [
             '有段者',
             '有階者',
@@ -100,6 +124,18 @@ class ItemData {
             '有冠者',
             '天上の者',
             '瞬く者',
+        ];
+        this.trophyConditionHtmlText = [
+            '段位リセットをする',
+            '階位リセットをする',
+            '輝きを獲得する',
+            '挑戦1+2+3+5+6+7を達成する\nまたは挑戦を100種類以上達成する',
+            '裏発生器1を購入する',
+            '煌きを獲得する',
+            '思い出を獲得する\n(世界1は合計思い出でもよい)',
+            '冠位リセットをする',
+            '天上発生器1を購入する',
+            '瞬きを獲得する',
         ];
         this.smallTrophyText = [
             'ポイントを0より大きくする',
@@ -157,9 +193,9 @@ class ItemData {
             '100以上の輝きを所持する',
             '1000以上の輝きを所持する',
             '10000以上の輝きを所持する',
-            '100000以上の輝きを所持する',
-            '1000000以上の輝きを所持する',
-            '10000000以上の輝きを所持する',
+            '100,000以上の輝きを所持する',
+            '1,000,000以上の輝きを所持する',
+            '10,000,000以上の輝きを所持する',
             '設定タブ内で、データ吐き出しを行う',
             '設定タブ内で、ツイート設定機能を2つ以上設定する',
             '裏発生器1を1つ以上購入する',
@@ -257,6 +293,10 @@ class ItemData {
             '紫鋼像を64個以上にする',
             '朱鋼像を64個以上にする',
             '蒼鋼像を64個以上にする',
+            '100,000,000以上の輝きを所持する',
+            '1,000,000,000以上の輝きを所持する',
+            '100,000以上の煌きを所有する',
+            '1,000,000以上の煌きを所有する',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -313,6 +353,38 @@ class ItemData {
             '煌き使用効率',
             '煌き使用効率裏',
         ];
+        this.chipTable = [
+            ["0", [1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e80", [0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e90", [0.65, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e100", [0.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e110", [0.30, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e120", [0.20, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e130", [0.05, 0.80, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e140", [0.00, 0.65, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e150", [0.00, 0.55, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e160", [0.00, 0.45, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e170", [0.00, 0.25, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e180", [0.00, 0.15, 0.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e190", [0.00, 0.10, 0.40, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e200", [0.00, 0.00, 0.20, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e210", [0.00, 0.00, 0.15, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e220", [0.00, 0.00, 0.10, 0.70, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e230", [0.00, 0.00, 0.05, 0.60, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e240", [0.00, 0.00, 0.00, 0.50, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e250", [0.00, 0.00, 0.00, 0.40, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e275", [0.00, 0.00, 0.00, 0.30, 0.95, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e300", [0.00, 0.00, 0.00, 0.20, 0.95, 0.99, 1.00, 1.00, 1.00, 1.00, 1.00]],
+            ["1e325", [0.00, 0.00, 0.00, 0.20, 0.93, 0.98, 1.00, 1.00, 1.00, 1.00, 1.00]],
+
+            ["1e350", [0.00, 0.00, 0.00, 0.20, 0.90, 0.97, 0.995, 1.00, 1.00, 1.00, 1.00]],
+        ];
         this.perfectChallengetext = [
             '発生器の倍率が1/100になります。',
             '間隙のベースは10000毛秒になります。',
@@ -325,6 +397,11 @@ class ItemData {
             '裏発生器と裏ポイントは発生器を強化しません。',
             '鋳片効力は、新規挑戦達成でない段位リセットを行うごとにランダムで1つが無効になります。',
         ];
+    }
+
+    calcChipProbability(chipLv, lotteryTime) {
+        let probTable = this.chipTable[chipLv][1].map(x => Math.pow(x, lotteryTime));
+        return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
     }
 }
 
@@ -397,13 +474,14 @@ class Nig {
         this.worldOpened = new Array(10).fill(false);
         this.chipUsed = new Array(SET_CHIP_KIND).fill(0);
         this.pChallengeStage = 0;
+        this.pChallengeStageRaw = 0;
         this.world = 0;
     };
 
     static decimalProperties = [
         'money',
         'level',
-        'leveResetTime',
+        'levelResetTime',
         'maxLevelGained',
         'rank',
         'rankResetTime',
@@ -432,7 +510,7 @@ class Nig {
 
             money: D(1),
             level: D(0),
-            leveResetTime: D(0),
+            levelResetTime: D(0),
             maxLevelGained: D(1),
             token: 0,
             shine: 0,
@@ -470,6 +548,7 @@ class Nig {
             tickSpeed: 1000,
             accelLevel: 0,
             accelLevelUsed: 0,
+            timeCrystal: new Array(8).fill(null).map(() => 0),
 
             onChallenge: false,
             challenges: new Array(8).fill(false),
@@ -497,10 +576,46 @@ class Nig {
             chip: new Array(SET_CHIP_KIND).fill(0),
             setChip: new Array(SET_CHIP_NUM).fill(0),
             disabledChip: new Array(SET_CHIP_NUM).fill(false),
+            spendChip: new Array(SET_CHIP_KIND).fill(0),
 
             statue: new Array(SET_CHIP_KIND).fill(0),
+            polishedStatue: new Array(SET_CHIP_KIND).fill(0),
+            polishedStatueBright: new Array(SET_CHIP_KIND).fill(0),
 
             worldPipe: new Array(10).fill(0),
+            rings: {
+                setRings: [],
+                ringsExp: new Array(13).fill(null).map(() => 0),
+                onMission: false,
+                missionId: 0,
+                missionState: {
+                    turn: 0,
+                    activeRing: 0,
+                    skillLog: [],
+                    flowerPoint: 0,
+                    snowPoint: 0,
+                    moonPoint: 0,
+                    flowerMultiplier: 1,
+                    snowMultiplier: 1,
+                    moonMultiplier: 1,
+                    tps: [],
+                    fieldEffect: [],
+                },
+                clearedMission: [],
+                auto: {
+                    doAuto: false,
+                    autoMissionId: 0,
+                },
+                outsideAuto: {
+                    autoSpendShine: false,
+                    autoSpendShineNumber: 0,
+                    autoSpendBright: false,
+                    autoSpendBrightNumber: 0,
+                    autoDarkLevelReset: false,
+                    autoDarkLevelResetBorder: 2,
+                    autoDoChallenge: false
+                },
+            },
         };
     };
 
@@ -509,11 +624,12 @@ class Nig {
     };
 
     static calcAfterNTick(expr, n) {
+        if (n instanceof Decimal) {n = n.toNumber();}
         let p = D(1);
         let res = D(0);
         for (let i = 0; i < expr.length; i++) {
             res = res.add(expr[i].mul(p));
-            p = p.mul(n.sub(i)).div(i + 1);
+            p = p.mul(n - i).div(i + 1);
         }
         return res;
     };
@@ -549,7 +665,7 @@ class Nig {
 
             money: playerData.money,
             level: playerData.level,
-            leveResetTime: playerData.levelresettime,
+            levelResetTime: playerData.levelresettime,
             maxLevelGained: playerData.maxlevelgained,
             token: playerData.token,
             shine: playerData.shine,
@@ -587,6 +703,7 @@ class Nig {
             tickSpeed: playerData.tickspeed,
             accelLevel: playerData.accelevel,
             accelLevelUsed: playerData.accelevelused,
+            timeCrystal: playerData.timecrystal,
 
             onChallenge: playerData.onchallenge,
             challenges: numArray2BoolArray(playerData.challenges ?? [], 8),
@@ -614,12 +731,54 @@ class Nig {
             chip: playerData.chip,
             setChip: playerData.setchip,
             disabledChip: playerData.disabledchip,
+            spendChip: playerData.spendchip,
 
             statue: playerData.statue,
+            polishedStatue: playerData.polishedstatue,
+            polishedStatueBright: playerData.polishedstatuebr,
 
             worldPipe: playerData.worldpipe,
+            rings: this.loadRingFromOriginal(playerData.rings),
         };
     };
+    loadRingFromOriginal(rings) {
+        // noinspection JSUnresolvedReference
+        if (rings == null) {return {};}
+        return {
+            setRings: rings.setrings,
+            ringsExp: rings.ringsexp,
+            onMission: rings.onmission,
+            missionId: rings.missionid,
+            missionState: {
+                turn: rings.missionstate.turn,
+                activeRing: rings.missionstate.activering,
+                skillLog: rings.missionstate.skilllog,
+                flowerPoint: rings.missionstate.flowerpoint,
+                snowPoint: rings.missionstate.snowpoint,
+                moonPoint: rings.missionstate.moonpoint,
+                flowerMultiplier: rings.missionstate.flowermultiplier,
+                snowMultiplier: rings.missionstate.snowmultiplier,
+                moonMultiplier: rings.missionstate.moonmultiplier,
+                tps: rings.missionstate.tps,
+                fieldEffect: rings.missionstate.fieldeffect,
+            },
+            clearedMission: rings.clearedmission,
+            auto: {
+                doAuto: rings.auto.doauto,
+                autoMissionId: rings.auto.automissionid,
+            },
+            outsideAuto: {
+                autoSpendShine: rings.outsideauto.autospendshine,
+                autoSpendShineNumber: rings.outsideauto.autospendshinenumber,
+                autoSpendBright: rings.outsideauto.autospendbright,
+                autoSpendBrightNumber: rings.outsideauto.autospendbrightnumber,
+                autoDarkLevelReset: rings.outsideauto.autodarklevelreset,
+                autoDarkLevelResetBorder: rings.outsideauto.autodarklevelresetborder,
+                autoDoChallenge: rings.outsideauto.autodochallenge,
+            },
+        }
+    };
+
     loadPlayer(playerData) {
         this.player = playerData;
         for (const property of Nig.decimalProperties) {
@@ -657,7 +816,7 @@ class Nig {
         let mult = D(1);
         if (!this.isChallengeActive(7)) {
             const cap = D(100).mul(this.player.levelItems[2] * (1 + this.player.setChip[28] * 0.3) + 1);
-            mult = mult.mul(this.softCap(this.player.leveResetTime.add(1), cap));
+            mult = mult.mul(this.softCap(this.player.levelResetTime.add(1), cap));
         }
 
         if (this.isChallengeBonusActive(3)) mult = mult.mul(D(2));
@@ -694,18 +853,30 @@ class Nig {
 
         mult = mult.mul(1 + this.player.setChip[0] * 0.1);
 
+        for (let i = 0; i < SET_CHIP_KIND; i++) {
+            mult = mult.mul(1 + this.player.statue[i] * 0.01);
+        }
+
         let camp = this.player.accelLevelUsed;
         let d = new Date();
-        if (d.getMonth() == 0 && d.getDate() <= 7) camp = camp + 1;
+        if (d.getMonth() == 0 && d.getDate() <= 7) {
+            camp += 1;
+            if (this.isChallengeActive(3) && this.isChallengeActive(4)) {
+                camp += 10;
+            }
+        }
         // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
         // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
-        if (d.getMonth() == 4 && 3 <= d.getDate() && d.getDate() <= 7) camp = camp + 1;
-        if ((d.getMonth() == 6 && 27 <= d.getDate()) || ((d.getMonth() == 7 && d.getDate() < 27))) camp = camp + 2;
-        if (d.getMonth() == 8 && 15 <= d.getDate() && d.getDate() <= 21) camp = camp + 1;
+        // if (d.getMonth() == 4 && 3 <= d.getDate() && d.getDate() <= 7) camp = camp + 1;
+        if ((d.getMonth() == 6 && 29 <= d.getDate()) || (d.getMonth() == 7 && d.getDate() <= 31)) camp = camp + 2;
+        // if (d.getMonth() == 8 && 15 <= d.getDate() && d.getDate() <= 21) camp = camp + 1;
 
-        if (camp > 7) camp = 7;
+        if (camp > 20) camp = 20;
         mult = mult.mul(1 + 4 * camp);
 
+        if (this.player.rings.outsideAuto.autoDoChallenge) {
+            mult = mult.mul(0.001);
+        }
 
         this.commonMult = mult;
     };
@@ -759,7 +930,7 @@ class Nig {
         let a = Array.from(new Array(8), (_, i) => new Array(Math.max(0, highest + 1 - i)).fill(D(0)));
         for (let i = 0; i <= highest; i++) a[i][0] = this.player.accelerators[i];
         for (let i = highest + 1; i-- > 1;) {
-            let mult = mu;
+            let mult = D(1);
             if (i == 1 ? this.isChallengeBonusActive(10) : this.isRankChallengeBonusActive(6))
                 if (this.isRankChallengeBonusActive(10))
                     mult = mult.add(this.player.acceleratorsBought[i].pow_base(2));
@@ -767,7 +938,7 @@ class Nig {
                     mult = mult.add(this.player.acceleratorsBought[i]);
             mult = mult.mul(D(1.5).pow(this.player.setChip[i + 10]));
             mult = mult.mul(1 + this.eachPipedSmallMemory[1] * 0.2);
-            a[i].forEach((aa, j) => a[i - 1][j + 1] = a[i - 1][j + 1].add(aa.mul(mult)));
+            a[i].forEach((aa, j) => a[i - 1][j + 1] = a[i - 1][j + 1].add(aa.mul(mult).mul(mu)));
             while (a[i - 1].length > 0 && a[i - 1][a[i - 1].length - 1].eq(0)) a[i - 1].pop();
         }
         return a;
@@ -835,25 +1006,44 @@ class Nig {
         this.incrementalMults[i] = mult;
     };
 
-    updateGenerators(mu = D(1), tick = D(1), gExpr = this.calcGeneratorExpr(mu)) {
-        this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
-        for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-    };
-    baseTick() {
+    getBaseTick() {
         const challengeBonusesCount = this.player.challengeBonuses.reduce((x, y) => x + (y ? 1 : 0), 0);
         let tickSpeed = 1000;
         if (this.isPerfectChallengeActive(1)) tickSpeed = 10000;
         tickSpeed += 500 * this.player.accelLevelUsed;
-        return tickSpeed - this.player.setChip[9] * 50 - this.player.levelItems[1] * challengeBonusesCount * (1 + this.player.setChip[27] * 0.5);
+        tickSpeed -= this.player.setChip[9] * 50;
+        tickSpeed -= this.player.levelItems[1] * challengeBonusesCount * (1 + this.player.setChip[27] * 0.5);
+        for (let i = 0; i < 8; i++) {
+            tickSpeed -= this.player.timeCrystal[i];
+        }
+        if (tickSpeed < 1) {tickSpeed = 1;}
+        return tickSpeed;
     };
-    updateTickSpeed() {
-        const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
+    getAMult() {
+        return this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
+    };
+    getAcceleratorsSpeed(aMult) {
         let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
         if (this.isRankChallengeBonusActive(13)) {
             for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
         }
-        this.player.tickSpeed = this.baseTick() / acNum.add(10).mul(aMult).log10();
+        return acNum.add(10).mul(aMult).log10();
+    };
+    getAcceleratorsSpeedFromExpr(aExpr, tick, aMult) {
+        let acNum = Nig.calcAfterNTick(aExpr[0], tick).mul(D(1.5).pow(this.player.setChip[10]));
+        if (this.isRankChallengeBonusActive(13)) {
+            for (let i = 1; i < 8; i++) acNum = acNum.mul(Nig.calcAfterNTick(aExpr[i], tick).add(1));
+        }
+        return acNum.add(10).mul(aMult).log10();
+    };
+    updateTickSpeed() {
+        this.player.tickSpeed = this.getBaseTick() / this.getAcceleratorsSpeed(this.getAMult());
         this.multByAc = D(50).div(this.player.tickSpeed);
+    };
+
+    updateGenerators(mu = D(1), tick = D(1), gExpr = this.calcGeneratorExpr(mu)) {
+        this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
+        for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
     };
     updateAccelerators(mu = D(1), tick = D(1), aExpr = this.calcAcceleratorExpr(mu)) {
         for (let i = 0; i < 8; i++) this.player.accelerators[i] = Nig.calcAfterNTick(aExpr[i], tick);
@@ -867,6 +1057,14 @@ class Nig {
         this.player.lightMoney = Nig.calcAfterNTick(lExpr[0], tick);
         for (let i = 0; i < 8; i++) this.player.lightGenerators[i] = Nig.calcAfterNTick(lExpr[i + 1], tick);
     }
+    updateAutoBuys() {
+        for (let i = 7; i >= 0; i--) {
+            this.buyGenerator(i);
+        }
+        for (let i = 7; i >= 0; i--) {
+            this.buyAccelerator(i);
+        }
+    };
 
     spendShine(num) {
         if (this.player.shine < num) return;
@@ -935,8 +1133,9 @@ class Nig {
     };
 
     isAcceleratorOpened(index) {
-        if (index >= 1 && this.player.leveResetTime.lte(0)) return false;
-        if (index >= 2 && this.player.levelItems[3] + 1 < index) return false;
+        if (index >= 1 && this.player.levelResetTime.lte(0)) return false;
+        if (index >= 2 && index < 7 && this.player.levelItems[3] + 1 < index) return false;
+        if (index == 7 && (this.player.levelItems[3] != 5 || this.player.accelLevel <= 0)) return false;
         return true;
     };
     isAcceleratorBuyable(index) {
@@ -1003,19 +1202,30 @@ class Nig {
         return true;
     };
 
+    getMaxToken() {
+        let maxToken = this.player.challengeCleared.length;
+        if (this.player.onPChallenge) {
+            const challengeId = this.calcPerfectChallengeId();
+            maxToken = Math.max(maxToken, this.player.pChallengeCleared[challengeId]);
+        }
+        return maxToken;
+    };
+    getMaxRankToken() {
+        let maxRankToken = this.player.rankChallengeCleared.length;
+        if (this.player.onPChallenge) {
+            const challengeId = this.calcPerfectChallengeId();
+            maxRankToken = Math.max(maxRankToken, this.player.pRChallengeCleared[challengeId]);
+        }
+        return maxRankToken;
+    };
     calcToken() {
-        const challengeId = this.calcPerfectChallengeId();
         let spent = 0;
         this.player.challengeBonuses.forEach((value, index) => {
             if (value) {
                 spent += itemData.rewardCost[index];
             }
         });
-        let t = this.player.challengeCleared.length;
-        if (this.player.onPChallenge) {
-            t = Math.max(t, this.player.pChallengeCleared[challengeId]);
-        }
-        this.player.token = t - spent;
+        this.player.token = this.getMaxToken() - spent;
 
         spent = 0;
         this.player.rankChallengeBonuses.forEach((value, index) => {
@@ -1023,12 +1233,7 @@ class Nig {
                 spent += itemData.rewardCost[index];
             }
         });
-        t = this.player.rankChallengeCleared.length;
-        if (this.player.onPChallenge) {
-            t = Math.max(t, this.player.pRChallengeCleared[challengeId]);
-        }
-        this.player.rankToken = t - spent;
-
+        this.player.rankToken = this.getMaxRankToken() - spent;
     };
     checkPChallengeCleared(){
       let cnt = 0;
@@ -1036,6 +1241,7 @@ class Nig {
         cnt += this.player.pChallengeCleared[i]
         cnt += this.player.pRChallengeCleared[i]
       }
+      this.pChallengeStageRaw = cnt;
 
       cnt /= 510;
       this.pChallengeStage = Math.floor(cnt);
@@ -1140,7 +1346,7 @@ class Nig {
         if (this.isPerfectChallengeActive(4)) gainLevel = D(gainLevel.log2()).max(1);
         gainLevel = gainLevel.round().max(1);
 
-        gainLevel = gainLevel.mul(1 + this.eachPipedSmallMemory[2] * 0.2);
+        gainLevel = gainLevel.mul(D(this.eachPipedSmallMemory[2] / 5.0).pow_base(2));
         if (this.isChallengeBonusActive(12)) gainLevel = gainLevel.mul(2);
         return gainLevel;
     };
@@ -1169,6 +1375,9 @@ class Nig {
         return D(money.log10()).div(dv).pow_base(2).round();
     };
 
+    resetLevelBorder() {
+        return D(this.isChallengeActive(0) ? '1e24' : '1e18');
+    };
     resetRankBorder() {
         let remember = this.countRemembers();
         if (this.isPerfectChallengeActive(7)) remember = Math.pow(remember, 0.5);
@@ -1178,7 +1387,8 @@ class Nig {
         return D('1e216');
     };
 
-    resetLevel(_force, exit, challenge) {
+    resetLevel(_force, exit) {
+        // todo: Refactor if exit
         const gainLevel = this.calcGainLevel();
         let rankResetTime = this.player.rankResetTime.add(1);
         if (this.isPerfectChallengeActive(4)) rankResetTime = rankResetTime.pow(0.1).round();
@@ -1186,16 +1396,11 @@ class Nig {
 
         let isChallengeClear = false;
         if (this.player.onChallenge) {
-            this.player.onChallenge = false;
             const id = this.calcChallengeId();
             if (!this.player.challengeCleared.includes(id)) {
                 this.player.challengeCleared.push(id);
                 isChallengeClear = true;
             }
-        } else if (challenge) {
-            this.player.onChallenge = true;
-            if (this.player.challenges[3])
-                this.player.generatorsMode = new Array(8).fill(0);
         }
         if (this.isPerfectChallengeActive(9) && (!exit) && (!isChallengeClear)) {
             const randomInt = Math.floor(Math.random() * 100);
@@ -1204,8 +1409,16 @@ class Nig {
         }
 
         this.player.level = this.player.level.add(exit ? D(0) : gainLevel);
-        this.player.leveResetTime = this.player.leveResetTime.add(gainLevelReset);
+        this.player.levelResetTime = this.player.levelResetTime.add(gainLevelReset);
         this.player.maxLevelGained = this.player.maxLevelGained.max(exit ? D(0) : gainLevel);
+        if (this.player.accelLevel > 0) {
+            for (let i = 0; i < 8; i++) {
+                let crystalNum = Math.floor(this.player.accelerators[i].log10()) - 10;
+                if (crystalNum < 0) {crystalNum = 0;}
+                if (crystalNum > 100) {crystalNum = 100;}
+                this.player.timeCrystal[i] = Math.max(this.player.timeCrystal[i], crystalNum);
+            }
+        }
         this.resetLevelData()
     };
     //TODO: resetRank is not tested.
@@ -1213,7 +1426,6 @@ class Nig {
         let gainRank = this.calcGainRank();
         if (!force && !confirm('昇階リセットして、階位' + gainRank + 'を得ますか？')) return;
         if (this.player.onChallenge) {
-            this.player.onChallenge = false;
             let id = this.calcChallengeId();
             if (this.player.challengeCleared.length >= 128 && !this.player.rankChallengeCleared.includes(id)) {
                 this.player.rankChallengeCleared.push(this.calcChallengeId());
@@ -1236,6 +1448,8 @@ class Nig {
     };
 
     resetLevelData() {
+        this.player.onChallenge = false;
+
         this.player.money = D(1);
 
         this.player.generators = new Array(8).fill(D(0));
@@ -1256,7 +1470,7 @@ class Nig {
     };
     resetRankData() {
         this.player.level = D(0);
-        this.player.leveResetTime = D(0);
+        this.player.levelResetTime = D(0);
         this.player.levelItems = new Array(5).fill(0);
         this.resetLevelData();
     };
@@ -1281,7 +1495,11 @@ class Nig {
     };
 
     startChallenge() {
-        this.resetLevel(true, true, true);
+        this.resetLevel(true, true);
+        this.player.onChallenge = true;
+        if (this.player.challenges[3]) {
+            this.player.generatorsMode = new Array(8).fill(0);
+        };
     };
     exitChallenge() {
         this.player.onChallenge = false;
@@ -1367,8 +1585,37 @@ class Nig {
         this.player.statue[i] += 1;
     };
 
+    isStatuePolishable(i) {
+        let cost = this.calcPolishCost(i);
+        if (this.player.polishedStatue[i] >= this.player.statue[i] || this.player.shine < cost) {return false;}
+        return true;
+    };
+    calcPolishCost(i) {
+        return (this.player.polishedStatue[i] + 1) * 1000000;
+    };
+    polishStatue(i) {
+        if (!this.isStatuePolishable(i)) {return;}
+        let cost = this.calcPolishCost(i);
+        this.player.shine -= cost;
+        this.player.polishedStatue[i] += 1;
+    };
+
+    isStatuePolishableBright(i) {
+        if (this.player.polishedStatueBright[i] >= this.player.polishedStatue[i] * 10) {return false;}
+        if (this.player.brightness < this.calcPolishCostBright(i)) {return false;}
+        return true;
+    };
+    calcPolishCostBright(i) {
+        return (this.player.polishedStatueBright[i] + 10) * 100;
+    };
+    polishStatueBright(i) {
+        if (!this.isStatuePolishableBright(i)) {return;}
+        this.player.brightness -= this.calcPolishCostBright(i);
+        this.player.polishedStatueBright[i] += 1;
+    };
+
     checkTrophies() {
-        if (this.player.leveResetTime.gt(0)) this.player.trophies[0] = true;
+        if (this.player.levelResetTime.gt(0)) this.player.trophies[0] = true;
         if (this.player.rankResetTime.gt(0)) this.player.trophies[1] = true;
         if (this.player.shine > 0) this.player.trophies[2] = true;
         if (this.player.challengeCleared.includes(238) || this.player.challengeCleared.length >= 100) this.player.trophies[3] = true;
@@ -1403,8 +1650,8 @@ class Nig {
         if (this.player.acceleratorsBought[5].gt(0)) this.player.smallTrophies[21] = true;
         if (this.player.acceleratorsBought[6].gt(0)) this.player.smallTrophies[22] = true;
         if (this.player.acceleratorsBought[7].gt(0)) this.player.smallTrophies[23] = true;
-        if (this.player.leveResetTime.gt(200)) this.player.smallTrophies[24] = true;
-        if (this.player.leveResetTime.gt(999)) this.player.smallTrophies[25] = true;
+        if (this.player.levelResetTime.gt(200)) this.player.smallTrophies[24] = true;
+        if (this.player.levelResetTime.gt(999)) this.player.smallTrophies[25] = true;
         if (this.player.challengeCleared.includes(128)) this.player.smallTrophies[26] = true;
         if (this.player.challengeCleared.includes(64)) this.player.smallTrophies[27] = true;
         if (this.player.challengeCleared.includes(32)) this.player.smallTrophies[28] = true;
@@ -1536,6 +1783,10 @@ class Nig {
             if (this.player.statue[4] >= 64) this.player.smallTrophies2nd[52] = true
             if (this.player.statue[5] >= 64) this.player.smallTrophies2nd[53] = true
             if (this.player.statue[6] >= 64) this.player.smallTrophies2nd[54] = true
+            if (this.player.shine >= 100_000_000) this.player.smallTrophies2nd[55] = true;
+            if (this.player.shine >= 1_000_000_000) this.player.smallTrophies2nd[56] = true;
+            if (this.player.brightness >= 100_000) this.player.smallTrophies2nd[57] = true;
+            if (this.player.brightness >= 1_000_000) this.player.smallTrophies2nd[58] = true;
         }
     };
     checkMemories() {
@@ -1545,15 +1796,21 @@ class Nig {
             this.memory += this.players[i].trophies.reduce((x, y) => x + (y ? 1 : 0), 0);
         }
     };
+    getPipedSmallMemory(fromWorld, pipeNum) {
+        let count = (this.smallMemories[fromWorld] - 75) * pipeNum;
+        const remember = this.players[fromWorld].remember;
+        if (remember >= 10) {
+            count = Math.floor(count * (0.1 + remember / 10));
+        }
+        return count;
+    };
     checkPipedSmallMemories() {
         let sum = 0;
         for (let i = 0; i < 10; i++) {
             if (this.players[i].worldPipe[this.world] >= 1) {
-                let cnt = this.smallMemories[i];
-                cnt -= 75;
-                cnt *= this.players[i].worldPipe[this.world];
-                this.eachPipedSmallMemory[i] = cnt;
-                sum += cnt;
+                const count = this.getPipedSmallMemory(i, this.players[i].worldPipe[this.world]);
+                this.eachPipedSmallMemory[i] = count;
+                sum += count;
             } else {
                 this.eachPipedSmallMemory[i] = 0;
             }
@@ -1590,6 +1847,7 @@ class Nig {
         if (this.players[0].challengeCleared.length >= 200) this.worldOpened[8] = true;
         if (this.players[0].rankChallengeCleared.length >= 200) this.worldOpened[9] = true;
     };
+
     toggleChip(i) {
         let oldChip = this.player.setChip[i];
         for (let j = oldChip + 1; j <= SET_CHIP_KIND; j++) if (this.configChip(i, j)) return true;
@@ -1613,6 +1871,23 @@ class Nig {
             if (v != 0) this.chipUsed[v - 1] = this.chipUsed[v - 1] + 1;
         }
     };
+    getMaxSpendChip(i) {
+        return this.player.statue[i] * this.player.statue[i];
+    };
+    calcChipRetryTime() { // return float value
+        let retry = 0;
+        for (let i = 0; i < 9; i++) {
+            if (this.player.spendChip[i] > 0) {
+                retry += 1 + Math.log(this.player.spendChip[i]) / Math.log(10 - i);
+            }
+        }
+        return retry;
+    };
+    getGainChipMoney(chipLv) {
+        let bonus = D(10).pow(this.eachPipedSmallMemory[7] * 0.4);
+        return D(itemData.chipTable[chipLv][0]).div(bonus);
+    };
+    
     workTime(val) {
         if (0 <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
@@ -1649,10 +1924,9 @@ class Nig {
     targetMoney(target, input) {
         try {
             let value = D(input);
-            const hasChallenge0 = this.isChallengeActive(0);
             if (target === 'levelReset') {
                 value = value.ceil();
-                return this.searchLowerBound(value, D(hasChallenge0 ? '1e24' : '1e18'), target);
+                return this.searchLowerBound(value, this.resetLevelBorder(), target);
             } else if (target == 'rankReset') {
                 value = value.ceil();
                 return this.searchLowerBound(value, this.resetRankBorder(), target);
@@ -1672,18 +1946,19 @@ class Nig {
     };
 
     calcGoalTicks(targetMoney, update) {
-        if (this.player.money.gte(targetMoney)) return D(0);
-        if (this.player.generators.every(g => g.eq(0))) return D(Infinity);
+        if (this.player.money.gte(targetMoney)) return 0;
+        if (this.player.generators.every(g => g.eq(0))) return Infinity;
         const gExpr = this.calcGeneratorExpr();
-        let ok = D(2);
-        let ng = D(0);
+        /* 指数を指数探索 -> 相乗平均で二分探索(指数の二分探索になる) -> 相加平均で探索 */
+        let ok = 2;
+        let ng = 0;
         while (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
             ng = ok;
-            ok = ok.mul(ok);
+            ok = ok * ok;
         }
         let cnt = 0;
-        while (ng.add(1).lt(ok) && cnt < 60) {
-            const m = ok.sub(ng).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
+        while (ng + 1 < ok && cnt < 60) {
+            const m = (ok - ng < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
             if (Nig.calcAfterNTick(gExpr[0], m).lt(targetMoney)) {
                 ng = m;
             } else {
@@ -1691,40 +1966,29 @@ class Nig {
             }
             cnt += 1;
         }
-        if (update) this.updateGenerators(D(1), ok, gExpr);
+        if (update) this.updateGenerators(D(1), D(ok), gExpr);
         return ok;
     };
 
-    calcTickFromExpr(aExpr, tick) {
-        let acNum = Nig.calcAfterNTick(aExpr[0], tick).mul(D(1.5).pow(this.player.setChip[10]));
-        if (this.isRankChallengeBonusActive(13)) {
-            for (let i = 1; i < 8; i++) acNum = acNum.mul(Nig.calcAfterNTick(aExpr[i], tick).add(1));
-        }
-        return acNum;
-    }
-
     tick2sec(tick, update) {
-        if (tick.lte(0)) return D(0);
-        if (tick.eq(D(Infinity))) return D(Infinity);
+        if (tick <= 0) return 0;
+        if (tick === Infinity) return Infinity;
         const aExpr = this.calcAcceleratorExpr();
-        const delta = D('1e-3');
-        const baseTick = D(this.baseTick()).div(1000);
-        const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
-        let curTick = D(0);
-        let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
-        if (this.isRankChallengeBonusActive(13)) {
-            for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
-        }
-        let prevDt = baseTick.div(acNum.add(10).mul(aMult).log10());
-        let sec = D(0);
-        while (curTick.lt(tick)) {
+        const delta = 1e-3;
+        const baseTick = this.getBaseTick() / 1000;
+        const aMult = this.getAMult();
+        let curTick = 0;
+        let prevDt = baseTick / this.getAcceleratorsSpeed(aMult);
+        let sec = 0;
+        while (curTick < tick) {
             const prevTick = curTick;
-            let ok = curTick.add(1);
-            let ng = tick.add(1);
+            /* tickspeedの変化が一定以下になる経過tickを二分探索 (相加平均 or 相乗平均) */
+            let ok = curTick + 1;
+            let ng = tick + 1;
             let cnt = 0;
-            while (ok.add(1).lt(ng) && cnt < 60) {
-                const m = ng.sub(ok).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
-                if (baseTick.div(this.calcTickFromExpr(aExpr, m).add(10).mul(aMult).log10()).add(delta).gt(prevDt)) {
+            while (ok + 1 < ng && cnt < 60) {
+                const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
+                if ((baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult)) + delta > prevDt) {
                     ok = m;
                 } else {
                     ng = m;
@@ -1732,12 +1996,12 @@ class Nig {
                 cnt += 1;
             }
             curTick = ok;
-            if (prevTick.eq(curTick)) break;
-            const dt = baseTick.div(this.calcTickFromExpr(aExpr, curTick).add(10).mul(aMult).log10());
-            sec = sec.add(prevDt.add(dt).div(2).mul(curTick.sub(prevTick)));
+            if (prevTick === curTick) break;
+            const dt = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, D(curTick), aMult);
+            sec += (prevDt + dt) / 2 * (curTick - prevTick);
             prevDt = dt;
         }
-        if (update) this.updateAccelerators(D(1), tick, aExpr);
+        if (update) this.updateAccelerators(D(1), D(tick), aExpr);
         return sec;
     };
 
@@ -1752,35 +2016,33 @@ class Nig {
                 multByAc: this.multByAc,
             };
             const aExpr = this.calcAcceleratorExpr();
-            const baseTick = D(this.baseTick());
-            const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
-            let curTick = D(0);
-            let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
-            if (this.isRankChallengeBonusActive(13)) {
-                for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
-            }
-            const baseMult9 = D(50).div(this.baseTick());
-            let prevMult9 = baseMult9.mul(acNum.add(10).mul(aMult).log10());
-            let prevMult9Mult = prevMult9.mul(prevMult9.max(1));
+            const baseTick = this.getBaseTick();
+            const aMult = this.getAMult();
+            const getSquareBy9 = (x) => (x * Math.max(x, 1));
+            let curTick = 0;
+            const baseMult9 = 50 / baseTick;
+            let prevMult9 = baseMult9 * this.getAcceleratorsSpeed(aMult);
+            let prevMult9Mult = getSquareBy9(prevMult9);
             let highestA = 0;
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
             while (this.player.money.lt(targetMoney)) {
-                const delta = prevMult9.lt('0.2') ? D('1e-2') : prevMult9.lt('2') ? D('1e-1') : prevMult9.lt('20') ? D('1') : D('10');
+                /* 上位効力10の倍率の変化が一定以内になる経過tickを指数の指数探索 */
+                const delta = prevMult9 < 0.2 ? 0.01 : prevMult9 < 2 ? 0.1 : prevMult9 < 20 ? 1 : 10;
 
-                let ok = curTick.add(1);
-                let ng = curTick.add(2);
+                let ok = curTick + 1;
+                let ng = curTick + 2;
                 let cnt = 0;
                 if (highestA > 0) {
-                    let curMult9 = baseMult9.mul(this.calcTickFromExpr(aExpr, ng).add(10).mul(aMult).log10());
-                    while (curMult9.mul(curMult9.max(1)).lt(prevMult9Mult.add(delta))) {
-                        ng = ng.mul(ng);
-                        curMult9 = baseMult9.mul(this.calcTickFromExpr(aExpr, ng).add(10).mul(aMult).log10());
+                    let curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(ng), aMult);
+                    while (getSquareBy9(curMult9) < prevMult9Mult + delta) {
+                        ng = ng * ng;
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(ng), aMult);
                     }
-                    while (ok.add(1).lt(ng) && cnt < 60) {
-                        const m = ng.sub(ok).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
-                        curMult9 = baseMult9.mul(this.calcTickFromExpr(aExpr, m).add(10).mul(aMult).log10());
-                        if (curMult9.mul(curMult9.max(1)).lt(prevMult9Mult.add(delta))) {
+                    while (ok + 1 < ng && cnt < 60) {
+                        const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, D(m), aMult);
+                        if (getSquareBy9(curMult9) < prevMult9Mult + delta) {
                             ok = m;
                         } else {
                             ng = m;
@@ -1789,20 +2051,22 @@ class Nig {
                     }
                 }
 
+                /* 倍率が変化しないなら、targetMoneyに到達するtickの指数を指数探索 */
                 const gExpr = this.calcGeneratorExpr();
                 if (highestA === 0) {
-                    ok = curTick.add(2);
-                    while (Nig.calcAfterNTick(gExpr[0], ok.sub(curTick)).lt(targetMoney)) {
-                        ok = ok.mul(ok);
+                    ok = curTick + 2;
+                    while (Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
+                        ok = ok * ok;
                     }
                 }
 
-                if (Nig.calcAfterNTick(gExpr[0], ok.sub(curTick)).gte(targetMoney)) {
+                /* 求めたtick後にtargetMoney到達済みなら到達tickを二分探索 */
+                if (Nig.calcAfterNTick(gExpr[0], ok - curTick).gte(targetMoney)) {
                     ng = curTick;
                     cnt = 0;
-                    while (ng.add(1).lt(ok) && cnt < 60) {
-                        const m = ok.sub(ng).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng.add(1)).sqrt().floor();
-                        if (Nig.calcAfterNTick(gExpr[0], m.sub(curTick)).lt(targetMoney)) {
+                    while (ng + 1 < ok && cnt < 60) {
+                        const m = (ok - ng) < 4 ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * (ng + 1)));
+                        if (Nig.calcAfterNTick(gExpr[0], m - curTick).lt(targetMoney)) {
                             ng = m;
                         } else {
                             ok = m;
@@ -1810,30 +2074,30 @@ class Nig {
                         cnt += 1;
                     }
                 }
-                const tick = ok.sub(curTick);
+                const tick = ok - curTick;
                 this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
                 for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-                const tsNum = this.calcTickFromExpr(aExpr, ok).add(10).mul(aMult).log10();
-                this.player.tickSpeed = baseTick.div(tsNum);
+                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, D(ok), aMult);
+                this.player.tickSpeed = baseTick / tsNum;
                 this.multByAc = D(50).div(this.player.tickSpeed);
-                prevMult9 = baseMult9.mul(tsNum);
-                prevMult9Mult = prevMult9.mul(prevMult9.max(1));
+                prevMult9 = baseMult9 * tsNum;
+                prevMult9Mult = getSquareBy9(prevMult9);
                 curTick = ok;
             }
             if (update) {
-                this.updateAccelerators(D(1), curTick, aExpr);
+                this.updateAccelerators(D(1), D(curTick), aExpr);
             } else {
                 this.player.money = prevInfo.money;
                 this.player.generators = prevInfo.generators;
                 this.player.tickSpeed = prevInfo.tickSpeed;
                 this.multByAc = prevInfo.multByAc;
             }
-            const sec = curTick.mul(0.05);
-            return { tick: curTick, sec: sec };
+            const sec = curTick * 0.05;
+            return { tick: D(curTick), sec: D(sec) };
         } else {
             const tick = this.calcGoalTicks(targetMoney, update);
             const sec = this.tick2sec(tick, update);
-            return { tick: tick, sec: sec };
+            return { tick: D(tick), sec: D(sec) };
         }
     };
 
@@ -1841,6 +2105,7 @@ class Nig {
         if (this.player.darkMoney.gte(targetDarkMoney)) return D(0);
         if (this.player.darkGenerators.every(g => g.eq(0))) return D(Infinity);
         const dExpr = this.calcDarkGeneratorExpr(mu);
+        /* 指数を指数探索 -> 相乗平均で二分探索(指数の二分探索になる) -> 相加平均で探索 */
         let ok = D(2);
         let ng = D(0);
         while (Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
@@ -1898,14 +2163,14 @@ class Nig {
             }
         }
 
-        let res = Array.from(checkpoints).fill(null);
+        let result = Array.from(checkpoints).fill(null);
         let totalTicks = D(0);
         let totalSec = D(0);
-        while (events.length) {
+        while (events.length && checkpointsQue.length) {
             let [cost, type, index, number] = events.pop();
             //達成済みならcontinue
             if (type === 0) {
-                if (res[index] !== null) continue;
+                if (result[index] !== null) continue;
             } else if (type === 1) {
                 if (this.player.generatorsBought[index].gt(number)) continue;
             } else if (type === 2) {
@@ -1918,7 +2183,7 @@ class Nig {
             if (this.player.money.gte(cost)) {
                 this.updateGenerators(D(1), tick);
                 this.updateAccelerators(D(1), tick)
-                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick, true);
+                sec = this.isRankChallengeBonusActive(9) ? tick.mul(0.05) : this.tick2sec(tick.toNumber(), true);
             } else {
                 const tickAndSec = this.calcTickAndSec(cost, true);
                 tick = tickAndSec.tick;
@@ -1930,25 +2195,20 @@ class Nig {
             //checkpoint確認
             while (checkpointsQue.length && this.player.money.gte(checkpointsQue.peek()[0])) {
                 let [_, k] = checkpointsQue.pop();
-                res[k] = {
+                result[k] = {
                     tick: totalTicks,
                     sec: totalSec,
                 };
             }
 
-            for (let i = 7; i >= 0; i--) {
-                this.buyGenerator(i);
-            }
-            for (let i = 7; i >= 0; i--) {
-                this.buyAccelerator(i);
-            }
+            this.updateAutoBuys();
         }
-        res = res.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
-        return res;
+        result = result.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
+        return result;
     };
 
     simulateChallenges(challengeId, rank, config) {
-        let minRes = {
+        let minResult = {
             tickMinimum: {
                 tick: D(Infinity),
                 sec: D(Infinity),
@@ -1965,14 +2225,15 @@ class Nig {
             },
             config,
         };
+        let usableRankToken = this.player.rankChallengeCleared.length >= 1 ? this.getMaxRankToken() : 0;
         let accelLevelCandidates = config.searchAccelLevel
             ? Array.from(new Array(this.player.accelLevel + 1).keys())
             : [this.player.accelLevelUsed];
         let challengeBonusesCandidates = config.searchChallengeBonuses
-            ? mbCache.get(this.player.challengeCleared.length, false, true)
+            ? mbCache.get(this.getMaxToken(), false, true)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
         let rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
-            ? mbCache.get(this.player.rankChallengeCleared.length, true, true)
+            ? mbCache.get(usableRankToken, true, true)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
         accelLevelCandidates.forEach(accelLevel => {
             challengeBonusesCandidates.forEach(challengeBonuses => {
@@ -2001,21 +2262,21 @@ class Nig {
                     rankChallengeBonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelLevelUsed = accelLevel;
 
-                    let checkpoints = [rank ? this.resetRankBorder() : D(this.isChallengeActive(0) ? '1e24' : '1e18')];
-                    let res = this.simulate(checkpoints)[0];
-                    if (res.tick.lt(minRes.tickMinimum.tick)) {
-                        minRes.tickMinimum = {
-                            tick: res.tick,
-                            sec: res.sec,
+                    let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
+                    let result = this.simulate(checkpoints)[0];
+                    if (result.tick.lt(minResult.tickMinimum.tick)) {
+                        minResult.tickMinimum = {
+                            tick: result.tick,
+                            sec: result.sec,
                             challengeBonuses: challengeBonuses.slice(),
                             rankChallengeBonuses: rankChallengeBonuses.slice(),
                             accelLevelUsed: this.player.accelLevelUsed,
                         };
                     }
-                    if (res.sec.lt(minRes.secMinimum.sec)) {
-                        minRes.secMinimum = {
-                            tick: res.tick,
-                            sec: res.sec,
+                    if (result.sec.lt(minResult.secMinimum.sec)) {
+                        minResult.secMinimum = {
+                            tick: result.tick,
+                            sec: result.sec,
                             challengeBonuses: challengeBonuses.slice(),
                             rankChallengeBonuses: rankChallengeBonuses.slice(),
                             accelLevelUsed: this.player.accelLevelUsed,
@@ -2024,21 +2285,21 @@ class Nig {
                 });
             })
         });
-        return minRes;
+        return minResult;
     };
 
     simulateDark(checkpoints) {
         if (checkpoints.length === 0) return [];
-        let index = Array.from(checkpoints, (_, i) => i);
-        index.sort((i, j) => checkpoints[i].cmp(checkpoints[j]));
-        let events = [];
+
+        let events = []; //[cost, index]
         for (let i = 0; i < checkpoints.length; i++) {
             events.push([checkpoints[i], i]);
         }
         events.sort((a, b) => a[0].cmp(b[0]));
+
         let result = Array.from(checkpoints).fill(null);
-        events.forEach(([c, i]) => {
-            result[i] = this.calcDarkGoalTick(c);
+        events.forEach(([cost, index]) => {
+            result[index] = this.calcDarkGoalTick(cost);
         });
         return result;
     };
@@ -2062,50 +2323,88 @@ const colorbarPower = f => {
     return col;
 };
 
+const initialConfig = () => {
+    return {
+        isPerfectChallengeReset: true,
+        hideClearedChallenge: false,
+        hideChallengeColor: false,
+        showTickMinimum: false,
+        challenge: {
+            searchChallengeBonuses: true,
+            searchRankChallengeBonuses: true,
+            searchAccelLevel: true,
+            toggleBonuses: true,
+        },
+        searchClearChallenge: true,
+        // autoSimulateCheckpoints: false,
+        // autoSimulateDarkCheckpoints: false,
+        simulateChips: {
+            // auto: false,
+            showMode: 'prob',
+            showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
+            doubleUp: false,
+            minPoint: '0',
+            maxPoint: '1e100',
+            showGainLevel: false,
+        },
+        procMsPerTick: 0,
+        verbose: false,
+        spoiler: false,
+        simulateTableWidth: 80,
+    };
+};
+
 const app = Vue.createApp({
     data() {
         return {
+            /* const */
             TROPHY_NUM: TROPHY_NUM,
             SET_CHIP_KIND: SET_CHIP_KIND,
             SET_CHIP_NUM: SET_CHIP_NUM,
-            nig: new Nig(),
             itemData: itemData,
             shineChallengeLength: [64, 96, 128, 160, 192, 224],
             brightnessRankChallengeLength: [32, 64, 128, 255],
             flickerPChallengeStage: [1],
-            simulatedCheckpoints: Array.from(new Array(10), () => new Map()),
-            challengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            rankChallengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            checkpoints: [D('1e18'), D('1e72')],
-            simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
-            darkCheckpoints: [D('1e18')],
-            cpSimulatedTime: Date.now(),
+
             sampleTick: [1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
             sampleTickLabel: ['1', '1e1', '1e2', '1e3', '1e4', '1e5', '1e6', '1e7', '1e8', '1e9'],
             sampleTime: [1, 60, 3600, 86400, 2592000, 31536000, 3153600000],
             sampleTimeLabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
-            isPerfectChallengeReset: true,
-            hideClearedChallenge: false,
-            hideChallengeColor: false,
-            showTickMinimum: false,
-            challengeConfig: {
-                searchChallengeBonuses: true,
-                searchRankChallengeBonuses: true,
-                searchAccelLevel: true,
-                toggleBonuses: true,
-            },
-            searchClearChallenge: true,
-            autoSimulateCheckpoints: false,
-            autoSimulateDarkCheckpoints: false,
+
+            /* game data */
+            nig: new Nig(),
+
+            /* saveable config */
+            config: initialConfig(),
+
+            /* simulation data */
+            challengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
+            rankChallengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
+            simulatedCheckpoints: Array.from(new Array(10), () => new Map()),
+            checkpoints: [D('1e18'), D('1e72')],
+            simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
+            darkCheckpoints: [D('1e18')],
+            simulatedChipCheckpoints: Array.from(new Array(10), () => new Map()),
+            cpSimulatedTime: Date.now(),
+
             checkpointTarget: 'point',
             checkpointValue: '',
             darkCheckpointTarget: 'point',
             darkCheckpointValue: '',
-            procMsPerTick: 0,
-            verbose: false,
-            spoiler: false,
-            simulateTableWidth: 80,
+
+            autoSimulateCheckpoints: false,
+            autoSimulateDarkCheckpoints: false,
+            autoSimulateChips: false,
         }
+    },
+    watch: {
+        config: {
+            handler: "saveConfig",
+            deep: true,
+        },
+        'config.simulateTableWidth'(newValue) {
+            document.querySelector(':root').style.setProperty('--challenge-width', `${newValue}vh`);
+        },
     },
     computed: {
         startChallengeMessage() {
@@ -2117,7 +2416,8 @@ const app = Vue.createApp({
         },
         startPerfectChallengeMessage() {
             let id = this.nig.calcPerfectChallengeId();
-            let contents = '進行度 通常: ' + (this.nig.player.pChallengeCleared[id]);
+            let contents = '挑戦番号: ' + id + '<br>';
+            contents += '  進行度 通常: ' + (this.nig.player.pChallengeCleared[id]);
             contents += '  上位: ' + (this.nig.player.pRChallengeCleared[id]);
             return contents;
         },
@@ -2153,7 +2453,7 @@ const app = Vue.createApp({
                 let color = 'transparent';
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 if (res !== null) {
-                    if (this.showTickMinimum) {
+                    if (this.config.showTickMinimum) {
                         const tick = res.tickMinimum.tick;
                         if (tick.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
@@ -2162,7 +2462,7 @@ const app = Vue.createApp({
                             color = colorbarPower(f);
                         }
                     } else {
-                        const sec = res.secMinimum.sec.add(res.secMinimum.tick.mul(this.procMsPerTick * 0.001));
+                        const sec = res.secMinimum.sec.add(res.secMinimum.tick.mul(this.config.procMsPerTick * 0.001));
                         if (sec.eq(D(Infinity))) {
                             color = 'rgb(255, 255, 255)';
                         } else {
@@ -2180,13 +2480,13 @@ const app = Vue.createApp({
                 const res = rank ? this.rankChallengeSimulated[this.nig.world][id] : this.challengeSimulated[this.nig.world][id];
                 let message = 'Uncalculated';
                 if (res !== null) {
-                    let minResult = this.showTickMinimum ? res.tickMinimum : res.secMinimum;
-                    const sec = minResult.sec.add(minResult.tick.mul(this.procMsPerTick * 0.001));
+                    let minResult = this.config.showTickMinimum ? res.tickMinimum : res.secMinimum;
+                    const sec = minResult.sec.add(minResult.tick.mul(this.config.procMsPerTick * 0.001));
                     message = minResult.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
-                    if ((this.verbose || this.challengeConfig.searchChallengeBonuses) && minResult.challengeBonuses.length > 0) message += '<br/>効力' + minResult.challengeBonuses.map(x => x + 1);
-                    if ((this.verbose || this.challengeConfig.searchRankChallengeBonuses) && minResult.rankChallengeBonuses.length > 0) message += '<br/>上位効力' + minResult.rankChallengeBonuses.map(x => x + 1);
-                    if ((this.verbose || this.challengeConfig.searchAccelLevel) && this.nig.player.accelLevel > 0) message += '<br/>起動時間回帰力' + minResult.accelLevelUsed;
+                    if ((this.config.verbose || this.config.challenge.searchChallengeBonuses) && minResult.challengeBonuses.length > 0) message += '<br/>効力' + minResult.challengeBonuses.map(x => x + 1);
+                    if ((this.config.verbose || this.config.challenge.searchRankChallengeBonuses) && minResult.rankChallengeBonuses.length > 0) message += '<br/>上位効力' + minResult.rankChallengeBonuses.map(x => x + 1);
+                    if ((this.config.verbose || this.config.challenge.searchAccelLevel) && this.nig.player.accelLevel > 0) message += '<br/>起動時間回帰力' + minResult.accelLevelUsed;
                     // message += '<br/>id: ' + id;
                 }
                 return message;
@@ -2196,7 +2496,7 @@ const app = Vue.createApp({
             return this.checkpoints.map(checkpoint => {
                 const res = this.simulatedCheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
-                const sec = res.sec.add(res.tick.mul(this.procMsPerTick * 0.001));
+                const sec = res.sec.add(res.tick.mul(this.config.procMsPerTick * 0.001));
                 let content = checkpoint.toExponential(3) + ' ポイントまで ' + res.tick.toExponential(3) + ' ticks';
                 content += ' (' + sec.toExponential(3) + ' sec)';
                 content += ' ' + (new Date(this.cpSimulatedTime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
@@ -2209,6 +2509,108 @@ const app = Vue.createApp({
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
                 return checkpoint.toExponential(3) + ' ポイントまで ' + res.toExponential(3) + ' ticks';
             });
+        },
+        chipCheckpointMoney() {
+            return new Array(itemData.chipTable.length).fill(null).map((_, i) => this.nig.getGainChipMoney(i));
+        },
+        chipCheckpointLevel() {
+            return this.chipCheckpointMoney.map(x => this.nig.calcGainLevel(x).toExponential(3));
+        },
+        chipCheckpointRange() {
+            let min = D(0);
+            let max = D("1e100");
+            try {
+                min = D(this.config.simulateChips.minPoint.trim());
+            } catch {}
+            try {
+                max = D(this.config.simulateChips.maxPoint.trim());
+            } catch {}
+            return {min, max};
+        },
+        chipCheckpointTimes() {
+            return new Array(itemData.chipTable.length).fill(null).map((_, chipLv) => {
+                const result = this.simulatedChipCheckpoints[this.nig.world].get(chipLv);
+                return result?.sec.add(result.tick.mul(this.config.procMsPerTick * 0.001));
+            });
+        },
+        chipCheckpointTimeMessages() {
+            return this.chipCheckpointTimes.map(sec => {
+                if (sec === undefined) {return "???";}
+                if (sec.lessThan(1000)) {
+                    return sec.toFixed(3);
+                }
+                return sec.toExponential(3);
+            });
+        },
+        chipCheckpointCellProbs() {
+            const lotteryTime = 1 + Math.floor(this.nig.calcChipRetryTime());
+            const probTable = new Array(itemData.chipTable.length).fill(null).map(
+                (_, i) => this.itemData.calcChipProbability(i, lotteryTime)
+            );
+            return probTable;
+        },
+        chipCheckpointPerHour: function () {
+            return function (prob, chipLv) {
+                const sec = this.chipCheckpointTimes[chipLv];
+                if (prob === 0) {return "0";}
+                if (sec === undefined) {return "???";}
+                const perHour = prob * 3600 / sec;
+                // 1時間に1000回以上
+                if (sec * 1000 <= 3600) {return perHour.toFixed(0);}
+                return perHour.toFixed(2);
+            };
+        },
+        chipDoubleUpExpected() {
+            return new Array(this.SET_CHIP_KIND).fill(null).map(
+                (_, i) => Math.pow(1 + 0.01, this.nig.chipUsed[i])
+            );
+        },
+        chipCheckpointCells() {
+            const config = this.config.simulateChips;
+            let probTable = this.chipCheckpointCellProbs;
+            if (config.doubleUp) {
+                const expect = this.chipDoubleUpExpected;
+                probTable = probTable.map(
+                    array => array.map((x, i) => x * expect[i])
+                );
+            }
+            if (config.showMode == "prob") {
+                if (config.doubleUp) {
+                    probTable = probTable.map(
+                        array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
+                    );
+                } else {
+                    probTable = probTable.map(
+                        array => array.map(x => (x == 0 ? "0 %" : (x * 100).toFixed(2) + " %"))
+                    );
+                }
+            } else if (config.showMode == "perHour") {
+                probTable = probTable.map(
+                    (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
+                );
+            } else if (config.showMode == "perHourWithSpend") {
+                probTable = probTable.map(
+                    (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
+                );
+            }
+            return probTable;
+        },
+        showChipsNum() {
+            return this.config.simulateChips.showChips.slice(0, this.SET_CHIP_KIND).reduce((a, b) => a + b, 0);
+        },
+        chipTableTitle() {
+            const config = this.config.simulateChips;
+            if (config.showMode == "prob") {
+                if (config.doubleUp) {
+                    return "期待値";
+                } else {
+                    return "確率";
+                }
+            } else if (config.showMode == "perHour") {
+                return "効率[個/時間]";
+            } else if (config.showMode == "perHourWithSpend") {
+                return "効率(消費含む)[個/時間]"
+            }
         },
         targetMoneys() {
             return this.commonTargetMoneys(this.checkpointValue, this.checkpointTarget);
@@ -2251,6 +2653,20 @@ const app = Vue.createApp({
         },
     },
     methods: {
+        loadConfig() {
+            console.log("load config.");
+            let config = localStorage.getItem("config");
+            if (config == null) {return;}
+            this.config = deepMergeWithoutUndefined(initialConfig(), JSON.parse(atob(config)), {
+                arrayMerge: combineMerge,
+                isMergeableObject: (target) => Array.isArray(target) || isPlainObject(target),
+                customMerge: (_) => deepMergeWithoutUndefined,
+            });
+        },
+        saveConfig() {
+            console.log("save config.");
+            localStorage.setItem("config", btoa(JSON.stringify(this.config)));
+        },
         formatDecimal(d, places) {
             if (d.lt(D(10).pow(places))) {
                 return d.toFixed(0);
@@ -2294,7 +2710,7 @@ const app = Vue.createApp({
         importSave() {
             const prevWorld = this.nig.world;
             const input = window.prompt('データを入力', '');
-            if (input == '') return;
+            if (input == '' || input === null) return;
             let nig = new Nig();
             nig.loadB(input);
             this.nig = nig;
@@ -2348,6 +2764,13 @@ const app = Vue.createApp({
         },
         buildStatue(i) {
             this.nig.buildStatue(i);
+            this.clearCheckpointsCache();
+        },
+        polishStatue(i) {
+            this.nig.polishStatue(i);
+        },
+        polishStatueBright(i) {
+            this.nig.polishStatueBright(i);
         },
         changeMode(i) {
             this.nig.changeMode(i);
@@ -2369,7 +2792,7 @@ const app = Vue.createApp({
             if (this.nig.player.onPChallenge) {
                 this.nig.exitPerfectChallenge();
             } else {
-                this.nig.startPerfectChallenge(this.isPerfectChallengeReset);
+                this.nig.startPerfectChallenge(this.config.isPerfectChallengeReset);
             }
             this.clearAllCache();
         },
@@ -2388,18 +2811,22 @@ const app = Vue.createApp({
         clearCheckpointsCache() {
             this.simulatedCheckpoints[this.nig.world].clear();
             this.simulatedDarkCheckpoints[this.nig.world].clear();
+            this.simulatedChipCheckpoints[this.nig.world].clear();
             if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
             if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         clearAllCache() {
             for (let i = 0; i < 10; i++) {
                 this.simulatedCheckpoints[i].clear();
                 this.simulatedDarkCheckpoints[i].clear();
+                this.simulatedChipCheckpoints[i].clear();
                 this.challengeSimulated[i] = new Array(256).fill(null);
                 this.rankChallengeSimulated[i] = new Array(256).fill(null);
             }
             if (this.autoSimulateCheckpoints) this.simulateCheckpoints();
             if (this.autoSimulateDarkCheckpoints) this.simulateDarkCheckpoints();
+            if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         addCheckpoint() {
             this.targetMoneys.forEach(targetMoney => this.checkpoints.push(targetMoney));
@@ -2419,11 +2846,11 @@ const app = Vue.createApp({
             if (challengeId <= 0 || 256 <= challengeId) return;
             let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
-            if (!update) update ||= sim[this.nig.world][challengeId].config !== this.challengeConfig;
-            if (!update) update ||= !this.challengeConfig.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
-            if (!update) update ||= !this.challengeConfig.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
-            if (!this.searchClearChallenge && rec) {
+            if (!update) update ||= sim[this.nig.world][challengeId].config !== this.config.challenge;
+            if (!update) update ||= !this.config.challenge.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
+            if (!update) update ||= !this.config.challenge.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
+            if (!update) update ||= !this.config.challenge.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
+            if (!this.config.searchClearChallenge && rec) {
                 let cleared = rank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
             }
@@ -2431,7 +2858,7 @@ const app = Vue.createApp({
             // simulateする場合のみsetTimeoutを挟む
             if (update) {
                 setTimeout(() => {
-                    sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, rank, JSON.parse(JSON.stringify(this.challengeConfig)));
+                    sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, rank, JSON.parse(JSON.stringify(this.config.challenge)));
                     if (rec) this.simulateChallenges(challengeId + 1, rank, rec);
                 }, 0);
             } else {
@@ -2457,6 +2884,28 @@ const app = Vue.createApp({
                 res.forEach((r, i) => this.simulatedDarkCheckpoints[this.nig.world].set(this.darkCheckpoints[i], r));
             }, 0);
         },
+        simulateChipCheckpoints() {
+            const maxPoint = this.chipCheckpointRange.max;
+
+            let checkpoints = new Array();
+            let chipLvs = new Array();
+            for (let i = 1; i < this.itemData.chipTable.length; i++) {
+                let money = this.nig.getGainChipMoney(i);
+                if (money.greaterThan(maxPoint)) {break;}
+                checkpoints.push(money);
+                chipLvs.push(i);
+            }
+
+            setTimeout(() => {
+                if (checkpoints.length === 0) {return;}
+                const nig = this.nig.clone();
+                nig.resetLevelData();
+                nig.updateAutoBuys();
+                nig.updateTickSpeed();
+                const result = nig.simulate(checkpoints);
+                result.forEach((r, i) => this.simulatedChipCheckpoints[this.nig.world].set(chipLvs[i], r));
+            }, 0);
+        },
         scaleSampleTime(t) {
             const r = Math.log10(t) / Math.log10(3153600000) * 100;
             return {
@@ -2473,34 +2922,35 @@ const app = Vue.createApp({
                 'btn-outline-dark': !cond,
             };
         },
-        chipColoredButtonClass(j) {
+        chipColoredButtonStyle(j) {
             if (j === 0) {
                 return {};
-            } else if (j >= 9) {
-                let color = ['silver', 'gold'][j - 9];
-                return {
-                    'background-color': color,
-                    'background-image': 'linear-gradient(135deg,transparent 20%,40%,rgba(255,255,255,1) 50%,60%,transparent 80%)'
-                }
-
-            } else {
-                let color = [
-                    '#cd7f32', 'silver', 'gold',
-                    '#E5E4E2', '#EE82EE', '#FF3333',
-                    '#42FFDD', '#38B48B'
-                ][j - 1];
-                return {
-                    'background-color': color,
-                };
             }
+            let color = [
+                '#cd7f32', 'silver', 'gold',
+                '#E5E4E2', '#EE82EE', '#FF3333',
+                '#42FFDD', '#38B48B',
+                'silver', 'gold',
+            ][j - 1];
+            let image = 'none';
+            if (j >= 9) {
+                image = 'linear-gradient(135deg,transparent 20%,40%,rgba(255,255,255,1) 50%,60%,transparent 80%)';
+            }
+            return {
+                'background-color': color,
+                'background-image': image,
+            };
         },
         scaleChallengeTable(c) {
-            this.simulateTableWidth = Math.max(20, Math.min(100, this.simulateTableWidth * c));
-            document.querySelector(':root').style.setProperty('--challenge-width', `${this.simulateTableWidth}vh`);
+            this.config.simulateTableWidth = Math.max(20, Math.min(100, this.config.simulateTableWidth * c));
+        },
+        resetChallengeTableScale() {
+            this.config.simulateTableWidth = 80;
         },
     },
     mounted() {
         setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);
+        this.loadConfig();
     },
     updated() {
         setTimeout(() => renderMathInElement(document.getElementById('gaExpression'), { delimiters: [{ left: '\\(', right: '\\)', display: false }] }), 0);

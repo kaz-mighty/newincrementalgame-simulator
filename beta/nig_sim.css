@@ -106,23 +106,53 @@ td .unchallengeable {
 }
 .tooltip-cell {
     position: relative;
-}
-.tooltip-cell .up-tooltip {
-    visibility: hidden;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    padding: 5px 5px;
-    border-radius: 6px;
 
-    width: 28ch;
-    bottom: 115%;
-    left: 50%;
-    margin-left: -14ch;
+    &:hover {
+        .up-tooltip, .down-tooltip, .left-tooltip, .right-tooltip {
+            visibility: visible;
+        }
+    }
+    .up-tooltip, .down-tooltip, .left-tooltip, .right-tooltip {
+        visibility: hidden;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        padding: 5px 5px;
+        border-radius: 6px;
+        width: 28ch;
 
-    position: absolute;
-    z-index: 1;
+        position: absolute;
+        z-index: 1;
+    }
+    .up-tooltip {
+        bottom: 115%;
+        left: 50%;
+        transform: translate(-50%, 0);
+    }
+    .down-tooltip {
+        top: 115%;
+        left: 50%;
+        transform: translate(-50%, 0);
+    }
+    .left-tooltip {
+        top: 50%;
+        right: 105%;
+        transform: translate(0, -50%);
+    }
+    .right-tooltip {
+        top: 50%;
+        left: 105%;
+        transform: translate(0, -50%);
+    }
 }
-.tooltip-cell:hover .up-tooltip {
-    visibility: visible;
+
+.form-inline {
+    display: inline;
+    width: auto;
+}
+.chip-input {
+    display: inline;
+    width: 100%;
+    max-width: 6em;
+    padding: 0.25rem;
 }
