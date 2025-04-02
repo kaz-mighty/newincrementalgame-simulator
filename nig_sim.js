@@ -2195,29 +2195,29 @@ class Nig {
             while (checkpointsQue.length && this.player.money.gte(checkpointsQue.peek()[0])) {
                 let [_, k] = checkpointsQue.pop();
                 result[k] = {
-                    tick: D(totalTicks),
-                    sec: D(totalSec),
+                    tick: totalTicks,
+                    sec: totalSec,
                 };
             }
 
             this.updateAutoBuys();
         }
-        result = result.map(item => item === null ? {tick: D(Infinity), sec: D(Infinity)} : item);
+        result = result.map(item => item === null ? {tick: Infinity, sec: Infinity} : item);
         return result;
     };
 
     simulateChallenges(challengeId, rank, config) {
         let minResult = {
             tickMinimum: {
-                tick: D(Infinity),
-                sec: D(Infinity),
+                tick: Infinity,
+                sec: Infinity,
                 challengeBonuses: [],
                 rankChallengeBonuses: [],
                 accelLevelUsed: 0,
             },
             secMinimum: {
-                tick: D(Infinity),
-                sec: D(Infinity),
+                tick: Infinity,
+                sec: Infinity,
                 challengeBonuses: [],
                 rankChallengeBonuses: [],
                 accelLevelUsed: 0,
@@ -2263,7 +2263,7 @@ class Nig {
 
                     let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
                     let result = this.simulate(checkpoints)[0];
-                    if (result.tick.lt(minResult.tickMinimum.tick)) {
+                    if (result.tick < minResult.tickMinimum.tick) {
                         minResult.tickMinimum = {
                             tick: result.tick,
                             sec: result.sec,
@@ -2272,7 +2272,7 @@ class Nig {
                             accelLevelUsed: this.player.accelLevelUsed,
                         };
                     }
-                    if (result.sec.lt(minResult.secMinimum.sec)) {
+                    if (result.sec < minResult.secMinimum.sec) {
                         minResult.secMinimum = {
                             tick: result.tick,
                             sec: result.sec,
@@ -2454,18 +2454,18 @@ const app = Vue.createApp({
                 if (res !== null) {
                     if (this.config.showTickMinimum) {
                         const tick = res.tickMinimum.tick;
-                        if (tick.eq(D(Infinity))) {
+                        if (tick === Infinity) {
                             color = 'rgb(255, 255, 255)';
                         } else {
-                            const f = tick.max(1).log10() / Math.log10(1e10);
+                            const f = Math.log10(Math.max(tick, 1)) / Math.log10(1e10);
                             color = colorbarPower(f);
                         }
                     } else {
-                        const sec = res.secMinimum.sec.add(res.secMinimum.tick.mul(this.config.procMsPerTick * 0.001));
-                        if (sec.eq(D(Infinity))) {
+                        const sec = res.secMinimum.sec + res.secMinimum.tick * this.config.procMsPerTick * 0.001;
+                        if (sec === Infinity) {
                             color = 'rgb(255, 255, 255)';
                         } else {
-                            const f = sec.max(1).log10() / Math.log10(3153600000);
+                            const f = Math.log10(Math.max(sec, 1)) / Math.log10(3153600000);
                             color = colorbarPower(f);
                         }
                     }
@@ -2480,7 +2480,7 @@ const app = Vue.createApp({
                 let message = 'Uncalculated';
                 if (res !== null) {
                     let minResult = this.config.showTickMinimum ? res.tickMinimum : res.secMinimum;
-                    const sec = minResult.sec.add(minResult.tick.mul(this.config.procMsPerTick * 0.001));
+                    const sec = minResult.sec + minResult.tick * this.config.procMsPerTick * 0.001;
                     message = minResult.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
                     if ((this.config.verbose || this.config.challenge.searchChallengeBonuses) && minResult.challengeBonuses.length > 0) message += '<br/>効力' + minResult.challengeBonuses.map(x => x + 1);
@@ -2495,10 +2495,10 @@ const app = Vue.createApp({
             return this.checkpoints.map(checkpoint => {
                 const res = this.simulatedCheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
-                const sec = res.sec.add(res.tick.mul(this.config.procMsPerTick * 0.001));
+                const sec = res.sec + res.tick * this.config.procMsPerTick * 0.001;
                 let content = checkpoint.toExponential(3) + ' ポイントまで ' + res.tick.toExponential(3) + ' ticks';
                 content += ' (' + sec.toExponential(3) + ' sec)';
-                content += ' ' + (new Date(this.cpSimulatedTime + Number(sec.mul(1000).toExponential(20)))).toLocaleString() + ' に達成';
+                content += ' ' + (new Date(this.cpSimulatedTime + (sec * 1000))).toLocaleString() + ' に達成';
                 return content;
             });
         },
@@ -2529,13 +2529,14 @@ const app = Vue.createApp({
         chipCheckpointTimes() {
             return new Array(itemData.chipTable.length).fill(null).map((_, chipLv) => {
                 const result = this.simulatedChipCheckpoints[this.nig.world].get(chipLv);
-                return result?.sec.add(result.tick.mul(this.config.procMsPerTick * 0.001));
+                if (result === undefined) {return undefined;}
+                return result.sec + result.tick * this.config.procMsPerTick * 0.001;
             });
         },
         chipCheckpointTimeMessages() {
             return this.chipCheckpointTimes.map(sec => {
                 if (sec === undefined) {return "???";}
-                if (sec.lessThan(1000)) {
+                if (sec <= 1000) {
                     return sec.toFixed(3);
                 }
                 return sec.toExponential(3);
