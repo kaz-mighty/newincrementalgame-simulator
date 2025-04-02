@@ -1005,11 +1005,7 @@ class Nig {
         this.incrementalMults[i] = mult;
     };
 
-    updateGenerators(mu = D(1), tick = D(1), gExpr = this.calcGeneratorExpr(mu)) {
-        this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
-        for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-    };
-    baseTick() {
+    getBaseTick() {
         const challengeBonusesCount = this.player.challengeBonuses.reduce((x, y) => x + (y ? 1 : 0), 0);
         let tickSpeed = 1000;
         if (this.isPerfectChallengeActive(1)) tickSpeed = 10000;
@@ -1022,14 +1018,31 @@ class Nig {
         if (tickSpeed < 1) {tickSpeed = 1;}
         return tickSpeed;
     };
-    updateTickSpeed() {
-        const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
+    getAMult() {
+        return this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
+    };
+    getAcceleratorsSpeed(aMult) {
         let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
         if (this.isRankChallengeBonusActive(13)) {
             for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
         }
-        this.player.tickSpeed = this.baseTick() / acNum.add(10).mul(aMult).log10();
+        return acNum.add(10).mul(aMult).log10();
+    };
+    getAcceleratorsSpeedFromExpr(aExpr, tick, aMult) {
+        let acNum = Nig.calcAfterNTick(aExpr[0], tick).mul(D(1.5).pow(this.player.setChip[10]));
+        if (this.isRankChallengeBonusActive(13)) {
+            for (let i = 1; i < 8; i++) acNum = acNum.mul(Nig.calcAfterNTick(aExpr[i], tick).add(1));
+        }
+        return acNum.add(10).mul(aMult).log10();
+    };
+    updateTickSpeed() {
+        this.player.tickSpeed = this.getBaseTick() / this.getAcceleratorsSpeed(this.getAMult());
         this.multByAc = D(50).div(this.player.tickSpeed);
+    };
+
+    updateGenerators(mu = D(1), tick = D(1), gExpr = this.calcGeneratorExpr(mu)) {
+        this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
+        for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
     };
     updateAccelerators(mu = D(1), tick = D(1), aExpr = this.calcAcceleratorExpr(mu)) {
         for (let i = 0; i < 8; i++) this.player.accelerators[i] = Nig.calcAfterNTick(aExpr[i], tick);
@@ -1955,27 +1968,15 @@ class Nig {
         return ok;
     };
 
-    calcTickFromExpr(aExpr, tick) {
-        let acNum = Nig.calcAfterNTick(aExpr[0], tick).mul(D(1.5).pow(this.player.setChip[10]));
-        if (this.isRankChallengeBonusActive(13)) {
-            for (let i = 1; i < 8; i++) acNum = acNum.mul(Nig.calcAfterNTick(aExpr[i], tick).add(1));
-        }
-        return acNum;
-    }
-
     tick2sec(tick, update) {
         if (tick.lte(0)) return D(0);
         if (tick.eq(D(Infinity))) return D(Infinity);
         const aExpr = this.calcAcceleratorExpr();
         const delta = D('1e-3');
-        const baseTick = D(this.baseTick()).div(1000);
-        const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
+        const baseTick = D(this.getBaseTick()).div(1000);
+        const aMult = this.getAMult();
         let curTick = D(0);
-        let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
-        if (this.isRankChallengeBonusActive(13)) {
-            for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
-        }
-        let prevDt = baseTick.div(acNum.add(10).mul(aMult).log10());
+        let prevDt = baseTick.div(this.getAcceleratorsSpeed(aMult));
         let sec = D(0);
         while (curTick.lt(tick)) {
             const prevTick = curTick;
@@ -1984,7 +1985,7 @@ class Nig {
             let cnt = 0;
             while (ok.add(1).lt(ng) && cnt < 60) {
                 const m = ng.sub(ok).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
-                if (baseTick.div(this.calcTickFromExpr(aExpr, m).add(10).mul(aMult).log10()).add(delta).gt(prevDt)) {
+                if (baseTick.div(this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult)).add(delta).gt(prevDt)) {
                     ok = m;
                 } else {
                     ng = m;
@@ -1993,7 +1994,7 @@ class Nig {
             }
             curTick = ok;
             if (prevTick.eq(curTick)) break;
-            const dt = baseTick.div(this.calcTickFromExpr(aExpr, curTick).add(10).mul(aMult).log10());
+            const dt = baseTick.div(this.getAcceleratorsSpeedFromExpr(aExpr, curTick, aMult));
             sec = sec.add(prevDt.add(dt).div(2).mul(curTick.sub(prevTick)));
             prevDt = dt;
         }
@@ -2012,15 +2013,11 @@ class Nig {
                 multByAc: this.multByAc,
             };
             const aExpr = this.calcAcceleratorExpr();
-            const baseTick = D(this.baseTick());
-            const aMult = this.isChallengeBonusActive(6) ? (this.isRankChallengeBonusActive(10) ? this.player.acceleratorsBought[0].pow_base(2) : this.player.acceleratorsBought[0].add(1)) : D(1);
+            const baseTick = D(this.getBaseTick());
+            const aMult = this.getAMult();
             let curTick = D(0);
-            let acNum = this.player.accelerators[0].mul(D(1.5).pow(this.player.setChip[10]));
-            if (this.isRankChallengeBonusActive(13)) {
-                for (let i = 1; i < 8; i++) acNum = acNum.mul(this.player.accelerators[i].add(1));
-            }
-            const baseMult9 = D(50).div(this.baseTick());
-            let prevMult9 = baseMult9.mul(acNum.add(10).mul(aMult).log10());
+            const baseMult9 = D(50).div(baseTick);
+            let prevMult9 = baseMult9.mul(this.getAcceleratorsSpeed(aMult));
             let prevMult9Mult = prevMult9.mul(prevMult9.max(1));
             let highestA = 0;
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
@@ -2032,14 +2029,14 @@ class Nig {
                 let ng = curTick.add(2);
                 let cnt = 0;
                 if (highestA > 0) {
-                    let curMult9 = baseMult9.mul(this.calcTickFromExpr(aExpr, ng).add(10).mul(aMult).log10());
+                    let curMult9 = baseMult9.mul(this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult));
                     while (curMult9.mul(curMult9.max(1)).lt(prevMult9Mult.add(delta))) {
                         ng = ng.mul(ng);
-                        curMult9 = baseMult9.mul(this.calcTickFromExpr(aExpr, ng).add(10).mul(aMult).log10());
+                        curMult9 = baseMult9.mul(this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult));
                     }
                     while (ok.add(1).lt(ng) && cnt < 60) {
                         const m = ng.sub(ok).lt(4) ? ok.add(ng).div(2).floor() : ok.mul(ng).sqrt().floor();
-                        curMult9 = baseMult9.mul(this.calcTickFromExpr(aExpr, m).add(10).mul(aMult).log10());
+                        curMult9 = baseMult9.mul(this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult));
                         if (curMult9.mul(curMult9.max(1)).lt(prevMult9Mult.add(delta))) {
                             ok = m;
                         } else {
@@ -2073,7 +2070,7 @@ class Nig {
                 const tick = ok.sub(curTick);
                 this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
                 for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-                const tsNum = this.calcTickFromExpr(aExpr, ok).add(10).mul(aMult).log10();
+                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, ok, aMult);
                 this.player.tickSpeed = baseTick.div(tsNum);
                 this.multByAc = D(50).div(this.player.tickSpeed);
                 prevMult9 = baseMult9.mul(tsNum);
