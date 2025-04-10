@@ -1951,10 +1951,16 @@ class Nig {
         /* 指数を指数探索 -> 相乗平均で二分探索(指数の二分探索になる) -> 相加平均で探索 */
         let ok = 2;
         let ng = 0;
-        while (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
+        while (Number.isFinite(ok) && Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
             ng = ok;
             ok = ok * ok;
-            if (!Number.isFinite(ok)) {return Infinity;}
+        }
+        /* オーバーフロー対策 */
+        if (!Number.isFinite(ok * ok)) {
+            ok = 1e154;
+            if (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
+                return Infinity;
+            }
         }
         let cnt = 0;
         while (ng + 1 < ok && cnt < 60) {
@@ -2026,7 +2032,7 @@ class Nig {
             let highestA = 0;
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
-            outerloop: while (this.player.money.lt(targetMoney)) {
+            while (this.player.money.lt(targetMoney)) {
                 /* 上位効力10の倍率の変化が一定以内になる経過tickを指数の指数探索 */
                 const delta = prevMult9 < 0.2 ? 0.01 : prevMult9 < 2 ? 0.1 : prevMult9 < 20 ? 1 : 10;
 
@@ -2035,12 +2041,17 @@ class Nig {
                 let cnt = 0;
                 if (highestA > 0) {
                     let curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
-                    while (getSquareBy9(curMult9) < prevMult9Mult + delta) {
+                    while (Number.isFinite(ng) && getSquareBy9(curMult9) < prevMult9Mult + delta) {
                         ng = ng * ng;
                         curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
-                        if (!Number.isFinite(ng)) {
+                    }
+                    /* オーバーフロー対策 */
+                    if (!Number.isFinite(ng * ng)) {
+                        ng = 1e154;
+                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
+                        if (getSquareBy9(curMult9) < prevMult9Mult + delta) {
                             curTick = Infinity;
-                            break outerloop;
+                            break;
                         }
                     }
                     while (ok + 1 < ng && cnt < 60) {
@@ -2059,11 +2070,15 @@ class Nig {
                 const gExpr = this.calcGeneratorExpr();
                 if (highestA === 0) {
                     ok = curTick + 2;
-                    while (Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
+                    while (Number.isFinite(ok) && Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
                         ok = ok * ok;
-                        if (!Number.isFinite(ok)) {
+                    }
+                    /* オーバーフロー対策 */
+                    if (!Number.isFinite(ok * ok)) {
+                        ok = 1e154;
+                        if (Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
                             curTick = Infinity;
-                            break outerloop;
+                            break;
                         }
                     }
                 }
@@ -2116,10 +2131,16 @@ class Nig {
         /* 指数を指数探索 -> 相乗平均で二分探索(指数の二分探索になる) -> 相加平均で探索 */
         let ok = 2;
         let ng = 0;
-        while (Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
+        while (Number.isFinite(ok) && Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
             ng = ok;
             ok = ok * ok;
-            if (!Number.isFinite(ok)) {return Infinity;}
+        }
+        /* オーバーフロー対策 */
+        if (!Number.isFinite(ok * ok)) {
+            ok = 1e154;
+            if (Nig.calcAfterNTick(dExpr[0], ok).lt(targetDarkMoney)) {
+                return Infinity;
+            }
         }
         let cnt = 0;
         while (ng + 1 < ok && cnt < 60) {
