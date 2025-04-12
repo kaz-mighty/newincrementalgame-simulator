@@ -2022,42 +2022,43 @@ class Nig {
                 multByAc: this.multByAc,
             };
             const aExpr = this.calcAcceleratorExpr();
-            const baseTick = this.getBaseTick();
             const aMult = this.getAMult();
-            const getSquareBy9 = (x) => (x * Math.max(x, 1));
-            let curTick = 0;
+            const baseTick = this.getBaseTick();
             const baseMult9 = 50 / baseTick;
-            let prevMult9 = baseMult9 * this.getAcceleratorsSpeed(aMult);
-            let prevMult9Mult = getSquareBy9(prevMult9);
+            const getMult9 = (tick) => {
+                const multi = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, tick, aMult);
+                return multi * Math.max(multi, 1);
+            }
+            let curTick = 0;
             let highestA = 0;
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
             while (this.player.money.lt(targetMoney)) {
                 /* 上位効力10の倍率の変化が一定以内になる経過tickを指数の指数探索 */
-                const delta = prevMult9 < 0.2 ? 0.01 : prevMult9 < 2 ? 0.1 : prevMult9 < 20 ? 1 : 10;
+                const prevMult9 = getMult9(curTick);
+                // さらなる最適化の余地: 現在の累積tick数(curTickではなく、呼び出し元のtotalTick) を利用する
+                // それより非常に小さいtick数なら、誤差が大きくてもかまわない
+                const delta = prevMult9 * 0.04;
+                // console.log("targetMoney:", targetMoney.toExponential(3), "mult9:", prevMult9, "curTick:", curTick);
 
                 let ok = curTick + 1;
                 let ng = curTick + 2;
                 let cnt = 0;
                 if (highestA > 0) {
-                    let curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
-                    while (Number.isFinite(ng) && getSquareBy9(curMult9) < prevMult9Mult + delta) {
+                    while (Number.isFinite(ng) && getMult9(ng) < prevMult9 + delta) {
                         ng = ng * ng;
-                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
                     }
                     /* オーバーフロー対策 */
                     if (!Number.isFinite(ng * ng)) {
                         ng = 1e154;
-                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, ng, aMult);
-                        if (getSquareBy9(curMult9) < prevMult9Mult + delta) {
+                        if (getMult9(ng) < prevMult9 + delta) {
                             curTick = Infinity;
                             break;
                         }
                     }
                     while (ok + 1 < ng && cnt < 60) {
                         const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
-                        curMult9 = baseMult9 * this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult);
-                        if (getSquareBy9(curMult9) < prevMult9Mult + delta) {
+                        if (getMult9(m) < prevMult9 + delta) {
                             ok = m;
                         } else {
                             ng = m;
@@ -2100,11 +2101,8 @@ class Nig {
                 const tick = ok - curTick;
                 this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
                 for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-                const tsNum = this.getAcceleratorsSpeedFromExpr(aExpr, ok, aMult);
-                this.player.tickSpeed = baseTick / tsNum;
+                this.player.tickSpeed = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, ok, aMult);;
                 this.multByAc = D(50).div(this.player.tickSpeed);
-                prevMult9 = baseMult9 * tsNum;
-                prevMult9Mult = getSquareBy9(prevMult9);
                 curTick = ok;
             }
             if (update) {
