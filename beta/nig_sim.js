@@ -2034,31 +2034,47 @@ class Nig {
             for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
             while (this.player.money.lt(targetMoney)) {
-                /* 上位効力10の倍率の変化が一定以内になる経過tickを指数の指数探索 */
-                const prevMult9 = getMult9(curTick);
+                /* targetMoneyの到達tickを指数探索 */
+                const gExpr = this.calcGeneratorExpr();
+                let ok = curTick + 2;
+                let ng = 0;
+                let cnt = 0;
+                while (Number.isFinite(ok) && Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
+                    ng = ok;
+                    ok = ok * ok;
+                }
+                /* オーバーフロー対策 */
+                if (!Number.isFinite(ok * ok)) {
+                    ok = 1e154;
+                    if (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
+                        curTick = Infinity;
+                        break;
+                    }
+                }
+                while (ng + 1 < ok && cnt < 60) {
+                    const m = (ok - ng < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * (ng + 1)));
+                    if (Nig.calcAfterNTick(gExpr[0], m).lt(targetMoney)) {
+                        ng = m;
+                    } else {
+                        ok = m;
+                    }
+                    cnt += 1;
+                }
+
+                /* 上位効力10の倍率の変化が一定以内になるようにする */
                 // さらなる最適化の余地: 現在の累積tick数(curTickではなく、呼び出し元のtotalTick) を利用する
                 // それより非常に小さいtick数なら、誤差が大きくてもかまわない
+                const prevMult9 = getMult9(curTick);
                 const delta = prevMult9 * 0.04;
-                // console.log("targetMoney:", targetMoney.toExponential(3), "mult9:", prevMult9, "curTick:", curTick);
-
-                let ok = curTick + 1;
-                let ng = curTick + 2;
-                let cnt = 0;
-                if (highestA > 0) {
-                    while (Number.isFinite(ng) && getMult9(ng) < prevMult9 + delta) {
-                        ng = ng * ng;
-                    }
-                    /* オーバーフロー対策 */
-                    if (!Number.isFinite(ng * ng)) {
-                        ng = 1e154;
-                        if (getMult9(ng) < prevMult9 + delta) {
-                            curTick = Infinity;
-                            break;
-                        }
-                    }
+                console.log("targetMoney:", targetMoney.toExponential(3), "mult9:", prevMult9, "curTick:", curTick, "ok:", ok);
+                if (getMult9(curTick + ok) >= prevMult9 + delta) {
+                    /* 一定以内になる経過tickを二分探索 */
+                    ng = ok;
+                    ok = 1;
+                    cnt = 0;
                     while (ok + 1 < ng && cnt < 60) {
                         const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
-                        if (getMult9(m) < prevMult9 + delta) {
+                        if (getMult9(curTick + m) < prevMult9 + delta) {
                             ok = m;
                         } else {
                             ng = m;
@@ -2067,43 +2083,12 @@ class Nig {
                     }
                 }
 
-                /* 倍率が変化しないなら、targetMoneyに到達するtickの指数を指数探索 */
-                const gExpr = this.calcGeneratorExpr();
-                if (highestA === 0) {
-                    ok = curTick + 2;
-                    while (Number.isFinite(ok) && Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
-                        ok = ok * ok;
-                    }
-                    /* オーバーフロー対策 */
-                    if (!Number.isFinite(ok * ok)) {
-                        ok = 1e154;
-                        if (Nig.calcAfterNTick(gExpr[0], ok - curTick).lt(targetMoney)) {
-                            curTick = Infinity;
-                            break;
-                        }
-                    }
-                }
-
-                /* 求めたtick後にtargetMoney到達済みなら到達tickを二分探索 */
-                if (Nig.calcAfterNTick(gExpr[0], ok - curTick).gte(targetMoney)) {
-                    ng = curTick;
-                    cnt = 0;
-                    while (ng + 1 < ok && cnt < 60) {
-                        const m = (ok - ng) < 4 ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * (ng + 1)));
-                        if (Nig.calcAfterNTick(gExpr[0], m - curTick).lt(targetMoney)) {
-                            ng = m;
-                        } else {
-                            ok = m;
-                        }
-                        cnt += 1;
-                    }
-                }
-                const tick = ok - curTick;
-                this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
-                for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], tick);
-                this.player.tickSpeed = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, ok, aMult);;
+                /* 状態を更新、acceleratorsは更新不要 */
+                curTick += ok;
+                this.player.money = Nig.calcAfterNTick(gExpr[0], ok);
+                for (let i = 0; i < 8; i++) this.player.generators[i] = Nig.calcAfterNTick(gExpr[i + 1], ok);
+                this.player.tickSpeed = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, curTick, aMult);;
                 this.multByAc = D(50).div(this.player.tickSpeed);
-                curTick = ok;
             }
             if (update) {
                 this.updateAccelerators(D(1), curTick, aExpr);
