@@ -1986,22 +1986,26 @@ class Nig {
         let curTick = 0;
         let prevDt = baseTick / this.getAcceleratorsSpeed(aMult);
         let sec = 0;
-        while (curTick < tick) {
+        while (curTick < tick * (1 - Number.EPSILON)) {
             const prevTick = curTick;
-            /* tickspeedの変化が一定以下になる経過tickを二分探索 (相加平均 or 相乗平均) */
-            let ok = curTick + 1;
-            let ng = tick + 1;
-            let cnt = 0;
-            while (ok + 1 < ng && cnt < 60) {
-                const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
-                if ((baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult)) + delta > prevDt) {
-                    ok = m;
-                } else {
-                    ng = m;
+            if ((baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, tick, aMult)) + delta > prevDt) {
+                curTick = tick;
+            } else {
+                /* tickspeedの変化が一定以下になる経過tickを二分探索 (相加平均 or 相乗平均) */
+                let ok = curTick + 1;
+                let ng = tick + 1;
+                let cnt = 0;
+                while (ok + 1 < ng && cnt < 60) {
+                    const m = (ng - ok < 4) ? Math.floor((ok + ng) / 2) : Math.floor(Math.sqrt(ok * ng));
+                    if ((baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, m, aMult)) + delta > prevDt) {
+                        ok = m;
+                    } else {
+                        ng = m;
+                    }
+                    cnt += 1;
                 }
-                cnt += 1;
+                curTick = ok;
             }
-            curTick = ok;
             if (prevTick === curTick) break;
             const dt = baseTick / this.getAcceleratorsSpeedFromExpr(aExpr, curTick, aMult);
             sec += (prevDt + dt) / 2 * (curTick - prevTick);
