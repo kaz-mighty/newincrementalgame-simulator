@@ -2066,7 +2066,7 @@ class Nig {
                 // それより非常に小さいtick数なら、誤差が大きくてもかまわない
                 const prevMult9 = getMult9(curTick);
                 const delta = prevMult9 * 0.04;
-                console.log("targetMoney:", targetMoney.toExponential(3), "mult9:", prevMult9, "curTick:", curTick, "ok:", ok);
+                // console.log("targetMoney:", targetMoney.toExponential(3), "mult9:", prevMult9, "curTick:", curTick, "ok:", ok);
                 if (getMult9(curTick + ok) >= prevMult9 + delta) {
                     /* 一定以内になる経過tickを二分探索 */
                     ng = ok;
