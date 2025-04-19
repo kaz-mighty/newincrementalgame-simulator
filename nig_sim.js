@@ -2860,34 +2860,37 @@ const app = Vue.createApp({
                 res.forEach((r, i) => this.simulatedCheckpoints[this.nig.world].set(this.checkpoints[i], r));
             }, 0);
         },
-        simulateChallenges(challengeId, rank, rec) {
+        simulateChallenges(challengeId, isRank, isRecursion, startTime) {
             if (challengeId <= 0 || 256 <= challengeId) return;
-            let sim = rank ? this.rankChallengeSimulated : this.challengeSimulated;
+            let sim = isRank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
             if (!update) update ||= sim[this.nig.world][challengeId].config !== this.config.challenge;
             if (!update) update ||= !this.config.challenge.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
             if (!update) update ||= !this.config.challenge.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
             if (!update) update ||= !this.config.challenge.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
-            if (!this.config.searchClearChallenge && rec) {
-                let cleared = rank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
+            if (!this.config.searchClearChallenge && isRecursion) {
+                let cleared = isRank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
             }
 
-            // simulateする場合のみsetTimeoutを挟む
             if (update) {
-                setTimeout(() => {
-                    sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, rank, JSON.parse(JSON.stringify(this.config.challenge)));
-                    if (rec) this.simulateChallenges(challengeId + 1, rank, rec);
-                }, 0);
-            } else {
-                if (rec) this.simulateChallenges(challengeId + 1, rank, rec);
+                sim[this.nig.world][challengeId] = this.nig.clone().simulateChallenges(challengeId, isRank, JSON.parse(JSON.stringify(this.config.challenge)));
+            }
+            if (isRecursion) {
+                if (performance.now() - startTime >= 50) {
+                    setTimeout(() => {
+                        this.simulateChallenges(challengeId + 1, isRank, isRecursion, performance.now());
+                    }, 0);
+                } else {
+                    this.simulateChallenges(challengeId + 1, isRank, isRecursion, startTime);
+                }
             }
         },
-        simulateChallengeOne(i, j, rank) {
-            this.simulateChallenges(this.challengeId(i, j), rank, false);
+        simulateChallengeOne(i, j, isRank) {
+            this.simulateChallenges(this.challengeId(i, j), isRank, false);
         },
-        simulateChallengesAll(rank) {
-            this.simulateChallenges(1, rank, true);
+        simulateChallengesAll(isRank) {
+            this.simulateChallenges(1, isRank, true, performance.now());
         },
         addDarkCheckpoint() {
             this.targetDarkMoneys.forEach(target_money => this.darkCheckpoints.push(target_money));
