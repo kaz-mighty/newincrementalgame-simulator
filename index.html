@@ -106,13 +106,13 @@
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
         <div
           v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
-          段位: {{ formatDecimal(nig.player.level, 6) }} 段位リセット: {{ formatDecimal(nig.player.levelResetTime, 6) }}
+          段位: {{ formatDecimal(nig.player.level, 6) }}&ensp; 段位リセット: {{ formatDecimal(nig.player.levelResetTime, 6) }}
         </div>
         <div v-if="nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
-          階位: {{ formatDecimal(nig.player.rank, 6) }} 階位リセット: {{ formatDecimal(nig.player.rankResetTime, 6) }}
+          階位: {{ formatDecimal(nig.player.rank, 6) }}&ensp; 階位リセット: {{ formatDecimal(nig.player.rankResetTime, 6) }}
         </div>
         <div v-if="nig.player.crownResetTime.gt(0)">
-          冠位: {{ formatDecimal(nig.player.crown, 6) }} 冠位リセット: {{ formatDecimal(nig.player.crownResetTime, 6) }}
+          冠位: {{ formatDecimal(nig.player.crown, 6) }}&ensp; 冠位リセット: {{ formatDecimal(nig.player.crownResetTime, 6) }}
         </div>
         <div
           v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
@@ -120,10 +120,11 @@
         </div>
         <div v-if="nig.player.challengeCleared.length>0">挑戦達成: {{ nig.player.challengeCleared.length }}</div>
         <div v-if="nig.player.rankChallengeCleared.length>0">階位挑戦達成: {{ nig.player.rankChallengeCleared.length }}</div>
-        <div v-if="nig.worldOpened[1] || nig.worldOpened[2]">記憶: {{ nig.memory }}</div>
-        <div>里程: {{ nig.smallMemory }}</div>
-        <div v-if="nig.worldOpened[1] || nig.worldOpened[2]">合計思い出: {{ nig.countRemembers() }}</div>
-        <div v-if="nig.smallMemory>=75">世界管所持数: {{ Math.floor((nig.smallMemory - 72) / 3) }}</div>
+        <div v-if="nig.worldOpened[1] || nig.worldOpened[2]">記憶: {{ nig.memory }}&ensp; 合計思い出: {{ nig.countRemembers() }}</div>
+        <div>
+          <span>里程: {{ nig.smallMemory }}</span>&ensp;
+          <span v-if="nig.smallMemory>=75">世界管所持数: {{ Math.floor((nig.smallMemory - 72) / 3) }}</span>
+        </div>
       </div>
     </div>
 
@@ -251,9 +252,8 @@
 
     <div class="collapse" id="timeInfo">
       <div class="card card-body">
-        <div>時間回帰力: {{ nig.player.accelLevel }}</div>
         <div>
-          起動時間回帰力: {{ nig.player.accelLevelUsed }}
+          起動時間回帰力: {{ nig.player.accelLevelUsed }} / {{ nig.player.accelLevel }}
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed-1)"
             :disabled="nig.player.accelLevelUsed<=0">-</button>
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed+1)"
