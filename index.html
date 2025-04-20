@@ -473,7 +473,8 @@
           鋳片効力
           <div v-for="i in 52" :key="i" class="tooltip-cell">
             <span v-if="i<=32||nig.countRemembers()>=16">
-              <button type="button" class="btn btn-outline-dark" :style="chipColoredButtonStyle(nig.player.setChip[i-1])"
+              <button type="button" class="btn btn-outline-dark toggle-use-chip"
+                :style="chipColoredButtonStyle(nig.player.setChip[i-1])"
                 @click="toggleChip(i-1)" :disabled="nig.player.disabledChip[i-1]">
                 {{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' : itemData.chipName[nig.player.setChip[i - 1] - 1] }}
               </button>
