@@ -1847,12 +1847,6 @@ class Nig {
         if (this.players[0].rankChallengeCleared.length >= 200) this.worldOpened[9] = true;
     };
 
-    toggleChip(i) {
-        let oldChip = this.player.setChip[i];
-        for (let j = oldChip + 1; j <= SET_CHIP_KIND; j++) if (this.configChip(i, j)) return true;
-        for (let j = 0; j < oldChip; j++) if (this.configChip(i, j)) return true;
-        return false;
-    };
     configChip(i, j) {
         if (this.player.disabledChip[i]) return false;
         if (this.player.setChip[i] == j) return false;
@@ -2342,6 +2336,7 @@ const colorbarPower = f => {
 
 const initialConfig = () => {
     return {
+        togglableChips: new Array(SET_CHIP_KIND + 1).fill(true),
         isPerfectChallengeReset: true,
         hideClearedChallenge: false,
         hideChallengeColor: false,
@@ -2815,7 +2810,16 @@ const app = Vue.createApp({
             this.clearAllCache();
         },
         toggleChip(i) {
-            this.nig.toggleChip(i);
+            let oldChip = this.nig.player.setChip[i];
+            toggle: {
+                for (let j = oldChip + 1; j <= SET_CHIP_KIND; j++) {
+                    if (this.config.togglableChips[j] && this.nig.configChip(i, j)) {break toggle;}
+                }
+                for (let j = 0; j < oldChip; j++) {
+                    if (this.config.togglableChips[j] && this.nig.configChip(i, j)) {break toggle;}
+                }
+                return;
+            }
             this.clearAllCache();
         },
         configChip(i, j) {
