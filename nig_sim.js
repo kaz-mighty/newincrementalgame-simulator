@@ -2145,7 +2145,7 @@ class Nig {
             return c;
         };
         //発生器の購入が間に合わないと、先にチェックポイントを達成することがあるのでチェックポイント専用キューも用意する
-        let events = new TinyQueue([], cmpEvents); //[cost, id, index, number]
+        let events = new TinyQueue([], cmpEvents); //[cost, type, index, currentBought]
         let checkpointsQue = new TinyQueue([], (a, b) => a[0].cmp(b[0]));
         let maxCheckpoint = D(0);
         for (let i = 0; i < checkpoints.length; i++) {
@@ -2178,23 +2178,26 @@ class Nig {
         let totalTicks = 0;
         let totalSec = 0;
         while (events.length && checkpointsQue.length) {
-            let [cost, type, index, number] = events.pop();
+            let [cost, type, index, bought] = events.pop();
+            // console.log(
+            //     `now tick: ${totalTicks.toExponential(3)}, money: ${this.player.money.toExponential(3)}, `
+            //     + `cost: ${cost.toExponential(3)}, type: ${type}, index: ${index}, bought: ${bought.toFixed(0)}`
+            // );
             //達成済みならcontinue
             if (type === 0) {
                 if (result[index] !== null) continue;
             } else if (type === 1) {
-                if (this.player.generatorsBought[index].gt(number)) continue;
+                if (this.player.generatorsBought[index].gt(bought)) continue;
             } else if (type === 2) {
-                if (this.player.acceleratorsBought[index].gt(number)) continue;
+                if (this.player.acceleratorsBought[index].gt(bought)) continue;
             }
-            //console.log(totalTicks.toExponential(3), this.player.money.toExponential(3), cost.toExponential(3), type, index, number.toFixed(0))
 
             //次の目標まで(最低1tick)更新
             let tick = 1, sec = 0;
             if (this.player.money.gte(cost)) {
+                sec = this.isRankChallengeBonusActive(9) ? tick * 0.05 : tick * this.player.tickSpeed / 1000;
                 this.updateGenerators(D(1), tick);
-                this.updateAccelerators(D(1), tick)
-                sec = this.isRankChallengeBonusActive(9) ? tick * 0.05 : this.tick2sec(tick, true);
+                this.updateAccelerators(D(1), tick);
             } else {
                 const tickAndSec = this.calcTickAndSec(cost, true);
                 tick = tickAndSec.tick;
@@ -2213,6 +2216,12 @@ class Nig {
             }
 
             this.updateAutoBuys();
+            // より高額で優先度の高いものを購入して、目標を購入できなくなることがあるため
+            if ((type === 1 && this.player.generatorsBought[index].lte(bought))
+                || (type === 2 && this.player.acceleratorsBought[index].lte(bought))
+            ) {
+                events.push([cost, type, index, bought]);
+            }
         }
         result = result.map(item => item === null ? {tick: Infinity, sec: Infinity} : item);
         return result;
