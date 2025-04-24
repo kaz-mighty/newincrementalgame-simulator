@@ -2046,6 +2046,7 @@ class Nig {
                     ok = 1e154;
                     if (Nig.calcAfterNTick(gExpr[0], ok).lt(targetMoney)) {
                         curTick = Infinity;
+                        update = false;
                         break;
                     }
                 }
@@ -2202,6 +2203,7 @@ class Nig {
                 const tickAndSec = this.calcTickAndSec(cost, true);
                 tick = tickAndSec.tick;
                 sec = tickAndSec.sec;
+                if (tick === Infinity) {break;}
             }
             totalTicks += tick;
             totalSec += sec;
