@@ -2365,7 +2365,7 @@ const initialConfig = () => {
             // auto: false,
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
-            doubleUp: false,
+            enableGetNum: false,
             minPoint: '0',
             maxPoint: '1e100',
             showGainLevel: false,
@@ -2584,22 +2584,29 @@ const app = Vue.createApp({
                 return perHour.toFixed(2);
             };
         },
-        chipDoubleUpExpected() {
+        chipGetNumExpected() {
             return new Array(this.SET_CHIP_KIND).fill(null).map(
-                (_, i) => Math.pow(1 + 0.01, this.nig.chipUsed[i])
+                (_, chipGrade) => {
+                    let expect = Math.pow(1 + 0.01, this.nig.chipUsed[chipGrade]);
+                    let date = new Date();
+                    if ((date.getMonth() == 3 && date.getDate() >= 26) || (date.getMonth() == 4 && date.getDate() <= 6)) {
+                        if (chipGrade == 2) {expect += 4;}
+                    }
+                    return expect;
+                }
             );
         },
         chipCheckpointCells() {
             const config = this.config.simulateChips;
             let probTable = this.chipCheckpointCellProbs;
-            if (config.doubleUp) {
-                const expect = this.chipDoubleUpExpected;
+            if (config.enableGetNum) {
+                const expect = this.chipGetNumExpected;
                 probTable = probTable.map(
                     array => array.map((x, i) => x * expect[i])
                 );
             }
             if (config.showMode == "prob") {
-                if (config.doubleUp) {
+                if (config.enableGetNum) {
                     probTable = probTable.map(
                         array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
                     );
@@ -2625,15 +2632,23 @@ const app = Vue.createApp({
         chipTableTitle() {
             const config = this.config.simulateChips;
             if (config.showMode == "prob") {
-                if (config.doubleUp) {
+                if (config.enableGetNum) {
                     return "期待値";
                 } else {
                     return "確率";
                 }
             } else if (config.showMode == "perHour") {
-                return "効率[個/時間]";
+                if (config.enableGetNum) {
+                    return "効率[個/時間]";
+                } else {
+                    return "効率[回数/時間]";
+                }
             } else if (config.showMode == "perHourWithSpend") {
-                return "効率(消費含む)[個/時間]"
+                if (config.enableGetNum) {
+                    return "効率(消費含む)[個/時間]"
+                } else {
+                    return "効率(消費含む)[回数/時間]"
+                }
             }
         },
         targetMoneys() {

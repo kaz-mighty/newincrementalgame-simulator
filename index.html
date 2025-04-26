@@ -802,7 +802,7 @@
             表示
             <select class="form-select form-inline" v-model="config.simulateChips.showMode">
               <option value="prob" selected>確率/期待値</option>
-              <option value="perHour">効率[個/時間]</option>
+              <option value="perHour">効率[獲得/時間]</option>
               <option value="perHourWithSpend">効率(消費含む)</option>
             </select>
           </label>
@@ -816,8 +816,8 @@
         </div>
         <div>
           <div class="form-check form-check-inline">
-            <input type="checkbox" class="form-check-input" id="doubleUp" v-model="config.simulateChips.doubleUp">
-            <label class="form-check-label" for="doubleUp">使用中の鋳片を考慮</label>
+            <input type="checkbox" class="form-check-input" id="enableGetNum" v-model="config.simulateChips.enableGetNum">
+            <label class="form-check-label" for="enableGetNum">一度の入手数を考慮</label>
           </div>
           <div class="form-check form-check-inline">
             <input type="checkbox" class="form-check-input" id="showGainLevel" v-model="config.simulateChips.showGainLevel">
@@ -838,7 +838,7 @@
               :style="chipColoredButtonStyle(i)"
               v-show="config.simulateChips.showChips[i - 1]">
               {{ itemData.chipName[i - 1] }}
-              <div class="up-tooltip">入手数期待値: {{ chipDoubleUpExpected[i - 1].toFixed(3) }}倍</div>
+              <div class="up-tooltip">入手数期待値: {{ chipGetNumExpected[i - 1].toFixed(3) }}倍</div>
             </td>
           </tr>
           <tr>
