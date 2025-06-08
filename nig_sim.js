@@ -2264,7 +2264,11 @@ class Nig {
                     for (let i = 0; i < 8; i++) if (this.player.challenges[i]) this.configChallenge(i);
                     for (let i = 0; i < 15; i++) if (this.player.challengeBonuses[i]) this.toggleReward(i);
                     for (let i = 0; i < 15; i++) if (this.player.rankChallengeBonuses[i]) this.toggleRankReward(i);
-                    for (let i = 0; i < 8; i++) this.player.generatorsMode[i] = i;
+                    if (this.isPerfectChallengeActive(2)) {
+                        this.player.generatorsMode = [0, 1, 2, 2, 4, 5, 5, 7];
+                    } else {
+                        this.player.generatorsMode = new Array(8).fill(null).map((_, i) => i);
+                    }
 
                     for (let i = 0; i < 8; i++) if ((challengeId & (1 << 7 - i)) !== 0) this.configChallenge(i);
                     this.toggleReward(4);
@@ -2855,6 +2859,10 @@ const app = Vue.createApp({
         workTime(i) {
             this.nig.workTime(i);
             this.clearCheckpointsCache();
+        },
+        toggleAutoDoChallenge() {
+            this.nig.player.rings.outsideAuto.autoDoChallenge = !this.nig.player.rings.outsideAuto.autoDoChallenge;
+            this.clearAllCache();
         },
         clearCheckpointsCache() {
             this.simulatedCheckpoints[this.nig.world].clear();
