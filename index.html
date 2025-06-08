@@ -616,6 +616,14 @@
           <label class="form-check-label" for="searchClearChallenge">達成済みも探索</label>
         </div>
       </div>
+      <div>
+        <button type="button" class="btn"
+          :class="buttonSelectedClass(nig.player.rings.outsideAuto.autoDoChallenge)"
+          @click="toggleAutoDoChallenge()"
+          v-if="nig.player.rings.clearedMission.includes(12)">
+          自動挑戦器
+        </button>
+      </div>
       <nav>
         <div class="nav nav-tabs" id="challengeTab" role="tablist">
           <a class="nav-link active" id="challengePanelTab" data-bs-toggle="tab" href="#challengePanel" role="tab"
@@ -912,7 +920,7 @@
           段位効力2を購入しているなら、より良い効力の組み合わせが存在することがある。
           時間回帰力探索が有効なら、0から最大値まで全探索する。
           モードは発生器iならi-1固定。
-
+          <span v-if="nig.player.crownResetTime.gt(0)">ただし、完全挑戦3の挑戦中なら[0, 1, 2, 2, 4, 5, 5, 7]になる。</span>
         </p>
       </div>
       <div class="card-body">
