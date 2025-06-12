@@ -100,6 +100,8 @@ class ItemData {
             '階位挑戦1+2+3+5+6+7を達成する',
             '挑戦を200種類以上達成する',
             '階位挑戦を200種類以上達成する',
+            '天上ポイントを1e8以上にする',
+            '金像を16個以上にする',
         ];
         this.worldPipeText = [
             {effect: "発生器コスト", value: (x) => D(-(x * 0.2)).pow_base(10).toExponential(3) + " 倍"},
@@ -112,6 +114,8 @@ class ItemData {
             {effect: "鋳片判定ライン", value: (x) => D(10).pow(-(x * 0.4)).toExponential(3) + " 倍"},
             {effect: "裏発生器iコスト", value: (x) => "10 ^ (" + (-x * 0.02).toFixed(2) + " * i * i) 倍"},
             {effect: "煌き入手確率", value: (x) => "+ " + (0.1 * x * 0.5).toFixed(2) + " %"},
+            {effect: "天上発生器生産量", value: (x) => (1 + x * 0.1).toFixed(1) + " 倍"},
+            {effect: "鋳片ダブルアップ確率", value: (x) => (1 + x * 0.1).toFixed(1) + " 倍"},
         ];
         this.trophyText = [
             '有段者',
@@ -454,6 +458,7 @@ class MaximumBonuses {
 
 const mbCache = new MaximumBonuses();
 
+const WORLD_NUM = 12;
 const TROPHY_NUM = 10;
 const SET_CHIP_KIND = 10;
 const SET_CHIP_NUM = 100;
@@ -461,17 +466,17 @@ const SET_CHIP_NUM = 100;
 class Nig {
     constructor() {
         this.player = Nig.initialData();
-        this.players = new Array(10).fill(null).map(() => Nig.initialData());
+        this.players = new Array(WORLD_NUM).fill(null).map(() => Nig.initialData());
         this.highest = 0;
         this.commonMult = D(1);
         this.incrementalMults = new Array(8).fill(D(1));
         this.multByAc = D(1);
         this.memory = 0;
         this.smallMemory = 0;
-        this.smallMemories = new Array(10).fill(0);
-        this.eachPipedSmallMemory = new Array(10).fill(0);
+        this.smallMemories = new Array(WORLD_NUM).fill(0);
+        this.eachPipedSmallMemory = new Array(WORLD_NUM).fill(0);
         this.pipedSmallMemory = 0;
-        this.worldOpened = new Array(10).fill(false);
+        this.worldOpened = new Array(WORLD_NUM).fill(false);
         this.chipUsed = new Array(SET_CHIP_KIND).fill(0);
         this.pChallengeStage = 0;
         this.pChallengeStageRaw = 0;
@@ -582,7 +587,7 @@ class Nig {
             polishedStatue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatueBright: new Array(SET_CHIP_KIND).fill(0),
 
-            worldPipe: new Array(10).fill(0),
+            worldPipe: new Array(WORLD_NUM).fill(0),
             rings: {
                 setRings: [],
                 ringsExp: new Array(13).fill(null).map(() => 0),
@@ -635,8 +640,12 @@ class Nig {
 
     loadB(worldDatab) {
         let players = JSON.parse(atob(worldDatab));
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < WORLD_NUM; i++) {
             let player = players[i];
+            if (player === undefined) {
+                this.players[i] = Nig.initialData();
+                continue;
+            }
             if (!player.useCamelCase) {
                 player = this.loadPlayerFromOriginal(player);
             }
@@ -969,7 +978,8 @@ class Nig {
         d[0][0] = this.player.lightMoney;
         for (let i = 0; i <= highest; i++) d[i + 1][0] = this.player.lightGenerators[i];
         for (let i = highest + 1; i-- > 0;) {
-            d[i + 1].forEach((dd, j) => d[i][j + 1] = d[i][j + 1].add(dd));
+            let mult = mu.mul(1 + this.eachPipedSmallMemory[10] * 0.1);
+            d[i + 1].forEach((dd, j) => d[i][j + 1] = d[i][j + 1].add(dd.mul(mult)));
             while (d[i].length > 0 && d[i][d[i].length - 1].eq(0)) d[i].pop();
         }
         return d;
@@ -1563,7 +1573,7 @@ class Nig {
         let maxPipe = this.calcMaxPipe();
         if (this.player.worldPipe[i] >= maxPipe) return;
         let havePipe = Math.floor((this.smallMemory - 72) / 3);
-        for (let j = 0; j < 10; j++) {
+        for (let j = 0; j < WORLD_NUM; j++) {
             havePipe -= this.player.worldPipe[j];
         }
         if (havePipe > 0) this.player.worldPipe[i] += 1;
@@ -1790,7 +1800,7 @@ class Nig {
     };
     checkMemories() {
         this.memory = 0;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < WORLD_NUM; i++) {
             if (this.world == i) continue;
             this.memory += this.players[i].trophies.reduce((x, y) => x + (y ? 1 : 0), 0);
         }
@@ -1805,7 +1815,7 @@ class Nig {
     };
     checkPipedSmallMemories() {
         let sum = 0;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < WORLD_NUM; i++) {
             if (this.players[i].worldPipe[this.world] >= 1) {
                 const count = this.getPipedSmallMemory(i, this.players[i].worldPipe[this.world]);
                 this.eachPipedSmallMemory[i] = count;
@@ -1817,7 +1827,7 @@ class Nig {
         this.pipedSmallMemory = sum;
     };
     checkSmallMemories() {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < WORLD_NUM; i++) {
             this.smallMemories[i] = this.players[i].smallTrophies.reduce((x, y) => x + (y ? 1 : 0), 0);
             this.smallMemories[i] += this.players[i].smallTrophies2nd.reduce((x, y) => x + (y ? 1 : 0), 0);
         }
@@ -1825,7 +1835,7 @@ class Nig {
     };
     countRemembers() {
         let cnt = 0;
-        for (let i = this.world + 1; i < 10; i++)
+        for (let i = this.world + 1; i < WORLD_NUM; i++)
             cnt += this.players[i].remember;
         return cnt;
     };
@@ -1845,6 +1855,8 @@ class Nig {
         if (this.players[0].rankChallengeCleared.includes(238)) this.worldOpened[7] = true;
         if (this.players[0].challengeCleared.length >= 200) this.worldOpened[8] = true;
         if (this.players[0].rankChallengeCleared.length >= 200) this.worldOpened[9] = true;
+        if (D(this.players[0].lightMoney).gte('1e8')) this.worldOpened[10] = true;
+        if (this.player.statue[2] >= 16) this.worldOpened[11] = true;
     };
 
     configChip(i, j) {
@@ -2385,6 +2397,7 @@ const app = Vue.createApp({
     data() {
         return {
             /* const */
+            WORLD_NUM: WORLD_NUM,
             TROPHY_NUM: TROPHY_NUM,
             SET_CHIP_KIND: SET_CHIP_KIND,
             SET_CHIP_NUM: SET_CHIP_NUM,
@@ -2405,13 +2418,13 @@ const app = Vue.createApp({
             config: initialConfig(),
 
             /* simulation data */
-            challengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            rankChallengeSimulated: Array.from(new Array(10), () => new Array(256).fill(null)),
-            simulatedCheckpoints: Array.from(new Array(10), () => new Map()),
+            challengeSimulated: Array.from(new Array(WORLD_NUM), () => new Array(256).fill(null)),
+            rankChallengeSimulated: Array.from(new Array(WORLD_NUM), () => new Array(256).fill(null)),
+            simulatedCheckpoints: Array.from(new Array(WORLD_NUM), () => new Map()),
             checkpoints: [D('1e18'), D('1e72')],
-            simulatedDarkCheckpoints: Array.from(new Array(10), () => new Map()),
+            simulatedDarkCheckpoints: Array.from(new Array(WORLD_NUM), () => new Map()),
             darkCheckpoints: [D('1e18')],
-            simulatedChipCheckpoints: Array.from(new Array(10), () => new Map()),
+            simulatedChipCheckpoints: Array.from(new Array(WORLD_NUM), () => new Map()),
             cpSimulatedTime: Date.now(),
 
             checkpointTarget: 'point',
@@ -2591,7 +2604,8 @@ const app = Vue.createApp({
         chipGetNumExpected() {
             return new Array(this.SET_CHIP_KIND).fill(null).map(
                 (_, chipGrade) => {
-                    let expect = Math.pow(1 + 0.01, this.nig.chipUsed[chipGrade]);
+                    // todo: 近似精度に問題あり
+                    let expect = Math.pow(1 + 0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
                     let date = new Date();
                     if ((date.getMonth() == 3 && date.getDate() >= 26) || (date.getMonth() == 4 && date.getDate() <= 6)) {
                         if (chipGrade == 2) {expect += 4;}
@@ -2873,7 +2887,7 @@ const app = Vue.createApp({
             if (this.autoSimulateChips) {this.simulateChipCheckpoints();}
         },
         clearAllCache() {
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < WORLD_NUM; i++) {
                 this.simulatedCheckpoints[i].clear();
                 this.simulatedDarkCheckpoints[i].clear();
                 this.simulatedChipCheckpoints[i].clear();
