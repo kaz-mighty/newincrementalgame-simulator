@@ -417,11 +417,11 @@
             <td class="align-middle">思い出</td>
             <td class="align-middle">里程</td>
             <td class="align-middle">世界管</td>
-            <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldOpened[j-1]">{{ j }}</td>
+            <td class="align-middle" v-for="j in WORLD_NUM" :key="j" v-show="nig.worldOpened[j-1]">{{ j }}</td>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="i in 10" :key="i">
+          <tr v-for="i in WORLD_NUM" :key="i">
             <td class="d-grid tooltip-cell">
               <button type="button" class="btn btn-sm"
                 :class="buttonSelectedClass(nig.world == i-1)" :disabled="!nig.worldOpened[i-1]"
@@ -442,7 +442,7 @@
                 </div>
               </div>
             </td>
-            <td class="align-middle" v-for="j in 10" :key="j" v-show="nig.worldOpened[j-1]"
+            <td class="align-middle" v-for="j in WORLD_NUM" :key="j" v-show="nig.worldOpened[j-1]"
               :style="{ 'background-color': i==j ? 'lightgray' : 'transparent' }">
               {{ nig.players[i - 1].worldPipe[j - 1] ? nig.players[i - 1].worldPipe[j - 1] : '' }}
             </td>
