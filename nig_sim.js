@@ -2774,6 +2774,22 @@ const app = Vue.createApp({
             this.selectWorld(prevWorld);
             this.clearAllCache();
         },
+        importSaveFile() {
+            const inputElement = document.createElement("input");
+            inputElement.type= "file";
+            inputElement.addEventListener("change", async () => {
+                if (inputElement.files.length == 0) {return;}
+                const input = await inputElement.files[0].text();
+
+                const prevWorld = this.nig.world;
+                let nig = new Nig();
+                nig.loadB(input);
+                this.nig = nig;
+                this.selectWorld(prevWorld);
+                this.clearAllCache();
+            });
+            inputElement.click();
+        },
         selectWorld(i) {
             this.nig.save();
             this.nig.moveWorld(i);
