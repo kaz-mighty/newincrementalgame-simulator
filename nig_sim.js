@@ -408,8 +408,125 @@ class ItemData {
         return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
     }
 }
+class TimeData {
+    constructor() {
+        this.campaigns = {
+            "newyear" : {
+                title: "新年キャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+            },
+            "vt": {
+                title: "バレンタインキャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+            },
+            "hina": {
+                title: "ひなまつりキャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+            },
+            "gw": {
+                title: "ゴールデンウィークキャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+            },
+            "aniv": {
+                title: "周年キャンペーン",
+                desc: "発生器の倍率が+8倍",
+                cost: 2,
+                commonBonus: 2,
+            },
+            "sw": {
+                title: "シルバーウィークキャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+            },
+            "xmas": {
+                title: "クリスマスキャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+            },
+            "newyear2025": {
+                title: "新年キャンペーン2025",
+                desc: "挑戦4と5を含む挑戦中、発生器の倍率が+40倍",
+                cost: 3,
+                commonBonus: 0,
+            },
+            "gw2": {
+                title: "ゴールデンウィークキャンペーン2",
+                desc: "金片の入手数が+4個",
+                cost: 2,
+                commonBonus: 0,
+            },
+            "xmas2": {
+                title: "クリスマスキャンペーン2",
+                desc: "輝き系の入手時、50%確率で入手数+1",
+                cost: 2,
+                commonBonus: 0,
+            },
+        };
+    }
+
+    getCommonMultiBonus(nig) {
+        let camp = 0;
+        for (const campaignId of nig.player.activatedCampaigns) {
+            camp += this.campaigns[campaignId]?.commonBonus ?? 0;
+        }
+        if (nig.player.activatedCampaigns.includes("newyear2025")
+            && nig.isChallengeActive(3) && nig.isChallengeActive(4))
+        {
+            camp += 10;
+        }
+        return camp;
+    }
+
+    getChipBonus(nig, chipGrade) {
+        if (nig.player.activatedCampaigns.includes("gw2")) {
+            if (chipGrade == 2) {
+                return 4;
+            }
+        }
+        return 0;
+    }
+
+    calcCampaignsCost(activatedCampaigns) {
+        let sum = 0;
+        for (const campaignId of activatedCampaigns) {
+            sum += this.campaigns[campaignId]?.cost ?? 0;
+        }
+        return sum;
+    }
+
+    calcUseCampaigns(nig) {
+        let cost = 0;
+        let activates = []
+        if (nig.isChallengeActive(3) && nig.isChallengeActive(4)) {
+            if (cost + this.campaigns["newyear2025"].cost <= nig.player.accelLevelUsed) {
+                activates.push("newyear2025");
+                cost += this.campaigns["newyear2025"].cost;
+            }
+        }
+        for (const campaignId in this.campaigns) {
+            const campaign = this.campaigns[campaignId];
+            if (campaign.commonBonus != campaign.cost || campaign.commonBonus == 0) {continue;}
+            if (cost + campaign.cost <= nig.player.accelLevelUsed) {
+                activates.push(campaignId);
+                cost += campaign.cost;
+            }
+        }
+        return activates;
+    }
+}
 
 const itemData = new ItemData();
+const timeData = new TimeData();
 
 class MaximumBonuses {
     constructor() {
@@ -553,6 +670,7 @@ class Nig {
             tickSpeed: 1000,
             accelLevel: 0,
             accelLevelUsed: 0,
+            activatedCampaigns: [],
             timeCrystal: new Array(8).fill(null).map(() => 0),
 
             onChallenge: false,
@@ -711,6 +829,7 @@ class Nig {
             tickSpeed: playerData.tickspeed,
             accelLevel: playerData.accelevel,
             accelLevelUsed: playerData.accelevelused,
+            activatedCampaigns: playerData.activatedcampaigns,
             timeCrystal: playerData.timecrystal,
 
             onChallenge: playerData.onchallenge,
@@ -865,22 +984,7 @@ class Nig {
             mult = mult.mul(1 + this.player.statue[i] * 0.01);
         }
 
-        let camp = this.player.accelLevelUsed;
-        let d = new Date();
-        if ((d.getMonth() == 3 && d.getDate() >= 26) || (d.getMonth() == 4 && d.getDate() <= 6)) camp = camp + 1;
-        if (d.getMonth() == 0 && d.getDate() <= 7) {
-            camp += 1;
-            if (this.isChallengeActive(3) && this.isChallengeActive(4)) {
-                camp += 10;
-            }
-        }
-        // if (d.getMonth() == 1 && 8 <= d.getDate() && d.getDate() <= 14) camp = camp + 1;
-        // if ((d.getMonth() == 1 && 25 <= d.getDate()) || ((d.getMonth() == 2 && d.getDate() <= 3))) camp = camp + 1;
-        if ((d.getMonth() == 6 && 29 <= d.getDate()) || (d.getMonth() == 7 && d.getDate() <= 31)) camp = camp + 2;
-        // if (d.getMonth() == 8 && 15 <= d.getDate() && d.getDate() <= 21) camp = camp + 1;
-
-        if (camp > 20) camp = 20;
-        mult = mult.mul(1 + 4 * camp);
+        mult = mult.mul(1 + 4 * timeData.getCommonMultiBonus(this));
 
         if (this.player.rings.outsideAuto.autoDoChallenge) {
             mult = mult.mul(0.001);
@@ -1894,8 +1998,19 @@ class Nig {
     };
     
     workTime(val) {
-        if (0 <= val && val <= this.player.accelLevel) {
+        if (timeData.calcCampaignsCost(this.player.activatedCampaigns) <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
+        }
+    };
+    chooseCampaigns(name) {
+        let activatedCampaigns = this.player.activatedCampaigns;
+        if (activatedCampaigns.includes(name)) {
+            activatedCampaigns.splice(activatedCampaigns.indexOf(name), 1);
+        } else {
+            if (timeData.calcCampaignsCost(activatedCampaigns) + (timeData.campaigns[name]?.cost ?? 0) > this.player.accelLevelUsed) {
+                return;
+            }
+            activatedCampaigns.push(name);
         }
     };
 
@@ -2299,6 +2414,7 @@ class Nig {
                     challengeBonuses.forEach(c => this.toggleReward(c));
                     rankChallengeBonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelLevelUsed = accelLevel;
+                    this.player.activatedCampaigns = timeData.calcUseCampaigns(this);
 
                     let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
                     let result = this.simulate(checkpoints)[0];
@@ -2606,10 +2722,7 @@ const app = Vue.createApp({
                 (_, chipGrade) => {
                     // todo: 近似精度に問題あり
                     let expect = Math.pow(1 + 0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
-                    let date = new Date();
-                    if ((date.getMonth() == 3 && date.getDate() >= 26) || (date.getMonth() == 4 && date.getDate() <= 6)) {
-                        if (chipGrade == 2) {expect += 4;}
-                    }
+                    expect += timeData.getChipBonus(this.nig, chipGrade);
                     return expect;
                 }
             );
@@ -2707,6 +2820,9 @@ const app = Vue.createApp({
             if (this.nig.player.money.gte('1e200') && this.nig.player.crownResetTime.gt(0)) return true;
             if (this.nig.player.lightMoney.gt(0)) return true;
             return this.nig.player.lightGenerators.some(d => d.gt(0));
+        },
+        calcCampaignsCost() {
+            return timeData.calcCampaignsCost(this.nig.player.activatedCampaigns);
         },
     },
     methods: {
