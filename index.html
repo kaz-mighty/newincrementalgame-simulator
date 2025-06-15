@@ -256,14 +256,27 @@
         <div>
           起動時間回帰力: {{ nig.player.accelLevelUsed }} / {{ nig.player.accelLevel }}
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed-1)"
-            :disabled="nig.player.accelLevelUsed<=0">-</button>
+            :disabled="nig.player.accelLevelUsed<=timeData.calcCampaignsCost(nig.player.activatedCampaigns)">-</button>
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed+1)"
             :disabled="nig.player.accelLevelUsed>=nig.player.accelLevel">+</button>
           
             使用中: {{ calcCampaignsCost }}
         </div>
         <div>
-          時間回帰力選択(準備中)
+          時間回帰力選択
+          <div v-for="(value, key) in timeData.campaigns" :key="key">
+            <span class="tooltip-cell">
+              <button type="button" class="btn btn-sm" style="width: 16ic"
+                @click="chooseCampaigns(key)"
+                :class="buttonSelectedClass(nig.player.activatedCampaigns.includes(key))">
+                {{ value.title }}
+              </button>
+              <span class="right-tooltip">
+                {{ value.desc }}
+              </span>
+            </span>
+            <span> 使用回帰力: {{ value.cost }}</span>
+          </div>
         </div>
         <div>
           時の結晶

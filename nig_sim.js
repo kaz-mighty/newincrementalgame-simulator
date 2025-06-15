@@ -2008,10 +2008,11 @@ class Nig {
             activatedCampaigns.splice(activatedCampaigns.indexOf(name), 1);
         } else {
             if (timeData.calcCampaignsCost(activatedCampaigns) + (timeData.campaigns[name]?.cost ?? 0) > this.player.accelLevelUsed) {
-                return;
+                return false;
             }
             activatedCampaigns.push(name);
         }
+        return true;
     };
 
     searchLowerBound(value, l, target) {
@@ -2518,6 +2519,7 @@ const app = Vue.createApp({
             SET_CHIP_KIND: SET_CHIP_KIND,
             SET_CHIP_NUM: SET_CHIP_NUM,
             itemData: itemData,
+            timeData: timeData,
             shineChallengeLength: [64, 96, 128, 160, 192, 224],
             brightnessRankChallengeLength: [32, 64, 128, 255],
             flickerPChallengeStage: [1],
@@ -3005,6 +3007,11 @@ const app = Vue.createApp({
         workTime(i) {
             this.nig.workTime(i);
             this.clearCheckpointsCache();
+        },
+        chooseCampaigns(name) {
+            if (this.nig.chooseCampaigns(name)) {
+                this.clearCheckpointsCache();
+            }
         },
         toggleAutoDoChallenge() {
             this.nig.player.rings.outsideAuto.autoDoChallenge = !this.nig.player.rings.outsideAuto.autoDoChallenge;
