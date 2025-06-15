@@ -259,6 +259,11 @@
             :disabled="nig.player.accelLevelUsed<=0">-</button>
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed+1)"
             :disabled="nig.player.accelLevelUsed>=nig.player.accelLevel">+</button>
+          
+            使用中: {{ calcCampaignsCost }}
+        </div>
+        <div>
+          時間回帰力選択(準備中)
         </div>
         <div>
           時の結晶
@@ -919,7 +924,7 @@
           効力探索が有効なら、効力5と併用して使用する効力の候補として効力3,4,7,8,11,12,14の極大集合を全探索する。
           上位効力探索が有効なら、使用する上位効力の候補として上位効力4,5,7,8,10?,11,12,14の極大集合を全探索する。
           段位効力2を購入しているなら、より良い効力の組み合わせが存在することがある。
-          時間回帰力探索が有効なら、0から最大値まで全探索する。
+          時間回帰力探索が有効なら、起動時間回帰力を0から最大値まで全探索し、買えるだけ発生器を強化する時間回帰力を買う。
           モードは発生器iならi-1固定。
           <span v-if="nig.player.crownResetTime.gt(0)">ただし、完全挑戦3の挑戦中なら[0, 1, 2, 2, 4, 5, 5, 7]になる。</span>
         </p>
