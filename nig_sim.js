@@ -435,6 +435,13 @@ class TimeData {
                 cost: 1,
                 commonBonus: 1,
             },
+            "tanabata": {
+                title: "七夕キャンペーン",
+                desc: "発生器の倍率が+4倍",
+                cost: 1,
+                commonBonus: 1,
+                predicate: (date) => date.getMonth() == 6 && date.getDate() <= 7,
+            },
             "aniv": {
                 title: "周年キャンペーン",
                 desc: "発生器の倍率が+8倍",
@@ -465,9 +472,16 @@ class TimeData {
                 cost: 2,
                 commonBonus: 0,
             },
+            "tanabata2": {
+                title: "七夕キャンペーン2",
+                desc: "天上ポイントが獲得鋳片に影響",
+                cost: 4,
+                commonBonus: 0,
+                predicate: (date) => date.getMonth() == 6 && date.getDate() <= 7,
+            },
             "xmas2": {
                 title: "クリスマスキャンペーン2",
-                desc: "輝き系の入手時、50%確率で入手数+1",
+                desc: "輝き系の入手時、50%の確率で入手数+1",
                 cost: 2,
                 commonBonus: 0,
             },
@@ -498,10 +512,28 @@ class TimeData {
 
     calcCampaignsCost(activatedCampaigns) {
         let sum = 0;
+        const date = new Date();
         for (const campaignId of activatedCampaigns) {
-            sum += this.campaigns[campaignId]?.cost ?? 0;
+            const campaign = this.campaigns[campaignId];
+            if (campaign == null) {continue;}
+            if (campaign.predicate?.(date)) {continue;}
+            sum += campaign.cost ?? 0;
         }
         return sum;
+    }
+
+    activateInTimeCampaign(nig) {
+        const date = new Date();
+        for (const campaignId in this.campaigns) {
+            const campaign = this.campaigns[campaignId];
+            if (campaign.predicate?.(date) && !nig.player.activatedCampaigns.includes(campaignId)) {
+                nig.player.activatedCampaigns.push(campaignId);
+            }
+        }
+        if (this.calcCampaignsCost(nig.player.activatedCampaigns) > nig.player.accelLevelUsed) {
+            nig.player.activatedCampaigns = [];
+            alert("起動時間回帰力が不足しているため、キャンペーンの選択がリセットされました。");
+        }
     }
 
     calcUseCampaigns(nig) {
@@ -923,6 +955,7 @@ class Nig {
         this.updateTickSpeed();
         this.checkPipedSmallMemories();
         this.checkPChallengeCleared();
+        timeData.activateInTimeCampaign(this);
         for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcDarkGeneratorCost(i, this.player.darkGeneratorsBought[i], true);
@@ -1994,6 +2027,9 @@ class Nig {
     };
     getGainChipMoney(chipLv) {
         let bonus = D(10).pow(this.eachPipedSmallMemory[7] * 0.4);
+        if (this.player.activatedCampaigns.includes("tanabata2")) {
+            bonus = bonus.mul(this.player.lightMoney.add(1));
+        }
         return D(itemData.chipTable[chipLv][0]).div(bonus);
     };
     
