@@ -539,6 +539,7 @@ class TimeData {
     calcUseCampaigns(nig) {
         let cost = 0;
         let activates = []
+        const date = new Date();
         if (nig.isChallengeActive(3) && nig.isChallengeActive(4)) {
             if (cost + this.campaigns["newyear2025"].cost <= nig.player.accelLevelUsed) {
                 activates.push("newyear2025");
@@ -547,6 +548,10 @@ class TimeData {
         }
         for (const campaignId in this.campaigns) {
             const campaign = this.campaigns[campaignId];
+            if (campaign.predicate?.(date)) {
+                activates.push(campaignId);
+                continue;
+            }
             if (campaign.commonBonus != campaign.cost || campaign.commonBonus == 0) {continue;}
             if (cost + campaign.cost <= nig.player.accelLevelUsed) {
                 activates.push(campaignId);
