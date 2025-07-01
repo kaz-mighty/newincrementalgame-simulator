@@ -488,6 +488,10 @@ class TimeData {
         };
     }
 
+    isDuring(campaignId, date) {
+        return this.campaigns[campaignId]?.predicate?.(date) ?? false;
+    }
+
     getCommonMultiBonus(nig) {
         let camp = 0;
         for (const campaignId of nig.player.activatedCampaigns) {
@@ -514,33 +518,40 @@ class TimeData {
         let sum = 0;
         const date = new Date();
         for (const campaignId of activatedCampaigns) {
-            const campaign = this.campaigns[campaignId];
-            if (campaign == null) {continue;}
-            if (campaign.predicate?.(date)) {continue;}
-            sum += campaign.cost ?? 0;
+            if (this.isDuring(campaignId, date)) {continue;}
+            sum += this.campaigns[campaignId]?.cost ?? 0;
         }
         return sum;
     }
 
     activateInTimeCampaign(nig) {
+        let isChanged = false;
         const date = new Date();
         for (const campaignId in this.campaigns) {
-            const campaign = this.campaigns[campaignId];
-            if (campaign.predicate?.(date) && !nig.player.activatedCampaigns.includes(campaignId)) {
+            if (this.isDuring(campaignId, date) && !nig.player.activatedCampaigns.includes(campaignId)) {
                 nig.player.activatedCampaigns.push(campaignId);
+                isChanged = true;
             }
         }
         if (this.calcCampaignsCost(nig.player.activatedCampaigns) > nig.player.accelLevelUsed) {
             nig.player.activatedCampaigns = [];
+            isChanged = true;
             alert("起動時間回帰力が不足しているため、キャンペーンの選択がリセットされました。");
         }
+        return isChanged;
     }
 
     calcUseCampaigns(nig) {
         let cost = 0;
         let activates = []
         const date = new Date();
-        if (nig.isChallengeActive(3) && nig.isChallengeActive(4)) {
+        for (const campaignId in this.campaigns) {
+            if (this.isDuring(campaignId, date)) {
+                activates.push(campaignId);
+            }
+        }
+
+        if (nig.isChallengeActive(3) && nig.isChallengeActive(4) && !activates.includes("newyear2025")) {
             if (cost + this.campaigns["newyear2025"].cost <= nig.player.accelLevelUsed) {
                 activates.push("newyear2025");
                 cost += this.campaigns["newyear2025"].cost;
@@ -548,11 +559,8 @@ class TimeData {
         }
         for (const campaignId in this.campaigns) {
             const campaign = this.campaigns[campaignId];
-            if (campaign.predicate?.(date)) {
-                activates.push(campaignId);
-                continue;
-            }
             if (campaign.commonBonus != campaign.cost || campaign.commonBonus == 0) {continue;}
+            if (activates.includes(campaignId)) {continue;}
             if (cost + campaign.cost <= nig.player.accelLevelUsed) {
                 activates.push(campaignId);
                 cost += campaign.cost;
@@ -814,6 +822,8 @@ class Nig {
     };
 
     clone() {
+        timeData.activateInTimeCampaign(this);
+
         let nig = new Nig();
         nig.players = JSON.parse(JSON.stringify(this.players));
         nig.world = this.world;
@@ -2039,17 +2049,21 @@ class Nig {
     };
     
     workTime(val) {
+        timeData.activateInTimeCampaign(this);
         if (timeData.calcCampaignsCost(this.player.activatedCampaigns) <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
         }
     };
     chooseCampaigns(name) {
+        let isChanged = timeData.activateInTimeCampaign(this);
+        if (timeData.isDuring(name, new Date())) {return isChanged;}
+
         let activatedCampaigns = this.player.activatedCampaigns;
         if (activatedCampaigns.includes(name)) {
             activatedCampaigns.splice(activatedCampaigns.indexOf(name), 1);
         } else {
             if (timeData.calcCampaignsCost(activatedCampaigns) + (timeData.campaigns[name]?.cost ?? 0) > this.player.accelLevelUsed) {
-                return false;
+                return isChanged;
             }
             activatedCampaigns.push(name);
         }

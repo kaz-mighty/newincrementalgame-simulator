@@ -268,7 +268,8 @@
             <span class="tooltip-cell">
               <button type="button" class="btn btn-sm" style="width: 16ic"
                 @click="chooseCampaigns(key)"
-                :class="buttonSelectedClass(nig.player.activatedCampaigns.includes(key))">
+                :class="buttonSelectedClass(nig.player.activatedCampaigns.includes(key))"
+                :disabled="timeData.isDuring(key, new Date())">
                 {{ value.title }}
               </button>
               <span class="right-tooltip">
