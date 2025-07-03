@@ -105,6 +105,14 @@
       <div class="card card-body">
         <div v-if="nig.worldOpened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
+        <div v-show="!nig.isRankChallengeBonusActive(9)">
+          間隔: {{ nig.player.tickSpeed.toFixed(2) }} ms&ensp;
+          加速器効果: {{ (1000 / nig.player.tickSpeed).toFixed(3) }} 倍
+        </div>
+        <div v-show="nig.isRankChallengeBonusActive(9)">
+          間隔: <s>{{ nig.player.tickSpeed.toFixed(2) }}</s> 50 ms&ensp;
+          加速器効果: <s>{{ (1000 / nig.player.tickSpeed).toFixed(3) }}</s> 20 倍
+        </div>
         <div
           v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
           段位: {{ formatDecimal(nig.player.level, 6) }}&ensp; 段位リセット: {{ formatDecimal(nig.player.levelResetTime, 6) }}
@@ -119,8 +127,10 @@
           v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
           最大取得段位: {{ formatDecimal(nig.player.maxLevelGained, 6) }}
         </div>
-        <div v-if="nig.player.challengeCleared.length>0">挑戦達成: {{ nig.player.challengeCleared.length }}</div>
-        <div v-if="nig.player.rankChallengeCleared.length>0">階位挑戦達成: {{ nig.player.rankChallengeCleared.length }}</div>
+        <div v-if="nig.player.challengeCleared.length>0">
+          <span>挑戦達成: {{ nig.player.challengeCleared.length }}</span>&ensp;
+          <span v-if="nig.player.rankChallengeCleared.length>0">階位挑戦達成: {{ nig.player.rankChallengeCleared.length }}</span>
+        </div>
         <div v-if="nig.worldOpened[1] || nig.worldOpened[2]">記憶: {{ nig.memory }}&ensp; 合計思い出: {{ nig.countRemembers() }}</div>
         <div>
           <span>里程: {{ nig.smallMemory }}</span>&ensp;

@@ -1304,6 +1304,7 @@ class Nig {
         this.player.accelerators[index] = this.player.accelerators[index].add(1);
         this.player.acceleratorsBought[index] = this.player.acceleratorsBought[index].add(1);
         this.calcAcceleratorCost(index, this.player.acceleratorsBought[index], true);
+        this.updateTickSpeed();
         return true;
     };
 
@@ -1441,6 +1442,7 @@ class Nig {
         this.player.level = this.player.level.sub(cost);
         this.player.levelItems[index] = this.player.levelItems[index] + 1;
         if (this.player.levelItemBought < 100000) this.player.levelItemBought = this.player.levelItemBought + 1;
+        this.updateTickSpeed();
     };
 
     configChallenge(index) {
@@ -1677,6 +1679,7 @@ class Nig {
         }
         this.player.onPChallenge = true;
         this.calcToken();
+        this.updateTickSpeed();
         return true;
     };
     exitPerfectChallenge() {
@@ -1693,6 +1696,7 @@ class Nig {
         }
         this.player.disabledChip = new Array(SET_CHIP_NUM).fill(false);
         this.calcToken();
+        this.updateTickSpeed();
         this.checkPChallengeCleared();
     };
 
@@ -2005,6 +2009,7 @@ class Nig {
         this.player.setChip[i] = j;
         if (j != 0) this.player.chip[j - 1] = this.player.chip[j - 1] - (this.chipUsed[j - 1] + 1);
         this.checkUsedChips();
+        this.updateTickSpeed();
         return true;
     };
     checkUsedChips() {
@@ -2037,6 +2042,7 @@ class Nig {
         this.activateInTimeCampaign();
         if (timeData.calcCampaignsCost(this.player.activatedCampaigns) <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
+            this.updateTickSpeed();
         }
     };
     chooseCampaigns(name) {
@@ -2472,6 +2478,7 @@ class Nig {
                     rankChallengeBonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelLevelUsed = accelLevel;
                     this.player.activatedCampaigns = timeData.calcUseCampaigns(accelLevel, this.isChallengeActive(3) && this.isChallengeActive(4));
+                    this.updateTickSpeed();
 
                     let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
                     let result = this.simulate(checkpoints)[0];
