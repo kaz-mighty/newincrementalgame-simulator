@@ -1220,7 +1220,7 @@ class Nig {
         this.updateGenerators(val);
         this.updateAccelerators(val);
         if (this.player.trophies[9]) {
-            this.player.residue += Math.floor(num * (1 + this.pchallengestage) / 1000000);
+            this.player.residue += Math.floor(num * (1 + this.pChallengeStage) / 1000000);
         }
     };
     spendBrightness(num) {
