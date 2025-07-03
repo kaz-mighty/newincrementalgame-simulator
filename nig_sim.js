@@ -492,27 +492,29 @@ class TimeData {
         return this.campaigns[campaignId]?.predicate?.(date) ?? false;
     }
 
-    getCommonMultiBonus(nig) {
+    getCommonMultiBonus(activatedCampaigns, isActive34) {
         let camp = 0;
-        for (const campaignId of nig.player.activatedCampaigns) {
+        for (const campaignId of activatedCampaigns) {
             camp += this.campaigns[campaignId]?.commonBonus ?? 0;
         }
-        if (nig.player.activatedCampaigns.includes("newyear2025")
-            && nig.isChallengeActive(3) && nig.isChallengeActive(4))
+        if (isActive34 && activatedCampaigns.includes("newyear2025"))
         {
             camp += 10;
         }
         return camp;
     }
-
-    getChipBonus(nig, chipGrade) {
-        if (nig.player.activatedCampaigns.includes("gw2")) {
+    getChipBonus(activatedCampaigns, chipGrade) {
+        if (activatedCampaigns.includes("gw2")) {
             if (chipGrade == 2) {
                 return 4;
             }
         }
         return 0;
     }
+    isChipMoneyBonus(activatedCampaigns) {
+        return activatedCampaigns.includes("tanabata2");
+    }
+
 
     calcCampaignsCost(activatedCampaigns) {
         let sum = 0;
@@ -524,24 +526,7 @@ class TimeData {
         return sum;
     }
 
-    activateInTimeCampaign(nig) {
-        let isChanged = false;
-        const date = new Date();
-        for (const campaignId in this.campaigns) {
-            if (this.isDuring(campaignId, date) && !nig.player.activatedCampaigns.includes(campaignId)) {
-                nig.player.activatedCampaigns.push(campaignId);
-                isChanged = true;
-            }
-        }
-        if (this.calcCampaignsCost(nig.player.activatedCampaigns) > nig.player.accelLevelUsed) {
-            nig.player.activatedCampaigns = [];
-            isChanged = true;
-            alert("起動時間回帰力が不足しているため、キャンペーンの選択がリセットされました。");
-        }
-        return isChanged;
-    }
-
-    calcUseCampaigns(nig) {
+    calcUseCampaigns(accelLevel, isActive34) {
         let cost = 0;
         let activates = []
         const date = new Date();
@@ -551,8 +536,8 @@ class TimeData {
             }
         }
 
-        if (nig.isChallengeActive(3) && nig.isChallengeActive(4) && !activates.includes("newyear2025")) {
-            if (cost + this.campaigns["newyear2025"].cost <= nig.player.accelLevelUsed) {
+        if (isActive34 && !activates.includes("newyear2025")) {
+            if (cost + this.campaigns["newyear2025"].cost <= accelLevel) {
                 activates.push("newyear2025");
                 cost += this.campaigns["newyear2025"].cost;
             }
@@ -561,7 +546,7 @@ class TimeData {
             const campaign = this.campaigns[campaignId];
             if (campaign.commonBonus != campaign.cost || campaign.commonBonus == 0) {continue;}
             if (activates.includes(campaignId)) {continue;}
-            if (cost + campaign.cost <= nig.player.accelLevelUsed) {
+            if (cost + campaign.cost <= accelLevel) {
                 activates.push(campaignId);
                 cost += campaign.cost;
             }
@@ -822,7 +807,7 @@ class Nig {
     };
 
     clone() {
-        timeData.activateInTimeCampaign(this);
+        this.activateInTimeCampaign();
 
         let nig = new Nig();
         nig.players = JSON.parse(JSON.stringify(this.players));
@@ -970,7 +955,7 @@ class Nig {
         this.updateTickSpeed();
         this.checkPipedSmallMemories();
         this.checkPChallengeCleared();
-        timeData.activateInTimeCampaign(this);
+        this.activateInTimeCampaign();
         for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
         for (let i = 0; i < 8; i++) this.calcDarkGeneratorCost(i, this.player.darkGeneratorsBought[i], true);
@@ -1032,7 +1017,7 @@ class Nig {
             mult = mult.mul(1 + this.player.statue[i] * 0.01);
         }
 
-        mult = mult.mul(1 + 4 * timeData.getCommonMultiBonus(this));
+        mult = mult.mul(1 + 4 * timeData.getCommonMultiBonus(this.player.activatedCampaigns, this.isChallengeActive(3) && this.isChallengeActive(4)));
 
         if (this.player.rings.outsideAuto.autoDoChallenge) {
             mult = mult.mul(0.001);
@@ -1319,6 +1304,7 @@ class Nig {
         this.player.accelerators[index] = this.player.accelerators[index].add(1);
         this.player.acceleratorsBought[index] = this.player.acceleratorsBought[index].add(1);
         this.calcAcceleratorCost(index, this.player.acceleratorsBought[index], true);
+        this.updateTickSpeed();
         return true;
     };
 
@@ -1456,6 +1442,7 @@ class Nig {
         this.player.level = this.player.level.sub(cost);
         this.player.levelItems[index] = this.player.levelItems[index] + 1;
         if (this.player.levelItemBought < 100000) this.player.levelItemBought = this.player.levelItemBought + 1;
+        this.updateTickSpeed();
     };
 
     configChallenge(index) {
@@ -1692,6 +1679,7 @@ class Nig {
         }
         this.player.onPChallenge = true;
         this.calcToken();
+        this.updateTickSpeed();
         return true;
     };
     exitPerfectChallenge() {
@@ -1708,6 +1696,7 @@ class Nig {
         }
         this.player.disabledChip = new Array(SET_CHIP_NUM).fill(false);
         this.calcToken();
+        this.updateTickSpeed();
         this.checkPChallengeCleared();
     };
 
@@ -2020,6 +2009,7 @@ class Nig {
         this.player.setChip[i] = j;
         if (j != 0) this.player.chip[j - 1] = this.player.chip[j - 1] - (this.chipUsed[j - 1] + 1);
         this.checkUsedChips();
+        this.updateTickSpeed();
         return true;
     };
     checkUsedChips() {
@@ -2042,20 +2032,21 @@ class Nig {
     };
     getGainChipMoney(chipLv) {
         let bonus = D(10).pow(this.eachPipedSmallMemory[7] * 0.4);
-        if (this.player.activatedCampaigns.includes("tanabata2")) {
+        if (timeData.isChipMoneyBonus(this.player.activatedCampaigns)) {
             bonus = bonus.mul(this.player.lightMoney.add(1));
         }
         return D(itemData.chipTable[chipLv][0]).div(bonus);
     };
     
     workTime(val) {
-        timeData.activateInTimeCampaign(this);
+        this.activateInTimeCampaign();
         if (timeData.calcCampaignsCost(this.player.activatedCampaigns) <= val && val <= this.player.accelLevel) {
             this.player.accelLevelUsed = val;
+            this.updateTickSpeed();
         }
     };
     chooseCampaigns(name) {
-        let isChanged = timeData.activateInTimeCampaign(this);
+        let isChanged = this.activateInTimeCampaign();
         if (timeData.isDuring(name, new Date())) {return isChanged;}
 
         let activatedCampaigns = this.player.activatedCampaigns;
@@ -2068,6 +2059,22 @@ class Nig {
             activatedCampaigns.push(name);
         }
         return true;
+    };
+    activateInTimeCampaign() {
+        let isChanged = false;
+        const date = new Date();
+        for (const campaignId in timeData.campaigns) {
+            if (timeData.isDuring(campaignId, date) && !this.player.activatedCampaigns.includes(campaignId)) {
+                this.player.activatedCampaigns.push(campaignId);
+                isChanged = true;
+            }
+        }
+        if (timeData.calcCampaignsCost(this.player.activatedCampaigns) > this.player.accelLevelUsed) {
+            this.player.activatedCampaigns = [];
+            isChanged = true;
+            alert("起動時間回帰力が不足しているため、キャンペーンの選択がリセットされました。");
+        }
+        return isChanged;
     };
 
     searchLowerBound(value, l, target) {
@@ -2470,7 +2477,8 @@ class Nig {
                     challengeBonuses.forEach(c => this.toggleReward(c));
                     rankChallengeBonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelLevelUsed = accelLevel;
-                    this.player.activatedCampaigns = timeData.calcUseCampaigns(this);
+                    this.player.activatedCampaigns = timeData.calcUseCampaigns(accelLevel, this.isChallengeActive(3) && this.isChallengeActive(4));
+                    this.updateTickSpeed();
 
                     let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
                     let result = this.simulate(checkpoints)[0];
@@ -2779,7 +2787,7 @@ const app = Vue.createApp({
                 (_, chipGrade) => {
                     // todo: 近似精度に問題あり
                     let expect = Math.pow(1 + 0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
-                    expect += timeData.getChipBonus(this.nig, chipGrade);
+                    expect += timeData.getChipBonus(this.nig.player.activatedCampaigns, chipGrade);
                     return expect;
                 }
             );
