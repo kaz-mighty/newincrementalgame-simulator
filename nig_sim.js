@@ -1595,18 +1595,26 @@ class Nig {
         this.resetCrownData();
     };
 
-    resetLevelData() {
+    resetLevelData(isUpdating = false) {
         this.player.onChallenge = false;
 
         this.player.money = D(1);
 
         this.player.generators = new Array(8).fill(D(0));
         this.player.generatorsBought = new Array(8).fill(D(0));
-        for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
+        if (isUpdating) {
+            this.player.generatorsCost = [D(1), D('1e4'), D('1e9'), D('1e16'), D('1e25'), D('1e36'), D('1e49'), D('1e64')];
+        } else {
+            for (let i = 0; i < 8; i++) this.calcGeneratorCost(i, this.player.generatorsBought[i], true);
+        }
 
         this.player.accelerators = new Array(8).fill(D(0));
         this.player.acceleratorsBought = new Array(8).fill(D(0));
-        for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
+        if (isUpdating) {
+            this.player.acceleratorsCost = [D(10), D('1e10'), D('1e20'), D('1e40'), D('1e80'), D('1e160'), D('1e320'), D('1e640')];
+        } else {
+            for (let i = 0; i < 8; i++) this.calcAcceleratorCost(i, this.player.acceleratorsBought[i], true);
+        }
 
         this.player.tickSpeed = 1000;
 
@@ -3174,9 +3182,11 @@ const app = Vue.createApp({
             setTimeout(() => {
                 if (checkpoints.length === 0) {return;}
                 const nig = this.nig.clone();
-                nig.resetLevelData();
+                nig.resetLevelData(true);
                 nig.updateAutoBuys();
                 nig.updateTickSpeed();
+                for (let i = 0; i < 8; i++) {nig.calcGeneratorCost(i, nig.player.generatorsBought[i], true);}
+                for (let i = 0; i < 8; i++) {nig.calcAcceleratorCost(i, nig.player.acceleratorsBought[i], true);}
                 const result = nig.simulate(checkpoints);
                 result.forEach((r, i) => this.simulatedChipCheckpoints[this.nig.world].set(chipLvs[i], r));
             }, 0);
