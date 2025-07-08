@@ -636,6 +636,10 @@
           <input type="checkbox" class="form-check-input" id="toggleBonuses" v-model="config.challenge.toggleBonuses">
           <label class="form-check-label" for="toggleBonuses">リセット時効力切り替え</label>
         </div>
+        <div class="form-check form-check-inline">
+          <input type="checkbox" class="form-check-input" id="keepAutoBonuses" v-model="config.challenge.keepAutoBonuses">
+          <label class="form-check-label" for="keepAutoBonuses">自動化効力を維持</label>
+        </div>
         <div class="form-check form-check-inline" v-if="nig.player.accelLevel>0">
           <input type="checkbox" class="form-check-input" id="searchAccelLevel"
             v-model="config.challenge.searchAccelLevel">
@@ -936,21 +940,32 @@
       <div class="card-body">
         <h5 class="card-title">シミュレーション</h5>
         <p class="card-text">
-          発生器と時間加速器を購入しながらシミュレーションを行っている。
-          購入順は、金額の小さい順、同じなら発生器を優先、同じなら番号の大きい方を優先する。
+          購入可能になった発生器と時間加速器を購入しながらシミュレーションを行っている。
+          購入の挙動は、ゲーム上で自動購入器をオンにした時と同様。
+          (1tickに各1個まで、時間加速器より発生器を優先、同じなら番号の大きい方を優先する。)
+        </p>
+        <p class="card-text">
           それ以外の条件（モード、効力、挑戦、段位効力）については、基本的に固定。
         </p>
       </div>
       <div class="card-body">
         <h5 class="card-title">挑戦シミュレーション</h5>
         <p class="card-text">
-          リセット時効力切り替えが有効なら、挑戦開始時に効力5,2,1、上位効力2,1の順に買えるだけ買う。
+          リセット時効力切り替えが有効なら、挑戦開始時に効力5,2,1、上位効力2,1の順に買えるだけ買い、すぐに解除する。
+          無効なら、現在の効力で挑戦開始し、効力、上位効力2,1を維持して残りの勲章で下記探索を行う。
+        </p>
+        <p class="card-text">
           効力探索が有効なら、効力5と併用して使用する効力の候補として効力3,4,7,8,11,12,14の極大集合を全探索する。
           上位効力探索が有効なら、使用する上位効力の候補として上位効力4,5,7,8,10?,11,12,14の極大集合を全探索する。
+          自動化効力を維持が有効なら、現在有効な効力6,10,15、上位効力6,15を維持して残りの勲章で上記探索を行う。
+          探索が無効なら、現在の効力をそのまま使用する。
           段位効力2を購入しているなら、より良い効力の組み合わせが存在することがある。
-          時間回帰力探索が有効なら、起動時間回帰力を0から最大値まで全探索し、買えるだけ発生器を強化する時間回帰力を買う。
+        </p>
+        <p class="card-text">
           モードは発生器iならi-1固定。
           <span v-if="nig.player.crownResetTime.gt(0)">ただし、完全挑戦3の挑戦中なら[0, 1, 2, 2, 4, 5, 5, 7]になる。</span>
+          時間回帰力探索が有効なら、起動時間回帰力を0から最大値まで全探索し、買えるだけ発生器を強化する時間回帰力を買う。
+          無効なら、現在の起動時間回帰力と選択を使用する。
         </p>
       </div>
       <div class="card-body">

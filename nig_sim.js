@@ -562,10 +562,10 @@ class MaximumBonuses {
     constructor() {
         this.cache = new Map();
     };
-    static maximumBonuses(maxToken, rank, onChallenge) {
+    static maximumBonuses(usableToken, rank, onChallenge) {
         const effectiveChallengeBonuses = rank ? [3, 4, 6, 7, 9, 10, 11, 13] : [2, 3, 6, 7, 10, 11, 13];
         const m = 1 << effectiveChallengeBonuses.length;
-        if (!rank && onChallenge) maxToken = Math.max(maxToken - 8, 0);
+        if (!rank && onChallenge) usableToken = Math.max(usableToken - 8, 0);
         let costs = new Array(m).fill(0);
         let challengeBonusesCandidates = [];
         for (let i = 0; i < m; i++) {
@@ -573,10 +573,10 @@ class MaximumBonuses {
             for (let j = 0; j < effectiveChallengeBonuses.length; j++) {
                 if (!(i & 1 << j)) {
                     costs[i ^ 1 << j] = costs[i] + itemData.rewardCost[effectiveChallengeBonuses[j]];
-                    ok &= costs[i ^ 1 << j] > maxToken || (rank && effectiveChallengeBonuses[j] === 9);
+                    ok &= costs[i ^ 1 << j] > usableToken || (rank && effectiveChallengeBonuses[j] === 9);
                 }
             }
-            if (ok && costs[i] <= maxToken) {
+            if (ok && costs[i] <= usableToken) {
                 let cs = [];
                 for (let j = 0; j < effectiveChallengeBonuses.length; j++) {
                     if (i & 1 << j) {
@@ -592,12 +592,19 @@ class MaximumBonuses {
         return challengeBonusesCandidates;
     }
 
-    get(maxToken, rank, onChallenge) {
-        const key = { maxToken: maxToken, rank: rank, onChallenge: onChallenge };
+    // fixBonusesは探索候補に含まれてない効力のみ有効
+    get(useableToken, rank, onChallenge, fixBonuses) {
+        for (let bonus of fixBonuses) {
+            useableToken -= itemData.rewardCost[bonus];
+        }
+        const key = { useableToken, rank, onChallenge };
         let res = this.cache.get(key);
         if (res === undefined) {
-            res = MaximumBonuses.maximumBonuses(maxToken, rank, onChallenge);
+            res = MaximumBonuses.maximumBonuses(useableToken, rank, onChallenge);
             this.cache.set(key, res);
+        }
+        if (fixBonuses.length != 0) {
+            res = res.map(bonuses => bonuses.concat(fixBonuses).sort((a, b) => a - b));
         }
         return res;
     };
@@ -2445,21 +2452,46 @@ class Nig {
             },
             config,
         };
+        const isActive34 = (challengeId & (1 << 7 - 3)) !== 0 && (challengeId & (1 << 7 - 4)) !== 0;
+        const campaignsCandidates = config.searchAccelLevel
+            ? new Array(this.player.accelLevel + 1).fill(null).map(
+                (_, i) => [i, timeData.calcUseCampaigns(i, isActive34)]
+            )
+            : [[this.player.accelLevelUsed, this.player.activatedCampaigns]];
+
+        const startBonuses = config.toggleBonuses
+            ? [4, 1, 0]
+            : [4, 1, 0].filter(i => this.player.challengeBonuses[i]);
+        const startRankBonuses = config.toggleBonuses
+            ? [1, 0]
+            : [1, 0].filter(i => this.player.rankChallengeBonuses[i]);
+
+        let fixBonuses = [];
+        let fixRankBonuses = [];
+        if (!config.toggleBonuses) {
+            fixBonuses.push(...startBonuses.filter(i => i != 4));
+            fixRankBonuses.push(...startRankBonuses);
+        }
+        if (config.keepAutoBonuses) {
+            fixBonuses.push(...[5, 9, 14].filter(i => this.player.challengeBonuses[i]));
+            fixRankBonuses.push(...[5, 14].filter(i => this.player.rankChallengeBonuses[i]));
+        }
+        
         let usableRankToken = this.player.rankChallengeCleared.length >= 1 ? this.getMaxRankToken() : 0;
-        let accelLevelCandidates = config.searchAccelLevel
-            ? Array.from(new Array(this.player.accelLevel + 1).keys())
-            : [this.player.accelLevelUsed];
-        let challengeBonusesCandidates = config.searchChallengeBonuses
-            ? mbCache.get(this.getMaxToken(), false, true)
+        const challengeBonusesCandidates = config.searchChallengeBonuses
+            ? mbCache.get(this.getMaxToken(), false, true, fixBonuses)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
-        let rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
-            ? mbCache.get(usableRankToken, true, true)
+        const rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
+            ? mbCache.get(usableRankToken, true, true, fixRankBonuses)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
-        accelLevelCandidates.forEach(accelLevel => {
+        
+        campaignsCandidates.forEach(([accelLevel, activatedCampaigns]) => {
             challengeBonusesCandidates.forEach(challengeBonuses => {
                 rankChallengeBonusesCandidates.forEach(rankChallengeBonuses => {
                     if (this.player.onChallenge) this.exitChallenge();
                     for (let i = 0; i < 8; i++) if (this.player.challenges[i]) this.configChallenge(i);
+                    for (let i = 0; i < 8; i++) if ((challengeId & (1 << 7 - i)) !== 0) this.configChallenge(i);
+
                     for (let i = 0; i < 15; i++) if (this.player.challengeBonuses[i]) this.toggleReward(i);
                     for (let i = 0; i < 15; i++) if (this.player.rankChallengeBonuses[i]) this.toggleRankReward(i);
                     if (this.isPerfectChallengeActive(2)) {
@@ -2467,25 +2499,20 @@ class Nig {
                     } else {
                         this.player.generatorsMode = new Array(8).fill(null).map((_, i) => i);
                     }
-
-                    for (let i = 0; i < 8; i++) if ((challengeId & (1 << 7 - i)) !== 0) this.configChallenge(i);
-                    this.toggleReward(4);
-                    if (config.toggleBonuses) {
-                        this.toggleReward(1);
-                        this.toggleReward(0);
-                        this.toggleRankReward(1);
-                        this.toggleRankReward(0);
-                    }
+                    
+                    for (let i of startBonuses) {this.toggleReward(i);}
+                    for (let i of startRankBonuses) {this.toggleRankReward(i);}
 
                     this.startChallenge();
+
                     for (let i = 0; i < 2; i++) if (this.player.challengeBonuses[i]) this.toggleReward(i);
                     for (let i = 0; i < 2; i++) if (this.player.rankChallengeBonuses[i]) this.toggleRankReward(i);
-                    if (!config.searchChallengeBonuses && this.player.challengeBonuses[4]) this.toggleReward(4);
+                    if (config.searchChallengeBonuses != this.player.challengeBonuses[4]) this.toggleReward(4);
 
                     challengeBonuses.forEach(c => this.toggleReward(c));
                     rankChallengeBonuses.forEach(c => this.toggleRankReward(c));
                     this.player.accelLevelUsed = accelLevel;
-                    this.player.activatedCampaigns = timeData.calcUseCampaigns(accelLevel, this.isChallengeActive(3) && this.isChallengeActive(4));
+                    this.player.activatedCampaigns = activatedCampaigns;
                     this.updateTickSpeed();
 
                     let checkpoints = [rank ? this.resetRankBorder() : this.resetLevelBorder()];
@@ -2561,6 +2588,7 @@ const initialConfig = () => {
             searchRankChallengeBonuses: true,
             searchAccelLevel: true,
             toggleBonuses: true,
+            keepAutoBonuses: false,
         },
         searchClearChallenge: true,
         // autoSimulateCheckpoints: false,
@@ -3126,10 +3154,13 @@ const app = Vue.createApp({
             if (challengeId <= 0 || 256 <= challengeId) return;
             let sim = isRank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
-            if (!update) update ||= sim[this.nig.world][challengeId].config !== this.config.challenge;
-            if (!update) update ||= !this.config.challenge.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
-            if (!update) update ||= !this.config.challenge.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
-            if (!update) update ||= !this.config.challenge.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
+            update ||= sim[this.nig.world][challengeId].config !== this.config.challenge;
+            update ||= !this.config.challenge.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
+            update ||= !this.config.challenge.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
+            update ||= !this.config.challenge.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
+            // todo: 判定が適当なのでissue #13と同時に直す
+            update ||= (this.config.challenge.searchChallengeBonuses || this.config.challenge.searchRankChallengeBonuses) && this.config.challenge.keepAutoBonuses;
+            
             if (!this.config.searchClearChallenge && isRecursion) {
                 let cleared = isRank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
