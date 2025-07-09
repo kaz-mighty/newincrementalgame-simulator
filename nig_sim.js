@@ -34,6 +34,24 @@ const deepMergeWithoutUndefined = (target, source, options) => {
     return deepmerge(target, source, options);
 };
 
+const isObjectShallowEqual = (target, other) => {
+    const targetKeys = Object.keys(target);
+    const otherKeys = Object.keys(other);
+    if (targetKeys.length !== otherKeys.length) {return false;}
+    for (let key of targetKeys) {
+        if (target[key] !== other[key]) {return false;}
+    }
+    return true;
+};
+
+const isArrayShallowEqual = (target, other) => {
+    if (target.length !== other.length) {return false;}
+    for (let i of target.keys()) {
+        if (target[i] !== other[i]) {return false;}
+    }
+    return true;
+};
+
 class ItemData {
     constructor() {
         this.challengeText = [
@@ -2442,6 +2460,7 @@ class Nig {
                 challengeBonuses: [],
                 rankChallengeBonuses: [],
                 accelLevelUsed: 0,
+                activatedCampaigns: [],
             },
             secMinimum: {
                 tick: Infinity,
@@ -2449,6 +2468,7 @@ class Nig {
                 challengeBonuses: [],
                 rankChallengeBonuses: [],
                 accelLevelUsed: 0,
+                activatedCampaigns: [],
             },
             config,
         };
@@ -2465,6 +2485,8 @@ class Nig {
         const startRankBonuses = config.toggleBonuses
             ? [1, 0]
             : [1, 0].filter(i => this.player.rankChallengeBonuses[i]);
+        minResult.startBonuses = startBonuses;
+        minResult.startRankBonuses = startRankBonuses;
 
         let fixBonuses = [];
         let fixRankBonuses = [];
@@ -2524,6 +2546,7 @@ class Nig {
                             challengeBonuses: challengeBonuses.slice(),
                             rankChallengeBonuses: rankChallengeBonuses.slice(),
                             accelLevelUsed: this.player.accelLevelUsed,
+                            activatedCampaigns: activatedCampaigns.slice(),
                         };
                     }
                     if (result.sec < minResult.secMinimum.sec) {
@@ -2533,6 +2556,7 @@ class Nig {
                             challengeBonuses: challengeBonuses.slice(),
                             rankChallengeBonuses: rankChallengeBonuses.slice(),
                             accelLevelUsed: this.player.accelLevelUsed,
+                            activatedCampaigns: activatedCampaigns.slice(),
                         };
                     }
                 });
@@ -3154,13 +3178,25 @@ const app = Vue.createApp({
             if (challengeId <= 0 || 256 <= challengeId) return;
             let sim = isRank ? this.rankChallengeSimulated : this.challengeSimulated;
             let update = sim[this.nig.world][challengeId] === null;
-            update ||= sim[this.nig.world][challengeId].config !== this.config.challenge;
-            update ||= !this.config.challenge.searchChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.challengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.challengeBonuses[i]);
-            update ||= !this.config.challenge.searchRankChallengeBonuses && sim[this.nig.world][challengeId].secMinimum.rankChallengeBonuses !== new Array(15).fill(null).map((_, i) => i).filter(i => this.nig.player.rankChallengeBonuses[i]);
-            update ||= !this.config.challenge.searchAccelLevel && sim[this.nig.world][challengeId].secMinimum.accelLevelUsed !== this.nig.player.accelLevelUsed;
-            // todo: 判定が適当なのでissue #13と同時に直す
-            update ||= (this.config.challenge.searchChallengeBonuses || this.config.challenge.searchRankChallengeBonuses) && this.config.challenge.keepAutoBonuses;
-            
+            update ||= !isObjectShallowEqual(sim[this.nig.world][challengeId].config, this.config.challenge);
+            if (!update) {
+                let simulatedSample = sim[this.nig.world][challengeId].secMinimum;
+                const simulatedBonuses = numArray2BoolArray(simulatedSample.challengeBonuses, 15);
+                const simulatedRankBonuses = numArray2BoolArray(simulatedSample.rankChallengeBonuses, 15);
+                const startBonuses = numArray2BoolArray(sim[this.nig.world][challengeId].startBonuses, 5);
+                const startRankBonuses = numArray2BoolArray(sim[this.nig.world][challengeId].startRankBonuses, 2);
+                update ||= !this.config.challenge.searchChallengeBonuses && simulatedBonuses.some((value, i) => value !== this.nig.player.challengeBonuses[i]);
+                update ||= !this.config.challenge.searchRankChallengeBonuses && simulatedRankBonuses.some((value, i) => value !== this.nig.player.rankChallengeBonuses[i]);
+                update ||= !this.config.challenge.searchAccelLevel && (simulatedSample.accelLevelUsed !== this.nig.player.accelLevelUsed || !isArrayShallowEqual(simulatedSample.activatedCampaigns, this.nig.player.activatedCampaigns));
+                update ||= !this.config.challenge.toggleBonuses && (
+                    [0, 1, 4].some(i => startBonuses[i] !== this.nig.player.challengeBonuses[i])
+                    || [0, 1].some(i => startRankBonuses[i] !== this.nig.player.rankChallengeBonuses[i])
+                );
+                update ||= this.config.challenge.keepAutoBonuses && (
+                    (this.config.challenge.searchChallengeBonuses && [5, 9, 14].some(i => simulatedBonuses[i] !== this.nig.player.challengeBonuses[i]))
+                    || (this.config.challenge.searchRankChallengeBonuses && [5, 14].some(i => simulatedRankBonuses[i] !== this.nig.player.rankChallengeBonuses[i]))
+                );
+            }
             if (!this.config.searchClearChallenge && isRecursion) {
                 let cleared = isRank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
