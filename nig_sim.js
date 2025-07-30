@@ -465,6 +465,7 @@ class TimeData {
                 desc: "発生器の倍率が+8倍",
                 cost: 2,
                 commonBonus: 2,
+                predicate: (date) => (date.getMonth() == 6 && date.getDate() >= 30) || date.getMonth() == 7
             },
             "sw": {
                 title: "シルバーウィークキャンペーン",
@@ -2096,16 +2097,16 @@ class Nig {
     activateInTimeCampaign() {
         let isChanged = false;
         const date = new Date();
+        if (timeData.calcCampaignsCost(this.player.activatedCampaigns) > this.player.accelLevelUsed) {
+            this.player.activatedCampaigns = [];
+            isChanged = true;
+            alert("起動時間回帰力が不足しているため、キャンペーンの選択がリセットされました。");
+        }
         for (const campaignId in timeData.campaigns) {
             if (timeData.isDuring(campaignId, date) && !this.player.activatedCampaigns.includes(campaignId)) {
                 this.player.activatedCampaigns.push(campaignId);
                 isChanged = true;
             }
-        }
-        if (timeData.calcCampaignsCost(this.player.activatedCampaigns) > this.player.accelLevelUsed) {
-            this.player.activatedCampaigns = [];
-            isChanged = true;
-            alert("起動時間回帰力が不足しているため、キャンペーンの選択がリセットされました。");
         }
         return isChanged;
     };
