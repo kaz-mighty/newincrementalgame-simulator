@@ -639,6 +639,8 @@ class Nig {
         this.world = 0;
 
         this.config = gameConfig;
+
+        this.activateInTimeCampaign();
     };
 
     static decimalProperties = [
