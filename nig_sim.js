@@ -535,7 +535,8 @@ class TimeData {
     }
 
 
-    calcCampaignsCost(activatedCampaigns) {
+    calcCampaignsCost(activatedCampaigns, isUnlimited = false) {
+        if (isUnlimited) {return 0;}
         let sum = 0;
         const date = new Date();
         for (const campaignId of activatedCampaigns) {
@@ -637,7 +638,7 @@ const SET_CHIP_KIND = 10;
 const SET_CHIP_NUM = 100;
 
 class Nig {
-    constructor() {
+    constructor(gameConfig) {
         this.player = Nig.initialData();
         this.players = new Array(WORLD_NUM).fill(null).map(() => Nig.initialData());
         this.highest = 0;
@@ -654,6 +655,8 @@ class Nig {
         this.pChallengeStage = 0;
         this.pChallengeStageRaw = 0;
         this.world = 0;
+
+        this.config = gameConfig;
     };
 
     static decimalProperties = [
@@ -835,7 +838,7 @@ class Nig {
     clone() {
         this.activateInTimeCampaign();
 
-        let nig = new Nig();
+        let nig = new Nig(this.config);
         nig.players = JSON.parse(JSON.stringify(this.players));
         nig.world = this.world;
         nig.loadPlayer(JSON.parse(JSON.stringify(this.player)));
@@ -2072,29 +2075,35 @@ class Nig {
         return D(itemData.chipTable[chipLv][0]).div(bonus);
     };
     
+    isWorkTimeChangeable(val) {
+        return timeData.calcCampaignsCost(this.player.activatedCampaigns, this.config.unlimitedCampaigns) <= val && val <= this.player.accelLevel;
+    }
+
     workTime(val) {
         this.activateInTimeCampaign();
-        if (timeData.calcCampaignsCost(this.player.activatedCampaigns) <= val && val <= this.player.accelLevel) {
+        if (this.isWorkTimeChangeable(val)) {
             this.player.accelLevelUsed = val;
             this.updateTickSpeed();
         }
     };
     chooseCampaigns(name) {
         let isChanged = this.activateInTimeCampaign();
-        if (timeData.isDuring(name, new Date())) {return isChanged;}
 
         let activatedCampaigns = this.player.activatedCampaigns;
         if (activatedCampaigns.includes(name)) {
             activatedCampaigns.splice(activatedCampaigns.indexOf(name), 1);
         } else {
-            if (timeData.calcCampaignsCost(activatedCampaigns) + (timeData.campaigns[name]?.cost ?? 0) > this.player.accelLevelUsed) {
+            activatedCampaigns.push(name);
+            if (timeData.calcCampaignsCost(activatedCampaigns, this.config.unlimitedCampaigns) > this.player.accelLevelUsed) {
+                activatedCampaigns.pop();
                 return isChanged;
             }
-            activatedCampaigns.push(name);
         }
         return true;
     };
     activateInTimeCampaign() {
+        if (this.config.unlimitedCampaigns) {return false;}
+
         let isChanged = false;
         const date = new Date();
         if (timeData.calcCampaignsCost(this.player.activatedCampaigns) > this.player.accelLevelUsed) {
@@ -2627,6 +2636,9 @@ const initialConfig = () => {
             maxPoint: '1e100',
             showGainLevel: false,
         },
+        game: {
+            unlimitedCampaigns: false,
+        },
         procMsPerTick: 0,
         verbose: false,
         spoiler: false,
@@ -2636,6 +2648,7 @@ const initialConfig = () => {
 
 const app = Vue.createApp({
     data() {
+        const config = initialConfig();
         return {
             /* const */
             WORLD_NUM: WORLD_NUM,
@@ -2654,10 +2667,10 @@ const app = Vue.createApp({
             sampleTimeLabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
 
             /* game data */
-            nig: new Nig(),
+            nig: new Nig(config),
 
             /* saveable config */
-            config: initialConfig(),
+            config: config,
 
             /* simulation data */
             challengeSimulated: Array.from(new Array(WORLD_NUM), () => new Array(256).fill(null)),
@@ -2686,6 +2699,12 @@ const app = Vue.createApp({
         },
         'config.simulateTableWidth'(newValue) {
             document.querySelector(':root').style.setProperty('--challenge-width', `${newValue}vh`);
+        },
+        'config.game'(newValue) {
+            this.nig.config = newValue;
+        },
+        'config.game.unlimitedCampaigns'(newValue) {
+            if (!newValue) {this.nig.activateInTimeCampaign();}
         },
     },
     computed: {
@@ -3010,7 +3029,7 @@ const app = Vue.createApp({
             const prevWorld = this.nig.world;
             const input = window.prompt('データを入力', '');
             if (input == '' || input === null) return;
-            let nig = new Nig();
+            let nig = new Nig(this.config.game);
             nig.loadB(input);
             this.nig = nig;
             this.selectWorld(prevWorld);
@@ -3024,7 +3043,7 @@ const app = Vue.createApp({
                 const input = await inputElement.files[0].text();
 
                 const prevWorld = this.nig.world;
-                let nig = new Nig();
+                let nig = new Nig(this.config.game);
                 nig.loadB(input);
                 this.nig = nig;
                 this.selectWorld(prevWorld);
