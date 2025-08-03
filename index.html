@@ -266,20 +266,27 @@
         <div>
           起動時間回帰力: {{ nig.player.accelLevelUsed }} / {{ nig.player.accelLevel }}
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed-1)"
-            :disabled="nig.player.accelLevelUsed<=timeData.calcCampaignsCost(nig.player.activatedCampaigns)">-</button>
+            :disabled="!nig.isWorkTimeChangeable(nig.player.accelLevelUsed-1)">-</button>
           <button type="button" class="btn btn-outline-dark btn-sm" @click="workTime(nig.player.accelLevelUsed+1)"
-            :disabled="nig.player.accelLevelUsed>=nig.player.accelLevel">+</button>
+            :disabled="!nig.isWorkTimeChangeable(nig.player.accelLevelUsed+1)">+</button>
           
             使用中: {{ calcCampaignsCost }}
         </div>
         <div>
           時間回帰力選択
+          <div class="form-check form-check-inline tooltip-cell" style="margin-left: 1em">
+            <label class="form-check-label">
+              <input class="form-check-input" type="checkbox" v-model="config.game.unlimitedCampaigns">
+              無制限に選択可能
+            </label>
+            <span class="up-tooltip">※挑戦の回帰力探索には影響しません</span>
+          </div>
           <div v-for="(value, key) in timeData.campaigns" :key="key">
             <span class="tooltip-cell">
               <button type="button" class="btn btn-sm" style="width: 16ic"
                 @click="chooseCampaigns(key)"
                 :class="buttonSelectedClass(nig.player.activatedCampaigns.includes(key))"
-                :disabled="timeData.isDuring(key, new Date())">
+                :disabled="timeData.isDuring(key, new Date()) && !config.game.unlimitedCampaigns">
                 {{ value.title }}
               </button>
               <span class="right-tooltip">

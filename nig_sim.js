@@ -34,24 +34,6 @@ const deepMergeWithoutUndefined = (target, source, options) => {
     return deepmerge(target, source, options);
 };
 
-const isObjectShallowEqual = (target, other) => {
-    const targetKeys = Object.keys(target);
-    const otherKeys = Object.keys(other);
-    if (targetKeys.length !== otherKeys.length) {return false;}
-    for (let key of targetKeys) {
-        if (target[key] !== other[key]) {return false;}
-    }
-    return true;
-};
-
-const isArrayShallowEqual = (target, other) => {
-    if (target.length !== other.length) {return false;}
-    for (let i of target.keys()) {
-        if (target[i] !== other[i]) {return false;}
-    }
-    return true;
-};
-
 class ItemData {
     constructor() {
         this.challengeText = [
@@ -535,7 +517,8 @@ class TimeData {
     }
 
 
-    calcCampaignsCost(activatedCampaigns) {
+    calcCampaignsCost(activatedCampaigns, isUnlimited = false) {
+        if (isUnlimited) {return 0;}
         let sum = 0;
         const date = new Date();
         for (const campaignId of activatedCampaigns) {
@@ -637,7 +620,7 @@ const SET_CHIP_KIND = 10;
 const SET_CHIP_NUM = 100;
 
 class Nig {
-    constructor() {
+    constructor(gameConfig) {
         this.player = Nig.initialData();
         this.players = new Array(WORLD_NUM).fill(null).map(() => Nig.initialData());
         this.highest = 0;
@@ -654,6 +637,8 @@ class Nig {
         this.pChallengeStage = 0;
         this.pChallengeStageRaw = 0;
         this.world = 0;
+
+        this.config = gameConfig;
     };
 
     static decimalProperties = [
@@ -835,7 +820,7 @@ class Nig {
     clone() {
         this.activateInTimeCampaign();
 
-        let nig = new Nig();
+        let nig = new Nig(this.config);
         nig.players = JSON.parse(JSON.stringify(this.players));
         nig.world = this.world;
         nig.loadPlayer(JSON.parse(JSON.stringify(this.player)));
@@ -2072,29 +2057,35 @@ class Nig {
         return D(itemData.chipTable[chipLv][0]).div(bonus);
     };
     
+    isWorkTimeChangeable(val) {
+        return timeData.calcCampaignsCost(this.player.activatedCampaigns, this.config.unlimitedCampaigns) <= val && val <= this.player.accelLevel;
+    }
+
     workTime(val) {
         this.activateInTimeCampaign();
-        if (timeData.calcCampaignsCost(this.player.activatedCampaigns) <= val && val <= this.player.accelLevel) {
+        if (this.isWorkTimeChangeable(val)) {
             this.player.accelLevelUsed = val;
             this.updateTickSpeed();
         }
     };
     chooseCampaigns(name) {
         let isChanged = this.activateInTimeCampaign();
-        if (timeData.isDuring(name, new Date())) {return isChanged;}
 
         let activatedCampaigns = this.player.activatedCampaigns;
         if (activatedCampaigns.includes(name)) {
             activatedCampaigns.splice(activatedCampaigns.indexOf(name), 1);
         } else {
-            if (timeData.calcCampaignsCost(activatedCampaigns) + (timeData.campaigns[name]?.cost ?? 0) > this.player.accelLevelUsed) {
+            activatedCampaigns.push(name);
+            if (timeData.calcCampaignsCost(activatedCampaigns, this.config.unlimitedCampaigns) > this.player.accelLevelUsed) {
+                activatedCampaigns.pop();
                 return isChanged;
             }
-            activatedCampaigns.push(name);
         }
         return true;
     };
     activateInTimeCampaign() {
+        if (this.config.unlimitedCampaigns) {return false;}
+
         let isChanged = false;
         const date = new Date();
         if (timeData.calcCampaignsCost(this.player.activatedCampaigns) > this.player.accelLevelUsed) {
@@ -2486,8 +2477,6 @@ class Nig {
         const startRankBonuses = config.toggleBonuses
             ? [1, 0]
             : [1, 0].filter(i => this.player.rankChallengeBonuses[i]);
-        minResult.startBonuses = startBonuses;
-        minResult.startRankBonuses = startRankBonuses;
 
         let fixBonuses = [];
         let fixRankBonuses = [];
@@ -2627,6 +2616,9 @@ const initialConfig = () => {
             maxPoint: '1e100',
             showGainLevel: false,
         },
+        game: {
+            unlimitedCampaigns: false,
+        },
         procMsPerTick: 0,
         verbose: false,
         spoiler: false,
@@ -2636,6 +2628,7 @@ const initialConfig = () => {
 
 const app = Vue.createApp({
     data() {
+        const config = initialConfig();
         return {
             /* const */
             WORLD_NUM: WORLD_NUM,
@@ -2654,10 +2647,10 @@ const app = Vue.createApp({
             sampleTimeLabel: ['s', 'm', 'h', 'D', 'M', 'Y', 'C'],
 
             /* game data */
-            nig: new Nig(),
+            nig: new Nig(config),
 
             /* saveable config */
-            config: initialConfig(),
+            config: config,
 
             /* simulation data */
             challengeSimulated: Array.from(new Array(WORLD_NUM), () => new Array(256).fill(null)),
@@ -2686,6 +2679,12 @@ const app = Vue.createApp({
         },
         'config.simulateTableWidth'(newValue) {
             document.querySelector(':root').style.setProperty('--challenge-width', `${newValue}vh`);
+        },
+        'config.game'(newValue) {
+            this.nig.config = newValue;
+        },
+        'config.game.unlimitedCampaigns'(newValue) {
+            if (!newValue) {this.nig.activateInTimeCampaign();}
         },
     },
     computed: {
@@ -3010,7 +3009,7 @@ const app = Vue.createApp({
             const prevWorld = this.nig.world;
             const input = window.prompt('データを入力', '');
             if (input == '' || input === null) return;
-            let nig = new Nig();
+            let nig = new Nig(this.config.game);
             nig.loadB(input);
             this.nig = nig;
             this.selectWorld(prevWorld);
@@ -3024,7 +3023,7 @@ const app = Vue.createApp({
                 const input = await inputElement.files[0].text();
 
                 const prevWorld = this.nig.world;
-                let nig = new Nig();
+                let nig = new Nig(this.config.game);
                 nig.loadB(input);
                 this.nig = nig;
                 this.selectWorld(prevWorld);
@@ -3178,26 +3177,7 @@ const app = Vue.createApp({
         simulateChallenges(challengeId, isRank, isRecursion, startTime) {
             if (challengeId <= 0 || 256 <= challengeId) return;
             let sim = isRank ? this.rankChallengeSimulated : this.challengeSimulated;
-            let update = sim[this.nig.world][challengeId] === null;
-            update ||= !isObjectShallowEqual(sim[this.nig.world][challengeId].config, this.config.challenge);
-            if (!update) {
-                let simulatedSample = sim[this.nig.world][challengeId].secMinimum;
-                const simulatedBonuses = numArray2BoolArray(simulatedSample.challengeBonuses, 15);
-                const simulatedRankBonuses = numArray2BoolArray(simulatedSample.rankChallengeBonuses, 15);
-                const startBonuses = numArray2BoolArray(sim[this.nig.world][challengeId].startBonuses, 5);
-                const startRankBonuses = numArray2BoolArray(sim[this.nig.world][challengeId].startRankBonuses, 2);
-                update ||= !this.config.challenge.searchChallengeBonuses && simulatedBonuses.some((value, i) => value !== this.nig.player.challengeBonuses[i]);
-                update ||= !this.config.challenge.searchRankChallengeBonuses && simulatedRankBonuses.some((value, i) => value !== this.nig.player.rankChallengeBonuses[i]);
-                update ||= !this.config.challenge.searchAccelLevel && (simulatedSample.accelLevelUsed !== this.nig.player.accelLevelUsed || !isArrayShallowEqual(simulatedSample.activatedCampaigns, this.nig.player.activatedCampaigns));
-                update ||= !this.config.challenge.toggleBonuses && (
-                    [0, 1, 4].some(i => startBonuses[i] !== this.nig.player.challengeBonuses[i])
-                    || [0, 1].some(i => startRankBonuses[i] !== this.nig.player.rankChallengeBonuses[i])
-                );
-                update ||= this.config.challenge.keepAutoBonuses && (
-                    (this.config.challenge.searchChallengeBonuses && [5, 9, 14].some(i => simulatedBonuses[i] !== this.nig.player.challengeBonuses[i]))
-                    || (this.config.challenge.searchRankChallengeBonuses && [5, 14].some(i => simulatedRankBonuses[i] !== this.nig.player.rankChallengeBonuses[i]))
-                );
-            }
+            let update = true;
             if (!this.config.searchClearChallenge && isRecursion) {
                 let cleared = isRank ? this.nig.player.rankChallengeCleared : this.nig.player.challengeCleared;
                 update &&= !cleared.includes(challengeId);
