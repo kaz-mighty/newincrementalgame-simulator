@@ -37,7 +37,7 @@
 
       <input type="checkbox" class="btn-check" id="timeInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="timeInfoB" data-bs-toggle="collapse" data-bs-target="#timeInfo"
-        aria-expanded="false" aria-controls="timeInfo" v-if="nig.player.accelLevel>0">時</label>
+        aria-expanded="false" aria-controls="timeInfo">時</label>
 
       <input type="checkbox" class="btn-check" id="levelInfoB" autocomplete="off">
       <label class="btn btn-outline-dark" for="levelInfoB" data-bs-toggle="collapse" data-bs-target="#levelInfo"
@@ -439,7 +439,7 @@
             </button>
           </span>
         </div>
-        <div v-if="nig.pChallengeStage>=10">
+        <div v-if="nig.pChallengeStage >= 10 || nig.player.residue !== 0">
           残滓: {{ nig.player.residue }}
         </div>
       </div>
