@@ -159,4 +159,5 @@ td .unchallengeable {
 .toggle-use-chip {
     box-sizing: content-box;
     min-width: calc(2.6ch + 2ic);
+    padding: .375rem 0.4rem;
 }
