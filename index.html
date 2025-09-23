@@ -281,19 +281,19 @@
             </label>
             <span class="up-tooltip">※挑戦の回帰力探索には影響しません</span>
           </div>
-          <div v-for="(value, key) in timeData.campaigns" :key="key">
-            <span class="tooltip-cell">
-              <button type="button" class="btn btn-sm" style="width: 16ic"
-                @click="chooseCampaigns(key)"
-                :class="buttonSelectedClass(nig.player.activatedCampaigns.includes(key))"
-                :disabled="timeData.isDuring(key, new Date()) && !config.game.unlimitedCampaigns">
-                {{ value.title }}
-              </button>
-              <span class="right-tooltip">
-                {{ value.desc }}
-              </span>
+        </div>
+        <div class="d-flex align-items-center flex-wrap">
+          <div v-for="(value, key) in timeData.campaigns" :key="key" class="tooltip-cell">
+            <button type="button" class="btn"
+              @click="chooseCampaigns(key)"
+              :class="buttonSelectedClass(nig.player.activatedCampaigns.includes(key))"
+              :disabled="timeData.isDuring(key, new Date()) && !config.game.unlimitedCampaigns">
+              {{ value.title }}
+            </button>
+            <span class="up-tooltip">
+              {{ value.desc }}<br>
+              コスト: {{ value.cost }}
             </span>
-            <span> 使用回帰力: {{ value.cost }}</span>
           </div>
         </div>
         <div>
