@@ -2467,6 +2467,7 @@ class Nig {
             config,
         };
         const isActive34 = (challengeId & (1 << 7 - 3)) !== 0 && (challengeId & (1 << 7 - 4)) !== 0;
+        const canToggleRankBonus = this.player.rankChallengeCleared.length > 0;
         const campaignsCandidates = config.searchAccelLevel
             ? new Array(this.player.accelLevel + 1).fill(null).map(
                 (_, i) => [i, timeData.calcUseCampaigns(i, isActive34)]
@@ -2476,7 +2477,7 @@ class Nig {
         const startBonuses = config.toggleBonuses
             ? [4, 1, 0]
             : [4, 1, 0].filter(i => this.player.challengeBonuses[i]);
-        const startRankBonuses = config.toggleBonuses
+        const startRankBonuses = config.toggleBonuses && canToggleRankBonus
             ? [1, 0]
             : [1, 0].filter(i => this.player.rankChallengeBonuses[i]);
 
@@ -2491,12 +2492,11 @@ class Nig {
             fixRankBonuses.push(...[5, 14].filter(i => this.player.rankChallengeBonuses[i]));
         }
         
-        let usableRankToken = this.player.rankChallengeCleared.length >= 1 ? this.getMaxRankToken() : 0;
         const challengeBonusesCandidates = config.searchChallengeBonuses
             ? mbCache.get(this.getMaxToken(), false, true, fixBonuses)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.challengeBonuses[i])];
-        const rankChallengeBonusesCandidates = config.searchRankChallengeBonuses
-            ? mbCache.get(usableRankToken, true, true, fixRankBonuses)
+        const rankChallengeBonusesCandidates = config.searchRankChallengeBonuses && canToggleRankBonus
+            ? mbCache.get(this.getMaxRankToken(), true, true, fixRankBonuses)
             : [new Array(15).fill(null).map((_, i) => i).filter(i => this.player.rankChallengeBonuses[i])];
         
         campaignsCandidates.forEach(([accelLevel, activatedCampaigns]) => {
@@ -2745,10 +2745,10 @@ const app = Vue.createApp({
                             color = colorbarPower(f);
                         }
                     } else {
-                        const sec = res.secMinimum.sec + res.secMinimum.tick * this.config.procMsPerTick * 0.001;
-                        if (sec === Infinity) {
+                        if (res.secMinimum.sec === Infinity) {
                             color = 'rgb(255, 255, 255)';
                         } else {
+                            const sec = res.secMinimum.sec + res.secMinimum.tick * this.config.procMsPerTick * 0.001;
                             const f = Math.log10(Math.max(sec, 1)) / Math.log10(3153600000);
                             color = colorbarPower(f);
                         }
@@ -2764,7 +2764,9 @@ const app = Vue.createApp({
                 let message = 'Uncalculated';
                 if (res !== null) {
                     let minResult = this.config.showTickMinimum ? res.tickMinimum : res.secMinimum;
-                    const sec = minResult.sec + minResult.tick * this.config.procMsPerTick * 0.001;
+                    const sec = minResult.sec === Infinity
+                        ? Infinity
+                        : minResult.sec + minResult.tick * this.config.procMsPerTick * 0.001;
                     message = minResult.tick.toExponential(3) + ' ticks';
                     message += '<br/>(' + sec.toExponential(3) + ' sec)';
                     if ((this.config.verbose || this.config.challenge.searchChallengeBonuses) && minResult.challengeBonuses.length > 0) message += '<br/>効力' + minResult.challengeBonuses.map(x => x + 1);
@@ -2779,7 +2781,9 @@ const app = Vue.createApp({
             return this.checkpoints.map(checkpoint => {
                 const res = this.simulatedCheckpoints[this.nig.world].get(checkpoint);
                 if (res === undefined) return checkpoint.toExponential(3) + ' ポイントまで ???';
-                const sec = res.sec + res.tick * this.config.procMsPerTick * 0.001;
+                const sec = res.sec === Infinity
+                    ? Infinity
+                    : res.sec + res.tick * this.config.procMsPerTick * 0.001;
                 let content = checkpoint.toExponential(3) + ' ポイントまで ' + res.tick.toExponential(3) + ' ticks';
                 content += ' (' + sec.toExponential(3) + ' sec)';
                 content += ' ' + (new Date(this.cpSimulatedTime + (sec * 1000))).toLocaleString() + ' に達成';
@@ -2814,6 +2818,7 @@ const app = Vue.createApp({
             return new Array(itemData.chipTable.length).fill(null).map((_, chipLv) => {
                 const result = this.simulatedChipCheckpoints[this.nig.world].get(chipLv);
                 if (result === undefined) {return undefined;}
+                if (result.sec === Infinity) {return Infinity;}
                 return result.sec + result.tick * this.config.procMsPerTick * 0.001;
             });
         },
