@@ -2575,6 +2575,24 @@ class Nig {
 
 }
 
+const changeableVariables = {
+    "money": ["ポイント", "decimal"],
+    "level": ["段位リセット", "decimal"],
+    "levelResetTime": ["段位リセット回数", "decimal"],
+    "rank": ["階位リセット", "decimal"],
+    "rankResetTime": ["階位リセット回数", "decimal"],
+    "chip_0": [itemData.chipName[0] + "片 所持数", "intArray"],
+    "chip_1": [itemData.chipName[1] + "片 所持数", "intArray"],
+    "chip_2": [itemData.chipName[2] + "片 所持数", "intArray"],
+    "chip_3": [itemData.chipName[3] + "片 所持数", "intArray"],
+    "chip_4": [itemData.chipName[4] + "片 所持数", "intArray"],
+    "chip_5": [itemData.chipName[5] + "片 所持数", "intArray"],
+    "chip_6": [itemData.chipName[6] + "片 所持数", "intArray"],
+    "chip_7": [itemData.chipName[7] + "片 所持数", "intArray"],
+    "chip_8": [itemData.chipName[8] + "片 所持数", "intArray"],
+    "chip_9": [itemData.chipName[9] + "片 所持数", "intArray"],
+};
+
 const colors = ['#00ff00', '#11ff52', '#23ff9b', '#34ffda', '#46eeff', '#57c2ff', '#699fff', '#7a86ff', '#a18cff', '#ca9dff', '#e9afff', '#ffc0ff'];
 const colorbarPower = f => {
     const r = Math.max(0, Math.min(1, f));
@@ -2639,6 +2657,7 @@ const app = Vue.createApp({
             SET_CHIP_NUM: SET_CHIP_NUM,
             itemData: itemData,
             timeData: timeData,
+            changeableVariables: changeableVariables,
             shineChallengeLength: [64, 96, 128, 160, 192, 224],
             brightnessRankChallengeLength: [32, 64, 128, 255],
             flickerPChallengeStage: [1],
@@ -2672,6 +2691,9 @@ const app = Vue.createApp({
             autoSimulateCheckpoints: false,
             autoSimulateDarkCheckpoints: false,
             autoSimulateChips: false,
+
+            changedTarget: 'money',
+            changedValue: '',
         }
     },
     watch: {
@@ -3037,6 +3059,24 @@ const app = Vue.createApp({
                 this.clearAllCache();
             });
             inputElement.click();
+        },
+        changeVariable() {
+            const targetType = changeableVariables[this.changedTarget][1];
+            let value;
+            if (targetType === "decimal") {
+                try {
+                    value = D(this.changedValue);
+                } catch {
+                    return;
+                }
+                if (isNaN(value.exponent) || isNaN(value.mantissa)) {return;}
+                this.nig.player[this.changedTarget] = value;
+            } else if (targetType === "intArray") {
+                const [key, index] = this.changedTarget.split("_");
+                value = parseInt(this.changedValue);
+                if (isNaN(value)) {return;}
+                this.nig.player[key][index] = value;
+            }
         },
         selectWorld(i) {
             this.nig.save();
