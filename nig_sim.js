@@ -2577,9 +2577,9 @@ class Nig {
 
 const changeableVariables = {
     "money": ["ポイント", "decimal"],
-    "level": ["段位リセット", "decimal"],
+    "level": ["段位", "decimal"],
     "levelResetTime": ["段位リセット回数", "decimal"],
-    "rank": ["階位リセット", "decimal"],
+    "rank": ["階位", "decimal"],
     "rankResetTime": ["階位リセット回数", "decimal"],
     "chip_0": [itemData.chipName[0] + "片 所持数", "intArray"],
     "chip_1": [itemData.chipName[1] + "片 所持数", "intArray"],
