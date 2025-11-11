@@ -34,6 +34,19 @@ const deepMergeWithoutUndefined = (target, source, options) => {
     return deepmerge(target, source, options);
 };
 
+function combination(n, k) {
+    if (k > n) {return 0;}
+    if (n - k < k) {k = n - k;}
+    let a = n - k;
+    let c = 1;
+    for (let i = 1; i <= k; i++) {
+        c *= a + i;
+        c /= i;
+    }
+    return c;
+}
+
+
 class ItemData {
     constructor() {
         this.challengeText = [
@@ -406,6 +419,19 @@ class ItemData {
     calcChipProbability(chipLv, lotteryTime) {
         let probTable = this.chipTable[chipLv][1].map(x => Math.pow(x, lotteryTime));
         return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
+    }
+
+    calcChipExpect(prob, count) {
+        const DOUBLE_UP_LIMIT = 10;
+        let expect = 0.0;
+        let prob_sum = 0.0;
+        for (let i = 0; i <= Math.min(count, DOUBLE_UP_LIMIT); i++) {
+            const prob_i = combination(count, i) * Math.pow(prob, i) * Math.pow(1.0 - prob, count - i);
+            expect += Math.pow(2, i) * prob_i;
+            prob_sum += prob_i;
+        }
+        expect += (1.0 - prob_sum) * Math.pow(2, DOUBLE_UP_LIMIT);
+        return expect;
     }
 }
 class TimeData {
@@ -2632,10 +2658,10 @@ const initialConfig = () => {
             // auto: false,
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
-            enableGetNum: false,
+            // enableGetNum: false,
             minPoint: '0',
             maxPoint: '1e100',
-            showGainLevel: false,
+            // showGainLevel: false,
         },
         game: {
             unlimitedCampaigns: false,
@@ -2875,8 +2901,7 @@ const app = Vue.createApp({
         chipGetNumExpected() {
             return new Array(this.SET_CHIP_KIND).fill(null).map(
                 (_, chipGrade) => {
-                    // todo: 近似精度に問題あり
-                    let expect = Math.pow(1 + 0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
+                    let expect = itemData.calcChipExpect(0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
                     expect += timeData.getChipBonus(this.nig.player.activatedCampaigns, chipGrade);
                     return expect;
                 }
@@ -2884,57 +2909,50 @@ const app = Vue.createApp({
         },
         chipCheckpointCells() {
             const config = this.config.simulateChips;
-            let probTable = this.chipCheckpointCellProbs;
-            if (config.enableGetNum) {
-                const expect = this.chipGetNumExpected;
-                probTable = probTable.map(
-                    array => array.map((x, i) => x * expect[i])
-                );
-            }
-            if (config.showMode == "prob") {
-                if (config.enableGetNum) {
-                    probTable = probTable.map(
-                        array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
-                    );
-                } else {
-                    probTable = probTable.map(
+            const probTable = this.chipCheckpointCellProbs;
+            const expect = this.chipGetNumExpected;
+            const expectTable = probTable.map(
+                array => array.map((x, i) => x * expect[i])
+            );
+            switch (config.showMode) {
+                case "prob": 
+                    return probTable.map(
                         array => array.map(x => (x == 0 ? "0 %" : (x * 100).toFixed(2) + " %"))
                     );
-                }
-            } else if (config.showMode == "perHour") {
-                probTable = probTable.map(
-                    (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
-                );
-            } else if (config.showMode == "perHourWithSpend") {
-                probTable = probTable.map(
-                    (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
-                );
+                case "expect":
+                    return expectTable.map(
+                        array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
+                    );
+                case "perHour":
+                    return expectTable.map(
+                        (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
+                    );
+                case "perHourWithSpend":
+                    return expectTable.map(
+                        (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
+                    );
+                default:
+                    return probTable.map(
+                        array => array.map(x => "error")
+                    );
             }
-            return probTable;
         },
         showChipsNum() {
             return this.config.simulateChips.showChips.slice(0, this.SET_CHIP_KIND).reduce((a, b) => a + b, 0);
         },
         chipTableTitle() {
             const config = this.config.simulateChips;
-            if (config.showMode == "prob") {
-                if (config.enableGetNum) {
-                    return "期待値";
-                } else {
+            switch (config.showMode) {
+                case "prob":
                     return "確率";
-                }
-            } else if (config.showMode == "perHour") {
-                if (config.enableGetNum) {
+                case "expect":
+                    return "期待値";
+                case "perHour":
                     return "効率[個/時間]";
-                } else {
-                    return "効率[回数/時間]";
-                }
-            } else if (config.showMode == "perHourWithSpend") {
-                if (config.enableGetNum) {
-                    return "効率(消費含む)[個/時間]"
-                } else {
-                    return "効率(消費含む)[回数/時間]"
-                }
+                case "perHourWithSpend":
+                    return "効率(消費含む)[個/時間]";
+                default:
+                    return "error";
             }
         },
         targetMoneys() {
