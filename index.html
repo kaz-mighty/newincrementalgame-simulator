@@ -554,6 +554,13 @@
 
     <div class="collapse" id="statueInfo">
       <div class="card card-body">
+        <div>
+          <span>合計</span>
+          <span> 所持数: {{ nig.player.statue.reduce((a, b) => a + b) }}</span>
+          <span> (発生器 {{ nig.player.statue.reduce((a, b) => a * (1 + b * 0.01), 1).toFixed(3) }} 倍) &thinsp;</span>
+          <span> 輝像: {{ nig.player.polishedStatue.reduce((a, b) => a + b) }} &thinsp;</span>
+          <span> 煌像: {{ nig.player.polishedStatueBright.reduce((a, b) => a + Math.floor(b / 10), 0) }} &thinsp;</span>
+        </div>
         <div v-for="i in SET_CHIP_KIND" :key="i">
           <div v-show="nig.player.chip[i-1] > 0 || nig.chipUsed[i-1] > 0 || nig.player.statue[i-1] > 0">
             <span>{{itemData.chipName[i - 1] + "像 "}}</span>
