@@ -34,6 +34,19 @@ const deepMergeWithoutUndefined = (target, source, options) => {
     return deepmerge(target, source, options);
 };
 
+function combination(n, k) {
+    if (k > n) {return 0;}
+    if (n - k < k) {k = n - k;}
+    let a = n - k;
+    let c = 1;
+    for (let i = 1; i <= k; i++) {
+        c *= a + i;
+        c /= i;
+    }
+    return c;
+}
+
+
 class ItemData {
     constructor() {
         this.challengeText = [
@@ -406,6 +419,19 @@ class ItemData {
     calcChipProbability(chipLv, lotteryTime) {
         let probTable = this.chipTable[chipLv][1].map(x => Math.pow(x, lotteryTime));
         return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
+    }
+
+    calcChipExpect(prob, count) {
+        const DOUBLE_UP_LIMIT = 10;
+        let expect = 0.0;
+        let prob_sum = 0.0;
+        for (let i = 0; i <= Math.min(count, DOUBLE_UP_LIMIT); i++) {
+            const prob_i = combination(count, i) * Math.pow(prob, i) * Math.pow(1.0 - prob, count - i);
+            expect += Math.pow(2, i) * prob_i;
+            prob_sum += prob_i;
+        }
+        expect += (1.0 - prob_sum) * Math.pow(2, DOUBLE_UP_LIMIT);
+        return expect;
     }
 }
 class TimeData {
@@ -2875,8 +2901,7 @@ const app = Vue.createApp({
         chipGetNumExpected() {
             return new Array(this.SET_CHIP_KIND).fill(null).map(
                 (_, chipGrade) => {
-                    // todo: 近似精度に問題あり
-                    let expect = Math.pow(1 + 0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
+                    let expect = itemData.calcChipExpect(0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
                     expect += timeData.getChipBonus(this.nig.player.activatedCampaigns, chipGrade);
                     return expect;
                 }
