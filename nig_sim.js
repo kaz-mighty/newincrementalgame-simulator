@@ -2583,6 +2583,9 @@ const changeableVariables = function() {
         "levelResetTime": {name: "段位リセット回数", type: "decimal", clearCache: "all"},
         "rank": {name: "階位", type: "decimal", clearCache: "all"},
         "rankResetTime": {name: "階位リセット回数", type: "decimal", clearCache: "all"},
+        "shine": {name: "輝き", type: "int"},
+        "brightness": {name: "煌き", type: "int"},
+        "flicker": {name: "瞬き", type: "int"},
     };
 
     for (let i = 0; i < 10; i++) {
@@ -3060,6 +3063,12 @@ const app = Vue.createApp({
         },
         changeVariable() {
             switch(changeableVariables[this.changedTarget].type) {
+                case "int": {
+                    const value = parseFloat(this.changedValue);
+                    if (isNaN(value)) {return;}
+                    this.nig.player[this.changedTarget] = Math.trunc(value);
+                    break;
+                }
                 case "decimal": 
                     try {
                         const value = D(this.changedValue);
@@ -3071,9 +3080,9 @@ const app = Vue.createApp({
                     break;
                 case "intArray": {
                     const [key, index] = this.changedTarget.split("_");
-                    const value = parseInt(this.changedValue);
+                    const value = parseFloat(this.changedValue);
                     if (isNaN(value)) {return;}
-                    this.nig.player[key][index] = value;
+                    this.nig.player[key][index] = Math.trunc(value);
                     break;
                 }
             }
