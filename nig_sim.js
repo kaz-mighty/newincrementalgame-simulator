@@ -2658,10 +2658,10 @@ const initialConfig = () => {
             // auto: false,
             showMode: 'prob',
             showChips: new Array(SET_CHIP_KIND).fill(false).fill(true, 0, 4),
-            enableGetNum: false,
+            // enableGetNum: false,
             minPoint: '0',
             maxPoint: '1e100',
-            showGainLevel: false,
+            // showGainLevel: false,
         },
         game: {
             unlimitedCampaigns: false,
@@ -2909,57 +2909,50 @@ const app = Vue.createApp({
         },
         chipCheckpointCells() {
             const config = this.config.simulateChips;
-            let probTable = this.chipCheckpointCellProbs;
-            if (config.enableGetNum) {
-                const expect = this.chipGetNumExpected;
-                probTable = probTable.map(
-                    array => array.map((x, i) => x * expect[i])
-                );
-            }
-            if (config.showMode == "prob") {
-                if (config.enableGetNum) {
-                    probTable = probTable.map(
-                        array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
-                    );
-                } else {
-                    probTable = probTable.map(
+            const probTable = this.chipCheckpointCellProbs;
+            const expect = this.chipGetNumExpected;
+            const expectTable = probTable.map(
+                array => array.map((x, i) => x * expect[i])
+            );
+            switch (config.showMode) {
+                case "prob": 
+                    return probTable.map(
                         array => array.map(x => (x == 0 ? "0 %" : (x * 100).toFixed(2) + " %"))
                     );
-                }
-            } else if (config.showMode == "perHour") {
-                probTable = probTable.map(
-                    (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
-                );
-            } else if (config.showMode == "perHourWithSpend") {
-                probTable = probTable.map(
-                    (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
-                );
+                case "expect":
+                    return expectTable.map(
+                        array => array.map(x => (x == 0 ? "0" : x.toFixed(4)))
+                    );
+                case "perHour":
+                    return expectTable.map(
+                        (array, chipLv) => array.map(x => this.chipCheckpointPerHour(x, chipLv))
+                    );
+                case "perHourWithSpend":
+                    return expectTable.map(
+                        (array, chipLv) => array.map((x, i) => this.chipCheckpointPerHour(x - this.nig.player.spendChip[i], chipLv))
+                    );
+                default:
+                    return probTable.map(
+                        array => array.map(x => "error")
+                    );
             }
-            return probTable;
         },
         showChipsNum() {
             return this.config.simulateChips.showChips.slice(0, this.SET_CHIP_KIND).reduce((a, b) => a + b, 0);
         },
         chipTableTitle() {
             const config = this.config.simulateChips;
-            if (config.showMode == "prob") {
-                if (config.enableGetNum) {
-                    return "期待値";
-                } else {
+            switch (config.showMode) {
+                case "prob":
                     return "確率";
-                }
-            } else if (config.showMode == "perHour") {
-                if (config.enableGetNum) {
+                case "expect":
+                    return "期待値";
+                case "perHour":
                     return "効率[個/時間]";
-                } else {
-                    return "効率[回数/時間]";
-                }
-            } else if (config.showMode == "perHourWithSpend") {
-                if (config.enableGetNum) {
-                    return "効率(消費含む)[個/時間]"
-                } else {
-                    return "効率(消費含む)[回数/時間]"
-                }
+                case "perHourWithSpend":
+                    return "効率(消費含む)[個/時間]";
+                default:
+                    return "error";
             }
         },
         targetMoneys() {
