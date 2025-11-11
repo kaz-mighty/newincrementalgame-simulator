@@ -2575,23 +2575,21 @@ class Nig {
 
 }
 
-const changeableVariables = {
-    "money": ["ポイント", "decimal"],
-    "level": ["段位", "decimal"],
-    "levelResetTime": ["段位リセット回数", "decimal"],
-    "rank": ["階位", "decimal"],
-    "rankResetTime": ["階位リセット回数", "decimal"],
-    "chip_0": [itemData.chipName[0] + "片 所持数", "intArray"],
-    "chip_1": [itemData.chipName[1] + "片 所持数", "intArray"],
-    "chip_2": [itemData.chipName[2] + "片 所持数", "intArray"],
-    "chip_3": [itemData.chipName[3] + "片 所持数", "intArray"],
-    "chip_4": [itemData.chipName[4] + "片 所持数", "intArray"],
-    "chip_5": [itemData.chipName[5] + "片 所持数", "intArray"],
-    "chip_6": [itemData.chipName[6] + "片 所持数", "intArray"],
-    "chip_7": [itemData.chipName[7] + "片 所持数", "intArray"],
-    "chip_8": [itemData.chipName[8] + "片 所持数", "intArray"],
-    "chip_9": [itemData.chipName[9] + "片 所持数", "intArray"],
-};
+/** @type {Object.<string, {name: string, type: string, clearCache?: string}>} */
+const changeableVariables = function() {
+    let changeableVariables = {
+        "money": {name: "ポイント", type: "decimal", clearCache: "checkpoint"},
+        "level": {name: "段位", type: "decimal", clearCache: "all"},
+        "levelResetTime": {name: "段位リセット回数", type: "decimal", clearCache: "all"},
+        "rank": {name: "階位", type: "decimal", clearCache: "all"},
+        "rankResetTime": {name: "階位リセット回数", type: "decimal", clearCache: "all"},
+    };
+
+    for (let i = 0; i < 10; i++) {
+        changeableVariables["chip_" + i] = {name: itemData.chipName[i] + "片 所持数", type: "intArray"};
+    }
+    return changeableVariables;
+}();
 
 const colors = ['#00ff00', '#11ff52', '#23ff9b', '#34ffda', '#46eeff', '#57c2ff', '#699fff', '#7a86ff', '#a18cff', '#ca9dff', '#e9afff', '#ffc0ff'];
 const colorbarPower = f => {
@@ -3061,21 +3059,32 @@ const app = Vue.createApp({
             inputElement.click();
         },
         changeVariable() {
-            const targetType = changeableVariables[this.changedTarget][1];
-            let value;
-            if (targetType === "decimal") {
-                try {
-                    value = D(this.changedValue);
-                } catch {
-                    return;
+            switch(changeableVariables[this.changedTarget].type) {
+                case "decimal": 
+                    try {
+                        const value = D(this.changedValue);
+                        if (isNaN(value.exponent) || isNaN(value.mantissa)) {return;}
+                        this.nig.player[this.changedTarget] = value;
+                    } catch {
+                        return;
+                    }
+                    break;
+                case "intArray": {
+                    const [key, index] = this.changedTarget.split("_");
+                    const value = parseInt(this.changedValue);
+                    if (isNaN(value)) {return;}
+                    this.nig.player[key][index] = value;
+                    break;
                 }
-                if (isNaN(value.exponent) || isNaN(value.mantissa)) {return;}
-                this.nig.player[this.changedTarget] = value;
-            } else if (targetType === "intArray") {
-                const [key, index] = this.changedTarget.split("_");
-                value = parseInt(this.changedValue);
-                if (isNaN(value)) {return;}
-                this.nig.player[key][index] = value;
+            }
+
+            switch(changeableVariables[this.changedTarget].clearCache) {
+                case "checkpoint":
+                    this.clearCheckpointsCache();
+                    break;
+                case "all":
+                    this.clearAllCache();
+                    break;
             }
         },
         selectWorld(i) {
