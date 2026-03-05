@@ -752,8 +752,8 @@ class Nig {
                     cooldown: 0,
                     totalDamage: 0,
                     achievements: 0,
-                    shopUpgrades: [false, false, false, false],
-                    resolutions: [0, 0],
+                    shopUpgrades: new Array(7).fill(false),
+                    resolutions: new Array(3).fill(0),
                 },
             },
 
