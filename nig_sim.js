@@ -320,6 +320,14 @@ class ItemData {
             '貨印石を1個以上にする',
             '貨印石を100個以上にする',
             '貨印石を10000個以上にする',
+            '杯印石を1個以上にする',
+            '杯印石を100個以上にする',
+            '杯印石を10000個以上にする',
+            '剣印石を1個以上にする',
+            '剣印石を100個以上にする',
+            '剣印石を10000個以上にする',
+            '大杖印石を1個以上にする',
+            '大杖印石を10個以上にする',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -732,6 +740,10 @@ class Nig {
                 spade: 0,
                 spadeGainedSinceCrownReset: 0,
                 ticksSinceRankReset: 0,
+                greatClub: 0,
+                greatDiamond: 0,
+                greatHeart: 0,
+                greatSpade: 0,
             },
 
             generators: new Array(8).fill(D(0)),
@@ -1080,6 +1092,10 @@ class Nig {
 
         if (this.player.rings.outsideAuto.autoDoChallenge) {
             mult = mult.mul(0.001);
+        }
+
+        if ((this.player.markStone?.greatClub ?? 0) > 0) {
+            mult = mult.mul(1 + 0.01 * this.player.markStone.greatClub);
         }
 
         this.commonMult = mult;
@@ -2017,6 +2033,14 @@ class Nig {
             if (this.player.markStone.diamond >= 1) this.player.smallTrophies2nd[62] = true;
             if (this.player.markStone.diamond >= 100) this.player.smallTrophies2nd[63] = true;
             if (this.player.markStone.diamond >= 10000) this.player.smallTrophies2nd[64] = true;
+            if (this.player.markStone.heart >= 1) this.player.smallTrophies2nd[65] = true;
+            if (this.player.markStone.heart >= 100) this.player.smallTrophies2nd[66] = true;
+            if (this.player.markStone.heart >= 10000) this.player.smallTrophies2nd[67] = true;
+            if (this.player.markStone.spade >= 1) this.player.smallTrophies2nd[68] = true;
+            if (this.player.markStone.spade >= 100) this.player.smallTrophies2nd[69] = true;
+            if (this.player.markStone.spade >= 10000) this.player.smallTrophies2nd[70] = true;
+            if (this.player.markStone.greatClub >= 1) this.player.smallTrophies2nd[71] = true;
+            if (this.player.markStone.greatClub >= 10) this.player.smallTrophies2nd[72] = true;
         }
     };
     checkMemories() {
