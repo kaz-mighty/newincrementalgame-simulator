@@ -744,6 +744,17 @@ class Nig {
                 greatDiamond: 0,
                 greatHeart: 0,
                 greatSpade: 0,
+                calibration: {
+                    active: false,
+                    selectedEnemy: 0,
+                    enemyHp: 100,
+                    enemyLevel: 1,
+                    cooldown: 0,
+                    totalDamage: 0,
+                    achievements: 0,
+                    shopUpgrades: [false, false, false, false],
+                    resolutions: [0, 0],
+                },
             },
 
             generators: new Array(8).fill(D(0)),
@@ -1094,8 +1105,11 @@ class Nig {
             mult = mult.mul(0.001);
         }
 
-        if ((this.player.markStone?.greatClub ?? 0) > 0) {
+        if (this.player.markStone.greatClub > 0) {
             mult = mult.mul(1 + 0.01 * this.player.markStone.greatClub);
+        }
+        if (this.player.markStone.calibration.shopUpgrades[3]) {
+            mult = mult.mul(2);
         }
 
         this.commonMult = mult;
@@ -1261,6 +1275,15 @@ class Nig {
         this.player.tickSpeed = this.getBaseTick() / this.getAcceleratorsSpeed(this.getAMult());
         this.multByAc = D(50).div(this.player.tickSpeed);
     };
+    getFixedTickSpeed() {
+        if (this.player.markStone.calibration.active) {
+            return 1000;
+        }
+        if (this.isRankChallengeBonusActive(9)) {
+            return 50;
+        }
+        return this.player.tickSpeed;
+    }
 
     updateGenerators(mu = D(1), tick = 1, gExpr = this.calcGeneratorExpr(mu)) {
         this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
@@ -2273,6 +2296,9 @@ class Nig {
     tick2sec(tick, update) {
         if (tick <= 0) return 0;
         if (tick === Infinity) return Infinity;
+        if (this.player.markStone.calibration.active) {
+            return this.getFixedTickSpeed() / 1000;
+        }
         const aExpr = this.calcAcceleratorExpr();
         const delta = 1e-3;
         const baseTick = this.getBaseTick() / 1000;
@@ -2397,7 +2423,7 @@ class Nig {
                 this.player.tickSpeed = prevInfo.tickSpeed;
                 this.multByAc = prevInfo.multByAc;
             }
-            const sec = curTick * 0.05;
+            const sec = curTick * this.getFixedTickSpeed() / 1000;
             return { tick: curTick, sec: sec };
         } else {
             const tick = this.calcGoalTicks(targetMoney, update);
@@ -2496,7 +2522,7 @@ class Nig {
             //次の目標まで(最低1tick)更新
             let tick = 1, sec = 0;
             if (this.player.money.gte(cost)) {
-                sec = this.isRankChallengeBonusActive(9) ? tick * 0.05 : tick * this.player.tickSpeed / 1000;
+                sec = tick * this.getFixedTickSpeed() / 1000;
                 this.updateGenerators(D(1), tick);
                 this.updateAccelerators(D(1), tick);
             } else {
