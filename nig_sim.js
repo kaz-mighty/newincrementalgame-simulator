@@ -314,6 +314,8 @@ class ItemData {
             '1,000,000,000以上の輝きを所持する',
             '100,000以上の煌きを所有する',
             '1,000,000以上の煌きを所有する',
+            '杖印石を1個以上にする',
+            '杖印石を100個以上にする',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -716,6 +718,14 @@ class Nig {
             crown: D(0),
             crownResetTime: D(0),
 
+            markStone: {
+                club: 0,
+                diamond: 0,
+                heart: 0,
+                spade: 0,
+                ticksSinceRankReset: 0,
+            },
+
             generators: new Array(8).fill(D(0)),
             generatorsBought: new Array(8).fill(D(0)),
             generatorsCost: [D(1), D('1e4'), D('1e9'), D('1e16'), D('1e25'), D('1e36'), D('1e49'), D('1e64')],
@@ -876,6 +886,8 @@ class Nig {
 
             crown: playerData.crown,
             crownResetTime: playerData.crownresettime,
+
+            markStone: playerData.markstone,
 
             generators: playerData.generators,
             generatorsBought: playerData.generatorsBought,
@@ -1618,6 +1630,8 @@ class Nig {
                 this.player.rankChallengeCleared.push(this.calcChallengeId());
             }
         }
+        this.player.markStone.ticksSinceRankReset = 0;
+
         let gainTime = this.isRankChallengeBonusActive(8) ? D(3) : D(1);
         gainTime = gainTime.mul(this.player.setChip[24] + 1).mul(this.player.crownResetTime.add(1));
         this.player.rank = this.player.rank.add(gainRank);
@@ -1984,6 +1998,8 @@ class Nig {
             if (this.player.shine >= 1_000_000_000) this.player.smallTrophies2nd[56] = true;
             if (this.player.brightness >= 100_000) this.player.smallTrophies2nd[57] = true;
             if (this.player.brightness >= 1_000_000) this.player.smallTrophies2nd[58] = true;
+            if (this.player.markStone.club >= 1) this.player.smallTrophies2nd[59] = true;
+            if (this.player.markStone.club >= 100) this.player.smallTrophies2nd[60] = true;
         }
     };
     checkMemories() {
