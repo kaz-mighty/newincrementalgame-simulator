@@ -316,6 +316,10 @@ class ItemData {
             '1,000,000以上の煌きを所有する',
             '杖印石を1個以上にする',
             '杖印石を100個以上にする',
+            '杖印石を10000個以上にする',
+            '貨印石を1個以上にする',
+            '貨印石を100個以上にする',
+            '貨印石を10000個以上にする',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -720,9 +724,13 @@ class Nig {
 
             markStone: {
                 club: 0,
+                clubGainedSinceCrownReset: 0,
                 diamond: 0,
+                diamondGainedSinceCrownReset: 0,
                 heart: 0,
+                heartGainedSinceCrownReset: 0,
                 spade: 0,
+                spadeGainedSinceCrownReset: 0,
                 ticksSinceRankReset: 0,
             },
 
@@ -1686,6 +1694,11 @@ class Nig {
     resetCrownData() {
         this.player.rank = D(0);
         this.player.rankResetTime = D(0);
+
+        this.player.markStone.clubGainedSinceCrownReset = 0;
+        this.player.markStone.diamondGainedSinceCrownReset = 0;
+        this.player.markStone.heartGainedSinceCrownReset = 0;
+        this.player.markStone.spadeGainedSinceCrownReset = 0;
         this.resetRankData();
     };
 
@@ -2000,6 +2013,10 @@ class Nig {
             if (this.player.brightness >= 1_000_000) this.player.smallTrophies2nd[58] = true;
             if (this.player.markStone.club >= 1) this.player.smallTrophies2nd[59] = true;
             if (this.player.markStone.club >= 100) this.player.smallTrophies2nd[60] = true;
+            if (this.player.markStone.club >= 10000) this.player.smallTrophies2nd[61] = true;
+            if (this.player.markStone.diamond >= 1) this.player.smallTrophies2nd[62] = true;
+            if (this.player.markStone.diamond >= 100) this.player.smallTrophies2nd[63] = true;
+            if (this.player.markStone.diamond >= 10000) this.player.smallTrophies2nd[64] = true;
         }
     };
     checkMemories() {
