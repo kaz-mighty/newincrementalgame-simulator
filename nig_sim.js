@@ -2354,8 +2354,6 @@ class Nig {
                 return multi * Math.max(multi, 1);
             }
             let curTick = 0;
-            let highestA = 0;
-            for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
             while (this.player.money.lt(targetMoney)) {
                 /* targetMoneyの到達tickを指数探索 */
