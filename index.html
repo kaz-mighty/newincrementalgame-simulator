@@ -105,13 +105,13 @@
       <div class="card card-body">
         <div v-if="nig.worldOpened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
-        <div v-show="!nig.isRankChallengeBonusActive(9)">
+        <div v-if="nig.tickSpeed != nig.getFixedTickSpeed()">
+          間隔: <s>{{ nig.player.tickSpeed.toFixed(2) }}</s> {{ nig.getFixedTickSpeed().toFixed(2) }} ms&ensp;
+          加速器効果: <s>{{ (1000 / nig.player.tickSpeed).toFixed(3) }}</s> {{ (1000 / nig.getFixedTickSpeed()).toFixed(3) }} 倍
+        </div>
+        <div v-else>
           間隔: {{ nig.player.tickSpeed.toFixed(2) }} ms&ensp;
           加速器効果: {{ (1000 / nig.player.tickSpeed).toFixed(3) }} 倍
-        </div>
-        <div v-show="nig.isRankChallengeBonusActive(9)">
-          間隔: <s>{{ nig.player.tickSpeed.toFixed(2) }}</s> 50 ms&ensp;
-          加速器効果: <s>{{ (1000 / nig.player.tickSpeed).toFixed(3) }}</s> 20 倍
         </div>
         <div
           v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
@@ -616,7 +616,7 @@
                   </span>
                 </td>
               </tr>
-              <tr v-for="i in 6" :key="i" v-if="nig.player.crownResetTime.gt(0)">
+              <tr v-for="i in 8" :key="i" v-if="nig.player.crownResetTime.gt(0)">
                 <td v-for="j in 10" :key="j" class="tooltip-cell">
                   <span>{{ nig.player.smallTrophies2nd[i * 10 + j - 11] ? 100 + (i - 1) * 10 + j : '　' }}</span>
                   <span class="up-tooltip" v-if="config.spoiler">

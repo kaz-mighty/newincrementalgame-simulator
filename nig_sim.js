@@ -314,6 +314,20 @@ class ItemData {
             '1,000,000,000以上の輝きを所持する',
             '100,000以上の煌きを所有する',
             '1,000,000以上の煌きを所有する',
+            '杖印石を1個以上にする',
+            '杖印石を100個以上にする',
+            '杖印石を10000個以上にする',
+            '貨印石を1個以上にする',
+            '貨印石を100個以上にする',
+            '貨印石を10000個以上にする',
+            '杯印石を1個以上にする',
+            '杯印石を100個以上にする',
+            '杯印石を10000個以上にする',
+            '剣印石を1個以上にする',
+            '剣印石を100個以上にする',
+            '剣印石を10000個以上にする',
+            '大杖印石を1個以上にする',
+            '大杖印石を10個以上にする',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -716,6 +730,33 @@ class Nig {
             crown: D(0),
             crownResetTime: D(0),
 
+            markStone: {
+                club: 0,
+                clubGainedSinceCrownReset: 0,
+                diamond: 0,
+                diamondGainedSinceCrownReset: 0,
+                heart: 0,
+                heartGainedSinceCrownReset: 0,
+                spade: 0,
+                spadeGainedSinceCrownReset: 0,
+                ticksSinceRankReset: 0,
+                greatClub: 0,
+                greatDiamond: 0,
+                greatHeart: 0,
+                greatSpade: 0,
+                calibration: {
+                    active: false,
+                    selectedEnemy: 0,
+                    enemyHp: 100,
+                    enemyLevel: 1,
+                    cooldown: 0,
+                    totalDamage: 0,
+                    achievements: 0,
+                    shopUpgrades: new Array(7).fill(false),
+                    resolutions: new Array(3).fill(0),
+                },
+            },
+
             generators: new Array(8).fill(D(0)),
             generatorsBought: new Array(8).fill(D(0)),
             generatorsCost: [D(1), D('1e4'), D('1e9'), D('1e16'), D('1e25'), D('1e36'), D('1e49'), D('1e64')],
@@ -876,6 +917,8 @@ class Nig {
 
             crown: playerData.crown,
             crownResetTime: playerData.crownresettime,
+
+            markStone: playerData.markstone,
 
             generators: playerData.generators,
             generatorsBought: playerData.generatorsBought,
@@ -1062,6 +1105,13 @@ class Nig {
             mult = mult.mul(0.001);
         }
 
+        if (this.player.markStone.greatClub > 0) {
+            mult = mult.mul(1 + 0.01 * this.player.markStone.greatClub);
+        }
+        if (this.player.markStone.calibration.shopUpgrades[3]) {
+            mult = mult.mul(2);
+        }
+
         this.commonMult = mult;
     };
 
@@ -1225,6 +1275,15 @@ class Nig {
         this.player.tickSpeed = this.getBaseTick() / this.getAcceleratorsSpeed(this.getAMult());
         this.multByAc = D(50).div(this.player.tickSpeed);
     };
+    getFixedTickSpeed() {
+        if (this.player.markStone.calibration.active) {
+            return 1000;
+        }
+        if (this.isRankChallengeBonusActive(9)) {
+            return 50;
+        }
+        return this.player.tickSpeed;
+    }
 
     updateGenerators(mu = D(1), tick = 1, gExpr = this.calcGeneratorExpr(mu)) {
         this.player.money = Nig.calcAfterNTick(gExpr[0], tick);
@@ -1618,6 +1677,8 @@ class Nig {
                 this.player.rankChallengeCleared.push(this.calcChallengeId());
             }
         }
+        this.player.markStone.ticksSinceRankReset = 0;
+
         let gainTime = this.isRankChallengeBonusActive(8) ? D(3) : D(1);
         gainTime = gainTime.mul(this.player.setChip[24] + 1).mul(this.player.crownResetTime.add(1));
         this.player.rank = this.player.rank.add(gainRank);
@@ -1672,6 +1733,11 @@ class Nig {
     resetCrownData() {
         this.player.rank = D(0);
         this.player.rankResetTime = D(0);
+
+        this.player.markStone.clubGainedSinceCrownReset = 0;
+        this.player.markStone.diamondGainedSinceCrownReset = 0;
+        this.player.markStone.heartGainedSinceCrownReset = 0;
+        this.player.markStone.spadeGainedSinceCrownReset = 0;
         this.resetRankData();
     };
 
@@ -1984,6 +2050,20 @@ class Nig {
             if (this.player.shine >= 1_000_000_000) this.player.smallTrophies2nd[56] = true;
             if (this.player.brightness >= 100_000) this.player.smallTrophies2nd[57] = true;
             if (this.player.brightness >= 1_000_000) this.player.smallTrophies2nd[58] = true;
+            if (this.player.markStone.club >= 1) this.player.smallTrophies2nd[59] = true;
+            if (this.player.markStone.club >= 100) this.player.smallTrophies2nd[60] = true;
+            if (this.player.markStone.club >= 10000) this.player.smallTrophies2nd[61] = true;
+            if (this.player.markStone.diamond >= 1) this.player.smallTrophies2nd[62] = true;
+            if (this.player.markStone.diamond >= 100) this.player.smallTrophies2nd[63] = true;
+            if (this.player.markStone.diamond >= 10000) this.player.smallTrophies2nd[64] = true;
+            if (this.player.markStone.heart >= 1) this.player.smallTrophies2nd[65] = true;
+            if (this.player.markStone.heart >= 100) this.player.smallTrophies2nd[66] = true;
+            if (this.player.markStone.heart >= 10000) this.player.smallTrophies2nd[67] = true;
+            if (this.player.markStone.spade >= 1) this.player.smallTrophies2nd[68] = true;
+            if (this.player.markStone.spade >= 100) this.player.smallTrophies2nd[69] = true;
+            if (this.player.markStone.spade >= 10000) this.player.smallTrophies2nd[70] = true;
+            if (this.player.markStone.greatClub >= 1) this.player.smallTrophies2nd[71] = true;
+            if (this.player.markStone.greatClub >= 10) this.player.smallTrophies2nd[72] = true;
         }
     };
     checkMemories() {
@@ -2216,6 +2296,9 @@ class Nig {
     tick2sec(tick, update) {
         if (tick <= 0) return 0;
         if (tick === Infinity) return Infinity;
+        if (this.player.markStone.calibration.active) {
+            return tick * this.getFixedTickSpeed() / 1000;
+        }
         const aExpr = this.calcAcceleratorExpr();
         const delta = 1e-3;
         const baseTick = this.getBaseTick() / 1000;
@@ -2271,8 +2354,6 @@ class Nig {
                 return multi * Math.max(multi, 1);
             }
             let curTick = 0;
-            let highestA = 0;
-            for (let i = 0; i < 8; i++) if (this.player.accelerators[i].gt(0)) highestA = i;
 
             while (this.player.money.lt(targetMoney)) {
                 /* targetMoneyの到達tickを指数探索 */
@@ -2340,7 +2421,7 @@ class Nig {
                 this.player.tickSpeed = prevInfo.tickSpeed;
                 this.multByAc = prevInfo.multByAc;
             }
-            const sec = curTick * 0.05;
+            const sec = curTick * this.getFixedTickSpeed() / 1000;
             return { tick: curTick, sec: sec };
         } else {
             const tick = this.calcGoalTicks(targetMoney, update);
@@ -2439,7 +2520,7 @@ class Nig {
             //次の目標まで(最低1tick)更新
             let tick = 1, sec = 0;
             if (this.player.money.gte(cost)) {
-                sec = this.isRankChallengeBonusActive(9) ? tick * 0.05 : tick * this.player.tickSpeed / 1000;
+                sec = tick * this.getFixedTickSpeed() / 1000;
                 this.updateGenerators(D(1), tick);
                 this.updateAccelerators(D(1), tick);
             } else {
