@@ -2297,7 +2297,7 @@ class Nig {
         if (tick <= 0) return 0;
         if (tick === Infinity) return Infinity;
         if (this.player.markStone.calibration.active) {
-            return this.getFixedTickSpeed() / 1000;
+            return tick * this.getFixedTickSpeed() / 1000;
         }
         const aExpr = this.calcAcceleratorExpr();
         const delta = 1e-3;
