@@ -2131,6 +2131,11 @@ class Nig {
         if (this.player.statue[2] >= 16) this.worldOpened[11] = true;
     };
 
+    isVisibleChip(i) {
+        if (i <= 31) return true;
+        if (i <= 51 && this.countRemembers() >= 16) return true;
+        return false;
+    };
     configChip(i, j) {
         if (this.player.disabledChip[i]) return false;
         if (this.player.setChip[i] == j) return false;
@@ -3299,7 +3304,7 @@ const app = Vue.createApp({
             }
             this.clearAllCache();
         },
-        toggleChip(i) {
+        toggleChip(i, doClearCache = true) {
             let oldChip = this.nig.player.setChip[i];
             toggle: {
                 for (let j = oldChip + 1; j <= SET_CHIP_KIND; j++) {
@@ -3309,6 +3314,12 @@ const app = Vue.createApp({
                     if (this.config.togglableChips[j] && this.nig.configChip(i, j)) {break toggle;}
                 }
                 return;
+            }
+            if (doClearCache) {this.clearAllCache();}
+        },
+        toggleAllChip() {
+            for (let i = 0; i < SET_CHIP_NUM; i++) {
+                if (this.nig.isVisibleChip(i)) {this.toggleChip(i, false);}
             }
             this.clearAllCache();
         },
