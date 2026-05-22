@@ -538,15 +538,20 @@
         </div>
         <div class="d-flex align-items-center flex-wrap">
           鋳片効力
-          <div v-for="i in 52" :key="i" class="tooltip-cell">
-            <span v-if="i<=32||nig.countRemembers()>=16">
+          <div v-for="i in SET_CHIP_NUM" :key="i" class="tooltip-cell">
+            <template v-if="nig.isVisibleChip(i-1)">
               <button type="button" class="btn btn-outline-dark toggle-use-chip"
                 :style="chipColoredButtonStyle(nig.player.setChip[i-1])"
                 @click="toggleChip(i-1)" :disabled="nig.player.disabledChip[i-1]">
                 {{ i }} {{ nig.player.setChip[i - 1] == 0 ? '　' : itemData.chipName[nig.player.setChip[i - 1] - 1] }}
               </button>
               <span class="up-tooltip">{{ itemData.chipBonusName[i - 1] }}</span>
-            </span>
+            </template>
+          </div>
+          <div class="ms-auto">
+            <button type="button" class="btn btn-outline-dark" @click="toggleAllChip()">
+              全て変更
+            </button>
           </div>
         </div>
       </div>
@@ -895,7 +900,14 @@
               :style="chipColoredButtonStyle(i)"
               v-show="config.simulateChips.showChips[i - 1]">
               {{ itemData.chipName[i - 1] }}
-              <div class="up-tooltip">入手数期待値: {{ chipGetNumExpected[i - 1].toFixed(3) }}倍</div>
+              <div class="down-tooltip">
+                入手数期待値: {{ chipGetNumExpected[i - 1].toFixed(3) }}倍
+                <div style="display: inline flex; flex-direction: column; align-items: flex-end; width: max-content;">
+                  <div v-for="text in chipDistributionText[i - 1]">
+                    {{ text }}
+                  </div>
+                </div>
+              </div>
             </td>
           </tr>
           <tr>
