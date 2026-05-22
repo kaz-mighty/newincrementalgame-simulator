@@ -46,6 +46,10 @@ function combination(n, k) {
     return c;
 }
 
+function binomialProb(n, k, p) {
+    return combination(n, k) * Math.pow(p, k) * Math.pow(1.0 - p, n - k);
+}
+
 
 class ItemData {
     constructor() {
@@ -435,17 +439,17 @@ class ItemData {
         return new Array(SET_CHIP_KIND).fill(null).map((_, i) => probTable[i+1] - probTable[i]);
     }
 
-    calcChipExpect(prob, count) {
+    calcChipDistribution(prob, count) {
         const DOUBLE_UP_LIMIT = 10;
-        let expect = 0.0;
+        let dist = new Array(DOUBLE_UP_LIMIT + 1).fill(0);
         let prob_sum = 0.0;
         for (let i = 0; i <= Math.min(count, DOUBLE_UP_LIMIT); i++) {
-            const prob_i = combination(count, i) * Math.pow(prob, i) * Math.pow(1.0 - prob, count - i);
-            expect += Math.pow(2, i) * prob_i;
+            const prob_i = binomialProb(count, i, prob);
+            dist[i] = prob_i;
             prob_sum += prob_i;
         }
-        expect += (1.0 - prob_sum) * Math.pow(2, DOUBLE_UP_LIMIT);
-        return expect;
+        dist[DOUBLE_UP_LIMIT] += (1.0 - prob_sum);
+        return dist;
     }
 }
 class TimeData {
@@ -2979,14 +2983,35 @@ const app = Vue.createApp({
                 return perHour.toFixed(2);
             };
         },
+        chipGetNumDistribution() {
+            return new Array(this.SET_CHIP_KIND).fill(null).map((_, chipGrade) =>
+                itemData.calcChipDistribution(0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade])
+            );
+        },
         chipGetNumExpected() {
+            const dist = this.chipGetNumDistribution;
+
             return new Array(this.SET_CHIP_KIND).fill(null).map(
                 (_, chipGrade) => {
-                    let expect = itemData.calcChipExpect(0.01 * (1 + 0.1 * this.nig.eachPipedSmallMemory[11]), this.nig.chipUsed[chipGrade]);
+                    let expect = 0;
+                    for (let i = 0; i < dist[chipGrade].length; i++) {
+                        expect += Math.pow(2, i) * dist[chipGrade][i];
+                    }
                     expect += timeData.getChipBonus(this.nig.player.activatedCampaigns, chipGrade);
                     return expect;
                 }
             );
+        },
+        chipDistributionText() {
+            const dist = this.chipGetNumDistribution;
+            return new Array(this.SET_CHIP_KIND).fill(null).map((_, chipGrade) => {
+                let text = [];
+                const bonus = timeData.getChipBonus(this.nig.player.activatedCampaigns, chipGrade);
+                for (let i = 0; i < dist[chipGrade].length; i++) {
+                    text.push((Math.pow(2, i) + bonus) + "個 : " + (dist[chipGrade][i] * 100).toFixed(1) + "%");
+                }
+                return text;
+            })
         },
         chipCheckpointCells() {
             const config = this.config.simulateChips;
