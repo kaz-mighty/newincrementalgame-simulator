@@ -22,83 +22,75 @@
       <button type="button" class="btn btn-outline-dark" @click="importSave()">データ取り込み</button>
       <button type="button" class="btn btn-outline-dark" @click="importSaveFile()">ファイル取り込み</button>
 
-      <input type="checkbox" class="btn-check" id="basicInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="basicInfoB" data-bs-toggle="collapse" data-bs-target="#basicInfo"
-        aria-expanded="false" aria-controls="basicInfo">基本</label>
+      <button type="button" class="btn btn-outline-dark" id="basicInfoB" data-bs-toggle="collapse" data-bs-target="#basicInfo"
+        aria-expanded="false" aria-controls="basicInfo">基本</button>
 
-      <input type="checkbox" class="btn-check" id="gaBoughtB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="gaBoughtB" data-bs-toggle="collapse" data-bs-target="#gaBought"
-        aria-expanded="false" aria-controls="gaBought">器</label>
+      <button type="button" class="btn btn-outline-dark" id="gaBoughtB" data-bs-toggle="collapse" data-bs-target="#gaBought"
+        aria-expanded="false" aria-controls="gaBought">器</button>
 
-      <input type="checkbox" class="btn-check" id="darkBoughtB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="darkBoughtB" data-bs-toggle="collapse" data-bs-target="#darkBought"
+      <button type="button" class="btn btn-outline-dark" id="darkBoughtB" data-bs-toggle="collapse" data-bs-target="#darkBought"
         aria-expanded="false" aria-controls="darkBought"
-        v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏</label>
+        v-show="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">
+        裏
+      </button>
 
-      <input type="checkbox" class="btn-check" id="timeInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="timeInfoB" data-bs-toggle="collapse" data-bs-target="#timeInfo"
-        aria-expanded="false" aria-controls="timeInfo">時</label>
+      <button type="button" class="btn btn-outline-dark" id="timeInfoB" data-bs-toggle="collapse" data-bs-target="#timeInfo"
+        aria-expanded="false" aria-controls="timeInfo">時</button>
 
-      <input type="checkbox" class="btn-check" id="levelInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="levelInfoB" data-bs-toggle="collapse" data-bs-target="#levelInfo"
+      <button type="button" class="btn btn-outline-dark" id="levelInfoB" data-bs-toggle="collapse" data-bs-target="#levelInfo"
         aria-expanded="false" aria-controls="levelInfo"
-        v-if="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">段位</label>
-
-      <input type="checkbox" class="btn-check" id="rankInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="rankInfoB" data-bs-toggle="collapse" data-bs-target="#rankInfo"
+        v-show="nig.player.levelResetTime.gt(0) || nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">
+        段位
+      </button>
+        
+      <button type="button" class="btn btn-outline-dark" id="rankInfoB" data-bs-toggle="collapse" data-bs-target="#rankInfo"
         aria-expanded="false" aria-controls="rankInfo"
-        v-if="nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">階位</label>
+        v-show="nig.player.rankResetTime.gt(0) || nig.player.crownResetTime.gt(0)">階位</button>
 
-      <input type="checkbox" class="btn-check" id="crownInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="crownInfoB" data-bs-toggle="collapse" data-bs-target="#crownInfo"
+      <button type="button" class="btn btn-outline-dark" id="crownInfoB" data-bs-toggle="collapse" data-bs-target="#crownInfo"
         aria-expanded="false" aria-controls="crownInfo"
-        v-if="nig.player.crownResetTime.gt(0)">冠位</label>
+        v-show="nig.player.crownResetTime.gt(0)">冠位</button>
 
-      <input type="checkbox" class="btn-check" id="shineInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="shineInfoB" data-bs-toggle="collapse" data-bs-target="#shineInfo"
-        aria-expanded="false" aria-controls="shineInfo" v-if="nig.player.challengeCleared.length >= 64">輝き</label>
+      <button type="button" class="btn btn-outline-dark" id="shineInfoB" data-bs-toggle="collapse" data-bs-target="#shineInfo"
+        aria-expanded="false" aria-controls="shineInfo"
+        v-show="nig.player.challengeCleared.length >= 64">輝き</button>
 
-      <input type="checkbox" class="btn-check" id="worldInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="worldInfoB" data-bs-toggle="collapse" data-bs-target="#worldInfo"
-        aria-expanded="false" aria-controls="worldInfo" v-if="nig.worldOpened.slice(1).some(b => b)">世界</label>
+      <button type="button" class="btn btn-outline-dark" id="worldInfoB" data-bs-toggle="collapse" data-bs-target="#worldInfo"
+        aria-expanded="false" aria-controls="worldInfo"
+        v-show="nig.worldOpened.slice(1).some(b => b)">世界</button>
 
-      <input type="checkbox" class="btn-check" id="chipInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="chipInfoB" data-bs-toggle="collapse" data-bs-target="#chipInfo"
-        aria-expanded="false" aria-controls="chipInfo" v-if="nig.player.smallTrophies[5]">鋳片</label>
+      <button type="button" class="btn btn-outline-dark" id="chipInfoB" data-bs-toggle="collapse" data-bs-target="#chipInfo"
+        aria-expanded="false" aria-controls="chipInfo"
+        v-show="nig.player.smallTrophies[5]">鋳片</button>
 
-      <input type="checkbox" class="btn-check" id="statueInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="statueInfoB" data-bs-toggle="collapse" data-bs-target="#statueInfo"
-        aria-expanded="false" aria-controls="statueInfo" v-if="nig.player.chip[0] >= 10000 || nig.player.statue[0] >= 1">像</label>
+      <button type="button" class="btn btn-outline-dark" id="statueInfoB" data-bs-toggle="collapse" data-bs-target="#statueInfo"
+        aria-expanded="false" aria-controls="statueInfo"
+        v-show="nig.player.chip[0] >= 10000 || nig.player.statue[0] >= 1">像</button>
 
-      <input type="checkbox" class="btn-check" id="trophyInfoB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="trophyInfoB" data-bs-toggle="collapse" data-bs-target="#trophyInfo"
-        aria-expanded="false" aria-controls="trophyInfo">実績</label>
+      <button type="button" class="btn btn-outline-dark" id="trophyInfoB" data-bs-toggle="collapse" data-bs-target="#trophyInfo"
+        aria-expanded="false" aria-controls="trophyInfo">実績</button>
 
-      <input type="checkbox" class="btn-check" id="challengeViewB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="challengeViewB" data-bs-toggle="collapse" data-bs-target="#challengeView"
-        aria-expanded="false" aria-controls="challengeView">挑戦</label>
+      <button type="button" class="btn btn-outline-dark" id="challengeViewB" data-bs-toggle="collapse" data-bs-target="#challengeView"
+        aria-expanded="false" aria-controls="challengeView">挑戦</button>
 
-      <input type="checkbox" class="btn-check" id="simulatedCheckpointsB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="simulatedCheckpointsB" data-bs-toggle="collapse"
-        data-bs-target="#simulatedCheckpoints" aria-expanded="false" aria-controls="simulatedCheckpoints">到達</label>
+      <button type="button" class="btn btn-outline-dark" id="simulatedCheckpointsB" data-bs-toggle="collapse"
+        data-bs-target="#simulatedCheckpoints" aria-expanded="false" aria-controls="simulatedCheckpoints">到達</button>
 
-      <input type="checkbox" class="btn-check" id="simulatedDarkB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="simulatedDarkB" data-bs-toggle="collapse"
+      <button type="button" class="btn btn-outline-dark" id="simulatedDarkB" data-bs-toggle="collapse"
         data-bs-target="#simulatedDark" aria-expanded="false" aria-controls="simulatedDark"
-        v-if="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">裏到達</label>
+        v-show="nig.player.money.gte('1e100') || nig.player.darkMoney.gt(0) || nig.player.darkGenerators.some(d => d.gt(0))">
+        裏到達
+      </button>
 
-      <input type="checkbox" class="btn-check" id="simulatedChipsB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="simulatedChipsB" data-bs-toggle="collapse"
+      <button type="button" class="btn btn-outline-dark" id="simulatedChipsB" data-bs-toggle="collapse"
         data-bs-target="#simulatedChips" aria-expanded="false" aria-controls="simulatedChips"
-        v-if="nig.player.smallTrophies[5]">鋳片入手</label>
+        v-show="nig.player.smallTrophies[5]">鋳片入手</button>
 
-      <input type="checkbox" class="btn-check" id="gaExpressionB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="gaExpressionB" data-bs-toggle="collapse" data-bs-target="#gaExpression"
-        aria-expanded="false" aria-controls="gaExpression">式</label>
+      <button type="button" class="btn btn-outline-dark" id="gaExpressionB" data-bs-toggle="collapse" data-bs-target="#gaExpression"
+        aria-expanded="false" aria-controls="gaExpression">式</button>
 
-      <input type="checkbox" class="btn-check" id="helpMessageB" autocomplete="off">
-      <label class="btn btn-outline-dark" for="helpMessageB" data-bs-toggle="collapse" data-bs-target="#helpMessage"
-        aria-expanded="false" aria-controls="helpMessage">？</label>
+      <button type="button" class="btn btn-outline-dark" id="helpMessageB" data-bs-toggle="collapse" data-bs-target="#helpMessage"
+        aria-expanded="false" aria-controls="helpMessage">？</button>
     </div>
 
     <div class="collapse" id="basicInfo">
