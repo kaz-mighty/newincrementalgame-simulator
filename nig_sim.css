@@ -2,6 +2,12 @@
     --challenge-width: 80vh;
 }
 
+.btn-outline-dark[aria-expanded="true"] {
+    color: var(--bs-white);
+    background-color: var(--bs-dark);
+    border-color: var(--bs-dark);
+}
+
 table.challenge-table {
     width: min(100%, var(--challenge-width));
     border-collapse: collapse;
