@@ -818,6 +818,7 @@ class Nig {
             statue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatueBright: new Array(SET_CHIP_KIND).fill(0),
+            polishedStatueFlicker: new Array(SET_CHIP_KIND).fill(0),
 
             worldPipe: new Array(WORLD_NUM).fill(0),
             rings: {
@@ -981,6 +982,7 @@ class Nig {
             statue: playerData.statue,
             polishedStatue: playerData.polishedstatue,
             polishedStatueBright: playerData.polishedstatuebr,
+            polishedStatueFlicker: playerData.polishedstatuefl,
 
             worldPipe: playerData.worldpipe,
             rings: this.loadRingFromOriginal(playerData.rings),
@@ -1879,6 +1881,20 @@ class Nig {
         if (!this.isStatuePolishableBright(i)) {return;}
         this.player.brightness -= this.calcPolishCostBright(i);
         this.player.polishedStatueBright[i] += 1;
+    };
+
+    isStatuePolishableFlicker(i) {
+        if (this.player.polishedStatueFlicker[i] >= this.player.polishedStatueBright[i] * 10) {return false;}
+        if (this.player.flicker < this.calcPolishCostFlicker(i)) {return false;}
+        return true;
+    };
+    calcPolishCostFlicker(i) {
+        return this.player.polishedStatueFlicker[i] + 100;
+    };
+    polishStatueFlicker(i) {
+        if (!this.isStatuePolishableFlicker(i)) {return;}
+        this.player.flicker -= this.calcPolishCostFlicker(i);
+        this.player.polishedStatueFlicker[i] += 1;
     };
 
     checkTrophies() {
@@ -3279,6 +3295,9 @@ const app = Vue.createApp({
         },
         polishStatueBright(i) {
             this.nig.polishStatueBright(i);
+        },
+        polishStatueFlicker(i) {
+            this.nig.polishStatueFlicker(i);
         },
         changeMode(i) {
             this.nig.changeMode(i);

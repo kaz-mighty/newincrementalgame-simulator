@@ -557,6 +557,9 @@
           <span> (発生器 {{ nig.player.statue.reduce((a, b) => a * (1 + b * 0.01), 1).toFixed(3) }} 倍) &thinsp;</span>
           <span> 輝像: {{ nig.player.polishedStatue.reduce((a, b) => a + b) }} &thinsp;</span>
           <span> 煌像: {{ nig.player.polishedStatueBright.reduce((a, b) => a + Math.floor(b / 10), 0) }} &thinsp;</span>
+          <span v-if="nig.player.trophies[9]">
+            瞬像: {{ nig.player.polishedStatueFlicker.reduce((a, b) => a + Math.floor(b / 100), 0) }} &thinsp;
+          </span>
         </div>
         <div v-for="i in SET_CHIP_KIND" :key="i">
           <div v-show="nig.player.chip[i-1] > 0 || nig.chipUsed[i-1] > 0 || nig.player.statue[i-1] > 0">
@@ -564,6 +567,9 @@
             <span> 所持数: {{ nig.player.statue[i-1] }} &thinsp;</span>
             <span> 輝像: {{ nig.player.polishedStatue[i-1] }} &thinsp;</span>
             <span> 煌像: {{ (nig.player.polishedStatueBright[i-1]/10).toFixed(1) }} &thinsp;</span>
+            <span v-if="nig.player.trophies[9]">
+              瞬像: {{ (nig.player.polishedStatueFlicker[i-1]/100).toFixed(2) }} &thinsp;
+            </span>
             <span class="tooltip-cell">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
                 :disabled="!nig.isStatueBuildable(i-1)">
@@ -576,6 +582,11 @@
               <button type="button" class="btn btn-outline-dark btn-sm" @click="polishStatueBright(i-1)"
                 :disabled="!nig.isStatuePolishableBright(i-1)">
                 磨像: 煌き{{ nig.calcPolishCostBright(i-1) }}
+              </button>
+              <button type="button" class="btn btn-outline-dark btn-sm" v-if="nig.player.trophies[9]"
+                @click="polishStatueFlicker(i-1)"
+                :disabled="!nig.isStatuePolishableFlicker(i-1)">
+                磨像: 瞬き{{ nig.calcPolishCostFlicker(i-1) }}
               </button>
             </span>
           </div>
