@@ -318,20 +318,20 @@ class ItemData {
             '1,000,000,000以上の輝きを所持する',
             '100,000以上の煌きを所有する',
             '1,000,000以上の煌きを所有する',
-            '杖印石を1個以上にする',
-            '杖印石を100個以上にする',
-            '杖印石を10000個以上にする',
-            '貨印石を1個以上にする',
-            '貨印石を100個以上にする',
-            '貨印石を10000個以上にする',
-            '杯印石を1個以上にする',
-            '杯印石を100個以上にする',
-            '杯印石を10000個以上にする',
-            '剣印石を1個以上にする',
-            '剣印石を100個以上にする',
-            '剣印石を10000個以上にする',
-            '大杖印石を1個以上にする',
-            '大杖印石を10個以上にする',
+            '杖印石を1個以上にする\n(Beta版限定)',
+            '杖印石を100個以上にする\n(Beta版限定)',
+            '杖印石を10000個以上にする\n(Beta版限定)',
+            '貨印石を1個以上にする\n(Beta版限定)',
+            '貨印石を100個以上にする\n(Beta版限定)',
+            '貨印石を10000個以上にする\n(Beta版限定)',
+            '杯印石を1個以上にする\n(Beta版限定)',
+            '杯印石を100個以上にする\n(Beta版限定)',
+            '杯印石を10000個以上にする\n(Beta版限定)',
+            '剣印石を1個以上にする\n(Beta版限定)',
+            '剣印石を100個以上にする\n(Beta版限定)',
+            '剣印石を10000個以上にする\n(Beta版限定)',
+            '大杖印石を1個以上にする\n(Beta版限定)',
+            '大杖印石を10個以上にする\n(Beta版限定)',
         ]
         this.chipName = ['銅', '銀', '金', '白金', '紫鋼', '朱鋼', '蒼鋼', '翠鋼', '聖銀', '覇金'];
         this.chipBonusName = [
@@ -676,6 +676,7 @@ class Nig {
         this.smallMemories = new Array(WORLD_NUM).fill(0);
         this.eachPipedSmallMemory = new Array(WORLD_NUM).fill(0);
         this.pipedSmallMemory = 0;
+        this.totalDarkLevelProof = 0;
         this.worldOpened = new Array(WORLD_NUM).fill(false);
         this.chipUsed = new Array(SET_CHIP_KIND).fill(0);
         this.pChallengeStage = 0;
@@ -775,6 +776,7 @@ class Nig {
             darkGeneratorsBought: new Array(8).fill(D(0)),
             darkGeneratorsCost: [D('1e100'), D('1e108'), D('1e127'), D('1e164'), D('1e225'), D('1e316'), D('1e443'), D('1e612')],
             darkLevel: D(0),
+            darkLevelProof: 0,
 
             lightMoney: D(0),
             lightGenerators: new Array(8).fill(D(0)),
@@ -818,6 +820,7 @@ class Nig {
             statue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatue: new Array(SET_CHIP_KIND).fill(0),
             polishedStatueBright: new Array(SET_CHIP_KIND).fill(0),
+            polishedStatueFlicker: new Array(SET_CHIP_KIND).fill(0),
 
             worldPipe: new Array(WORLD_NUM).fill(0),
             rings: {
@@ -938,6 +941,7 @@ class Nig {
             darkGeneratorsBought: playerData.darkgeneratorsBought,
             darkGeneratorsCost: playerData.darkgeneratorsCost,
             darkLevel: playerData.darklevel,
+            darkLevelProof: playerData.darklevelproof,
 
             lightMoney: playerData.lightmoney,
             lightGenerators: playerData.lightgenerators,
@@ -981,6 +985,7 @@ class Nig {
             statue: playerData.statue,
             polishedStatue: playerData.polishedstatue,
             polishedStatueBright: playerData.polishedstatuebr,
+            polishedStatueFlicker: playerData.polishedstatuefl,
 
             worldPipe: playerData.worldpipe,
             rings: this.loadRingFromOriginal(playerData.rings),
@@ -1038,6 +1043,7 @@ class Nig {
         this.checkSmallMemories();
         this.checkUsedChips();
         this.checkWorlds();
+        if (this.config.useBeta) this.checkDarkLevelProof();
         this.updateTickSpeed();
         this.checkPipedSmallMemories();
         this.checkPChallengeCleared();
@@ -1109,11 +1115,13 @@ class Nig {
             mult = mult.mul(0.001);
         }
 
-        if (this.player.markStone.greatClub > 0) {
-            mult = mult.mul(1 + 0.01 * this.player.markStone.greatClub);
-        }
-        if (this.player.markStone.calibration.shopUpgrades[3]) {
-            mult = mult.mul(2);
+        if (this.config.useBeta) {
+            if (this.player.markStone.greatClub > 0) {
+                mult = mult.mul(1 + 0.01 * this.player.markStone.greatClub);
+            }
+            if (this.player.markStone.calibration.shopUpgrades[3]) {
+                mult = mult.mul(2);
+            }
         }
 
         this.commonMult = mult;
@@ -1280,7 +1288,7 @@ class Nig {
         this.multByAc = D(50).div(this.player.tickSpeed);
     };
     getFixedTickSpeed() {
-        if (this.player.markStone.calibration.active) {
+        if (this.config.useBeta && this.player.markStone.calibration.active) {
             return 1000;
         }
         if (this.isRankChallengeBonusActive(9)) {
@@ -1622,7 +1630,9 @@ class Nig {
         const money = x === undefined ? this.player.darkMoney : x;
         let dv = 18 - this.player.crown.add(2).log2();
         dv = Math.max(dv, 1);
-        return D(money.log10()).div(dv).pow_base(2).round();
+        let gain = D(money.log10()).div(dv).pow_base(2);
+        if (this.config.useBeta) gain = gain.mul(1 + this.totalDarkLevelProof * 0.1);
+        return gain.round();
     };
 
     resetLevelBorder() {
@@ -1681,7 +1691,9 @@ class Nig {
                 this.player.rankChallengeCleared.push(this.calcChallengeId());
             }
         }
-        this.player.markStone.ticksSinceRankReset = 0;
+        if (this.config.useBeta) {
+            this.player.markStone.ticksSinceRankReset = 0;
+        }
 
         let gainTime = this.isRankChallengeBonusActive(8) ? D(3) : D(1);
         gainTime = gainTime.mul(this.player.setChip[24] + 1).mul(this.player.crownResetTime.add(1));
@@ -1738,10 +1750,12 @@ class Nig {
         this.player.rank = D(0);
         this.player.rankResetTime = D(0);
 
-        this.player.markStone.clubGainedSinceCrownReset = 0;
-        this.player.markStone.diamondGainedSinceCrownReset = 0;
-        this.player.markStone.heartGainedSinceCrownReset = 0;
-        this.player.markStone.spadeGainedSinceCrownReset = 0;
+        if (this.config.useBeta) {
+            this.player.markStone.clubGainedSinceCrownReset = 0;
+            this.player.markStone.diamondGainedSinceCrownReset = 0;
+            this.player.markStone.heartGainedSinceCrownReset = 0;
+            this.player.markStone.spadeGainedSinceCrownReset = 0;
+        }
         this.resetRankData();
     };
 
@@ -1879,6 +1893,20 @@ class Nig {
         if (!this.isStatuePolishableBright(i)) {return;}
         this.player.brightness -= this.calcPolishCostBright(i);
         this.player.polishedStatueBright[i] += 1;
+    };
+
+    isStatuePolishableFlicker(i) {
+        if (this.player.polishedStatueFlicker[i] >= this.player.polishedStatueBright[i] * 10) {return false;}
+        if (this.player.flicker < this.calcPolishCostFlicker(i)) {return false;}
+        return true;
+    };
+    calcPolishCostFlicker(i) {
+        return this.player.polishedStatueFlicker[i] + 100;
+    };
+    polishStatueFlicker(i) {
+        if (!this.isStatuePolishableFlicker(i)) {return;}
+        this.player.flicker -= this.calcPolishCostFlicker(i);
+        this.player.polishedStatueFlicker[i] += 1;
     };
 
     checkTrophies() {
@@ -2054,20 +2082,22 @@ class Nig {
             if (this.player.shine >= 1_000_000_000) this.player.smallTrophies2nd[56] = true;
             if (this.player.brightness >= 100_000) this.player.smallTrophies2nd[57] = true;
             if (this.player.brightness >= 1_000_000) this.player.smallTrophies2nd[58] = true;
-            if (this.player.markStone.club >= 1) this.player.smallTrophies2nd[59] = true;
-            if (this.player.markStone.club >= 100) this.player.smallTrophies2nd[60] = true;
-            if (this.player.markStone.club >= 10000) this.player.smallTrophies2nd[61] = true;
-            if (this.player.markStone.diamond >= 1) this.player.smallTrophies2nd[62] = true;
-            if (this.player.markStone.diamond >= 100) this.player.smallTrophies2nd[63] = true;
-            if (this.player.markStone.diamond >= 10000) this.player.smallTrophies2nd[64] = true;
-            if (this.player.markStone.heart >= 1) this.player.smallTrophies2nd[65] = true;
-            if (this.player.markStone.heart >= 100) this.player.smallTrophies2nd[66] = true;
-            if (this.player.markStone.heart >= 10000) this.player.smallTrophies2nd[67] = true;
-            if (this.player.markStone.spade >= 1) this.player.smallTrophies2nd[68] = true;
-            if (this.player.markStone.spade >= 100) this.player.smallTrophies2nd[69] = true;
-            if (this.player.markStone.spade >= 10000) this.player.smallTrophies2nd[70] = true;
-            if (this.player.markStone.greatClub >= 1) this.player.smallTrophies2nd[71] = true;
-            if (this.player.markStone.greatClub >= 10) this.player.smallTrophies2nd[72] = true;
+            if (this.config.useBeta) {
+                if (this.player.markStone.club >= 1) this.player.smallTrophies2nd[59] = true;
+                if (this.player.markStone.club >= 100) this.player.smallTrophies2nd[60] = true;
+                if (this.player.markStone.club >= 10000) this.player.smallTrophies2nd[61] = true;
+                if (this.player.markStone.diamond >= 1) this.player.smallTrophies2nd[62] = true;
+                if (this.player.markStone.diamond >= 100) this.player.smallTrophies2nd[63] = true;
+                if (this.player.markStone.diamond >= 10000) this.player.smallTrophies2nd[64] = true;
+                if (this.player.markStone.heart >= 1) this.player.smallTrophies2nd[65] = true;
+                if (this.player.markStone.heart >= 100) this.player.smallTrophies2nd[66] = true;
+                if (this.player.markStone.heart >= 10000) this.player.smallTrophies2nd[67] = true;
+                if (this.player.markStone.spade >= 1) this.player.smallTrophies2nd[68] = true;
+                if (this.player.markStone.spade >= 100) this.player.smallTrophies2nd[69] = true;
+                if (this.player.markStone.spade >= 10000) this.player.smallTrophies2nd[70] = true;
+                if (this.player.markStone.greatClub >= 1) this.player.smallTrophies2nd[71] = true;
+                if (this.player.markStone.greatClub >= 10) this.player.smallTrophies2nd[72] = true;
+            }
         }
     };
     checkMemories() {
@@ -2110,6 +2140,18 @@ class Nig {
         for (let i = this.world + 1; i < WORLD_NUM; i++)
             cnt += this.players[i].remember;
         return cnt;
+    };
+    checkDarkLevelProof() {
+        // updateDarklevelproof
+        const darkLevel = this.player.darkLevel;
+        let proof = darkLevel.lt('1e11') ? 0 : Math.max(0, Math.floor(darkLevel.log10()) - 10);
+        this.player.darkLevelProof = Math.max(this.player.darkLevelProof, proof);
+
+        // calcTotalDarklevelproof
+        this.totalDarkLevelProof = 0;
+        for (let i = 0; i < WORLD_NUM; i++) {
+            this.totalDarkLevelProof += this.players[i].darkLevelProof;
+        }
     };
     checkWorlds() {
         this.worldOpened[0] = true;
@@ -2305,7 +2347,7 @@ class Nig {
     tick2sec(tick, update) {
         if (tick <= 0) return 0;
         if (tick === Infinity) return Infinity;
-        if (this.player.markStone.calibration.active) {
+        if (this.config.useBeta && this.player.markStone.calibration.active) {
             return tick * this.getFixedTickSpeed() / 1000;
         }
         const aExpr = this.calcAcceleratorExpr();
@@ -2755,6 +2797,7 @@ const initialConfig = () => {
         },
         game: {
             unlimitedCampaigns: false,
+            useBeta: false,
         },
         procMsPerTick: 0,
         verbose: false,
@@ -2826,6 +2869,10 @@ const app = Vue.createApp({
         },
         'config.game.unlimitedCampaigns'(newValue) {
             if (!newValue) {this.nig.activateInTimeCampaign();}
+        },
+        'config.game.useBeta'(newValue) {
+            if (newValue) this.nig.checkDarkLevelProof();
+            this.clearAllCache();
         },
     },
     computed: {
@@ -3279,6 +3326,9 @@ const app = Vue.createApp({
         },
         polishStatueBright(i) {
             this.nig.polishStatueBright(i);
+        },
+        polishStatueFlicker(i) {
+            this.nig.polishStatueFlicker(i);
         },
         changeMode(i) {
             this.nig.changeMode(i);

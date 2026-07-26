@@ -215,6 +215,14 @@
           <tr>
             <td class="align-middle" colspan="2">裏段位</td>
             <td class="align-middle" colspan="2">{{ formatDecimal(nig.player.darkLevel, 6) }}</td>
+            <td class="align-middle" colspan="4" v-if="isLightBought"></td>
+          </tr>
+          <tr v-if="config.game.useBeta">
+            <td class="align-middle" colspan="4">
+              <span>裏段位の証: {{ nig.player.darkLevelProof }} &thinsp;</span>
+              <span>合計: {{ nig.totalDarkLevelProof }}</span>
+            </td>
+            <td class="align-middle" colspan="4" v-if="isLightBought"></td>
           </tr>
           <tr>
             <td class="align-middle" rowspan="2"></td>
@@ -557,6 +565,9 @@
           <span> (発生器 {{ nig.player.statue.reduce((a, b) => a * (1 + b * 0.01), 1).toFixed(3) }} 倍) &thinsp;</span>
           <span> 輝像: {{ nig.player.polishedStatue.reduce((a, b) => a + b) }} &thinsp;</span>
           <span> 煌像: {{ nig.player.polishedStatueBright.reduce((a, b) => a + Math.floor(b / 10), 0) }} &thinsp;</span>
+          <span v-if="config.game.useBeta && nig.player.trophies[9]">
+            瞬像: {{ nig.player.polishedStatueFlicker.reduce((a, b) => a + Math.floor(b / 100), 0) }} &thinsp;
+          </span>
         </div>
         <div v-for="i in SET_CHIP_KIND" :key="i">
           <div v-show="nig.player.chip[i-1] > 0 || nig.chipUsed[i-1] > 0 || nig.player.statue[i-1] > 0">
@@ -564,6 +575,9 @@
             <span> 所持数: {{ nig.player.statue[i-1] }} &thinsp;</span>
             <span> 輝像: {{ nig.player.polishedStatue[i-1] }} &thinsp;</span>
             <span> 煌像: {{ (nig.player.polishedStatueBright[i-1]/10).toFixed(1) }} &thinsp;</span>
+            <span v-if="config.game.useBeta && nig.player.trophies[9]">
+              瞬像: {{ (nig.player.polishedStatueFlicker[i-1]/100).toFixed(2) }} &thinsp;
+            </span>
             <span class="tooltip-cell">
               <button type="button" class="btn btn-outline-dark btn-sm" @click="buildStatue(i-1)"
                 :disabled="!nig.isStatueBuildable(i-1)">
@@ -576,6 +590,11 @@
               <button type="button" class="btn btn-outline-dark btn-sm" @click="polishStatueBright(i-1)"
                 :disabled="!nig.isStatuePolishableBright(i-1)">
                 磨像: 煌き{{ nig.calcPolishCostBright(i-1) }}
+              </button>
+              <button type="button" class="btn btn-outline-dark btn-sm" v-if="config.game.useBeta && nig.player.trophies[9]"
+                @click="polishStatueFlicker(i-1)"
+                :disabled="!nig.isStatuePolishableFlicker(i-1)">
+                磨像: 瞬き{{ nig.calcPolishCostFlicker(i-1) }}
               </button>
             </span>
           </div>
@@ -593,7 +612,7 @@
               <tr>
                 <td v-for="i in TROPHY_NUM" :key="i" class="tooltip-cell">
                   <span>{{ nig.player.trophies[i - 1] ? itemData.trophyText[i - 1] : '???' }}</span>
-                  <span v-if="config.spoiler" class="up-tooltip" style="white-space: pre-line;">
+                  <span class="up-tooltip" style="white-space: pre-line;" v-if="config.spoiler">
                     {{ itemData.trophyConditionHtmlText[i - 1] }}
                   </span>
                 </td>
@@ -608,7 +627,7 @@
               <tr v-for="i in 10" :key="i">
                 <td v-for="j in 10" :key="j" class="tooltip-cell">
                   <span>{{ nig.player.smallTrophies[i * 10 + j - 11] ? (i - 1) * 10 + j : '　' }}</span>
-                  <span class="up-tooltip" v-if="config.spoiler">
+                  <span class="up-tooltip" style="white-space: pre-line;" v-if="config.spoiler">
                     {{ itemData.smallTrophyText[i * 10 + j - 11] }}
                   </span>
                 </td>
@@ -616,7 +635,7 @@
               <tr v-for="i in 8" :key="i" v-if="nig.player.crownResetTime.gt(0)">
                 <td v-for="j in 10" :key="j" class="tooltip-cell">
                   <span>{{ nig.player.smallTrophies2nd[i * 10 + j - 11] ? 100 + (i - 1) * 10 + j : '　' }}</span>
-                  <span class="up-tooltip" v-if="config.spoiler">
+                  <span class="up-tooltip" style="white-space: pre-line;" v-if="config.spoiler">
                     {{ itemData.smallTrophyText[100 + i * 10 + j - 11] }}
                   </span>
                 </td>
@@ -1010,6 +1029,10 @@
         <div class="form-check">
           <input class="form-check-input" type="checkbox" id="spoiler" v-model="config.spoiler">
           <label class="form-check-label" for="spoiler">ネタバレ(世界、実績、里程の条件と世界管の効果が表示されます)</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="useBeta" v-model="config.game.useBeta">
+          <label class="form-check-label" for="useBeta">ベータ版のゲームをシミュレートする</label>
         </div>
         <div>
           <button type="button" class="btn btn-outline-dark btn-sm" @click="scaleChallengeTable(0.9)">-</button>
