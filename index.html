@@ -70,6 +70,10 @@
       <button type="button" class="btn btn-outline-dark" id="trophyInfoB" data-bs-toggle="collapse" data-bs-target="#trophyInfo"
         aria-expanded="false" aria-controls="trophyInfo">実績</button>
 
+      <button type="button" class="btn btn-outline-dark" id="markStoneInfoB" data-bs-toggle="collapse" data-bs-target="#markStoneInfo"
+        aria-expanded="false" aria-controls="markStoneInfo"
+        v-show="config.game.useBeta && (nig.player.money.gte('1e240') || nig.player.markStone.club > 0 || nig.player.markStone.greatClub > 0)">印石</button>
+
       <button type="button" class="btn btn-outline-dark" id="challengeViewB" data-bs-toggle="collapse" data-bs-target="#challengeView"
         aria-expanded="false" aria-controls="challengeView">挑戦</button>
 
@@ -645,6 +649,31 @@
         </div>
       </div>
     </div>
+
+    <div class="collapse card card-body" id="markStoneInfo">
+      <div v-for="(_, i) in 4">
+        <button type="button" class="btn btn-sm" :class="buttonSelectedClass(nig.player.markStone.selectedType == i)" @click="nig.selectMarkStoneType(i)">
+          {{ itemData.markStoneName[i] }}
+        </button>
+        <span> 所持数: {{ markStones[i] }} &thinsp;</span>
+        <span> 条件: {{ markStoneRequirements[i].toExponential(3) }} &thinsp;</span>
+        <span> 今冠位: {{ gainedMarkStones[i] }} &thinsp;</span>
+      </div>
+      <div>
+        <span>前回階位からの経過間隔: {{ nig.player.markStone.ticksSinceRankReset }} &thinsp;</span>
+        <span class="tooltip-cell">
+          <span> 印石効果: {{ nig.calcMarkStoneEffect().toFixed(2) }}</span>
+          <span class="up-tooltip">
+            100超で印石リセットができます。<br>
+            その他の効果はありません。
+          </span>
+        </span>
+      </div>
+      <div>
+        入手数 大杖印石: {{ nig.player.markStone.greatClub }}
+      </div>
+    </div>
+
 
     <div class="collapse card card-body" id="challengeView">
       <div>
