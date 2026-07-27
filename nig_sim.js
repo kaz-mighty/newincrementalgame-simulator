@@ -432,6 +432,12 @@ class ItemData {
             '裏発生器と裏ポイントは発生器を強化しません。',
             '鋳片効力は、新規挑戦達成でない段位リセットを行うごとにランダムで1つが無効になります。',
         ];
+        this.markStoneName = [
+            '杖印石',
+            '貨印石',
+            '杯印石',
+            '剣印石',
+        ];
     }
 
     calcChipProbability(chipLv, lotteryTime) {
@@ -745,6 +751,7 @@ class Nig {
                 spade: 0,
                 spadeGainedSinceCrownReset: 0,
                 ticksSinceRankReset: 0,
+                selectedType: 0,
                 greatClub: 0,
                 greatDiamond: 0,
                 greatHeart: 0,
@@ -1691,6 +1698,8 @@ class Nig {
                 this.player.rankChallengeCleared.push(this.calcChallengeId());
             }
         }
+
+        //TODO: 印石の入手処理
         if (this.config.useBeta) {
             this.player.markStone.ticksSinceRankReset = 0;
         }
@@ -2260,6 +2269,56 @@ class Nig {
         }
         return isChanged;
     };
+
+
+    getMarkStoneData(i) {
+        const markStone = this.player.markStone;
+        switch (i) {
+            case 0: return {
+                current: markStone.club,
+                gained: markStone.clubGainedSinceCrownReset,
+                baseExp: 240,
+                decayMult: 1,
+            };
+            case 1: return {
+                current: markStone.diamond,
+                gained: markStone.diamondGainedSinceCrownReset,
+                baseExp: 250,
+                decayMult: 1.25,
+            };
+            case 2: return {
+                current: markStone.heart,
+                gained: markStone.heartGainedSinceCrownReset,
+                baseExp: 260,
+                decayMult: 1.5,
+            };
+            case 3: return {
+                current: markStone.spade,
+                gained: markStone.spadeGainedSinceCrownReset,
+                baseExp: 270,
+                decayMult: 1.75,
+            };
+        }
+    };
+    selectMarkStoneType(i) {
+        this.player.markStone.selectedType = i;
+    };
+    calcMarkStoneRequirement(i) {
+        const msData = this.getMarkStoneData(i);
+
+        const ticks = this.player.markStone.ticksSinceRankReset;
+        const decay = ticks <= 1 ? 10000 : Math.pow(2, 12 / Math.log10(ticks));
+        return D(10).pow(msData.baseExp + msData.gained + decay * msData.decayMult);
+    };
+    calcMarkStoneEffect() {
+        let total = 1;
+        for (let i = 0; i < 4; i++) {
+            const msData = this.getMarkStoneData(i);
+            total *= msData.current * 0.01 + 1;
+        }
+        return (total - 1) * 100;
+    };
+
 
     searchLowerBound(value, l, target) {
         const f = x => {
@@ -2876,6 +2935,22 @@ const app = Vue.createApp({
         },
     },
     computed: {
+        markStones() {
+            const markStone = this.nig.player.markStone;
+            return [markStone.club, markStone.diamond, markStone.heart, markStone.spade];
+        },
+        gainedMarkStones() {
+            const markStone = this.nig.player.markStone;
+            return [
+                markStone.clubGainedSinceCrownReset,
+                markStone.diamondGainedSinceCrownReset,
+                markStone.heartGainedSinceCrownReset,
+                markStone.spadeGainedSinceCrownReset,
+            ];
+        },
+        markStoneRequirements() {
+            return new Array(4).fill(0).map((_, i) => this.nig.calcMarkStoneRequirement(i));
+        },
         startChallengeMessage() {
             let id = this.nig.calcChallengeId();
             let contents = '挑戦: ' + (this.nig.player.challengeCleared.includes(id) ? '済' : '未');
