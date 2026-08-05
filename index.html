@@ -101,12 +101,12 @@
       <div class="card card-body">
         <div v-if="nig.worldOpened.slice(1).some(b => b)">世界: {{ nig.world+1 }}</div>
         <div id="money">ポイント: {{ formatDecimal(nig.player.money, 6) }}</div>
-        <div v-if="nig.tickSpeed != nig.getFixedTickSpeed()">
-          間隔: <s>{{ nig.player.tickSpeed.toFixed(2) }}</s> {{ nig.getFixedTickSpeed().toFixed(2) }} ms&ensp;
+        <div v-if="nig.player.tickSpeed != nig.getFixedTickSpeed()">
+          間隙: <s>{{ nig.player.tickSpeed.toFixed(2) }}</s> {{ nig.getFixedTickSpeed().toFixed(2) }} ms&ensp;
           加速器効果: <s>{{ (1000 / nig.player.tickSpeed).toFixed(3) }}</s> {{ (1000 / nig.getFixedTickSpeed()).toFixed(3) }} 倍
         </div>
         <div v-else>
-          間隔: {{ nig.player.tickSpeed.toFixed(2) }} ms&ensp;
+          間隙: {{ nig.player.tickSpeed.toFixed(2) }} ms&ensp;
           加速器効果: {{ (1000 / nig.player.tickSpeed).toFixed(3) }} 倍
         </div>
         <div
